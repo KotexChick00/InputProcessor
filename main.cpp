@@ -1,22 +1,27 @@
-#include "src/OBJ/Vertex.h"
-#include <cstdio>
+#include <iostream>
+#include <GLFW/glfw3.h>
 
 int main() {
-	Vect4 v1(1.0f, 2.0f, 3.0f); // A regular vertex
-	Vect4 v2(1.0f, 2.0f, 3.0f, 0.0f); // A vertex at infinity
-	if (v1.IsInfinityFar()) {
-		// This should not be printed
-		printf("v1 is at infinity.\n");
+	if (!glfwInit()) {
+		std::cerr << "Failed to initialize GLFW" << std::endl;
+		return -1;
 	}
-	else {
-		printf("v1 is not at infinity.\n");
+
+	GLFWwindow* window = glfwCreateWindow(640, 480, "Hello, World!", NULL, NULL);
+	if (!window) {
+		std::cerr << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
 	}
-	if (v2.IsInfinityFar()) {
-		printf("v2 is at infinity.\n");
+
+	glfwMakeContextCurrent(window);
+
+	while (!glfwWindowShouldClose(window)) {
+		glClear(GL_COLOR_BUFFER_BIT);
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
-	else {
-		// This should not be printed
-		printf("v2 is not at infinity.\n");
-	}
+
+	glfwTerminate();
 	return 0;
 }
