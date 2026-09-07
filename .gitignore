@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/output.txt
+/Dragon_Baked_Actions_fbx_6.1_ASCII.fbx
