@@ -157,13 +157,11 @@
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\OBJ\Vect4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
-    <ClInclude Include="src\OBJ\Vect4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
