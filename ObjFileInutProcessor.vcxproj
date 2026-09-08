@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)src;$(IncludePath)</IncludePath>
@@ -120,9 +120,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_GLAD_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,11 +155,10 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\OBJ\ObjParser.cpp" />
+    <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\OBJ\Vect4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\OBJ\ObjParser.h" />
