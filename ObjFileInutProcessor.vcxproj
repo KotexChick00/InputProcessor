@@ -153,22 +153,22 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Vector2.cpp" />
+    <ClCompile Include="src\PrimitiveType\Vector2.cpp" />
     <ClCompile Include="src\OBJ\ObjParser.cpp" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\Vector3.cpp" />
-    <ClCompile Include="src\Vector4.cpp" />
+    <ClCompile Include="src\PrimitiveType\Vector3.cpp" />
+    <ClCompile Include="src\PrimitiveType\Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DataTypes.h" />
-    <ClInclude Include="src\Vector2.h" />
+    <ClInclude Include="src\PrimitiveType\Vector2.h" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
-    <ClInclude Include="src\Vector3.h" />
-    <ClInclude Include="src\Vector4.h" />
+    <ClInclude Include="src\PrimitiveType\Vector3.h" />
+    <ClInclude Include="src\PrimitiveType\Vector4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

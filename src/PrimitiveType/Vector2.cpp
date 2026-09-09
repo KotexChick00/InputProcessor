@@ -1,4 +1,4 @@
-#include <Vector2.h>
+#include <PrimitiveType/Vector2.h>
 
 bool Vector2::IsTheSame(const Vector2& other) const {
 	return x == other.x && y == other.y;

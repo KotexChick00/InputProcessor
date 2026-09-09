@@ -1,4 +1,4 @@
 #pragma once
-#include <Vector2.h>
-#include <Vector3.h>
-#include <Vector4.h>
+#include <PrimitiveType/Vector2.h>
+#include <PrimitiveType/Vector3.h>
+#include <PrimitiveType/Vector4.h>

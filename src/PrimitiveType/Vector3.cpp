@@ -1,4 +1,4 @@
-#include <Vector3.h>
+#include <PrimitiveType/Vector3.h>
 
 bool Vector3::IsTheSame(const Vector3& other) const {
 	return x == other.x && y == other.y && z == other.z;
