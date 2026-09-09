@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\DoAnChuyenNganh\InputProcessor\Core;D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)src;$(IncludePath)</IncludePath>
@@ -125,6 +125,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,12 +156,40 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglRendererCommand.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglConstantFactory.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglIndexBuffer.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglResourceManager.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglShader.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglTexture.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglVertexBuffer.cpp" />
+    <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Logger\Logger.hpp" />
+    <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
+    <ClInclude Include="Core\Model\ModelData.hpp" />
+    <ClInclude Include="Core\Renderer\IRenderer.hpp" />
+    <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglRendererCommand.hpp" />
+    <ClInclude Include="Core\Resource\IIndexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\IShader.hpp" />
+    <ClInclude Include="Core\Resource\ITexture.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglConstantFactory.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglIndexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglResourceManager.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglShader.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglTexture.hpp" />
+    <ClInclude Include="Core\Resource\IVertexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglVertexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\ResouceManager.hpp" />
+    <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
+    <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
