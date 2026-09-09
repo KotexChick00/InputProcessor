@@ -1,9 +1,7 @@
 #pragma once
 #include <iostream>
 #include <unordered_map>
-#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
-#endif
 #include <Resource/IVertexBuffer.hpp>
 
 namespace InputProcessor::Resource::Opengl {

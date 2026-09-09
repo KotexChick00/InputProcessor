@@ -2,6 +2,8 @@
   "dependencies": [
     "glfw3",
     "spdlog",
-    "stb"
+    "stb",
+    "glad",
+    "glm"
   ]
 }
