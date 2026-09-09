@@ -1,5 +1,9 @@
 {
   "dependencies": [
-    "glfw3"
+    "glfw3",
+    "spdlog",
+    "stb",
+    "glad",
+    "glm"
   ]
 }

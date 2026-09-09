@@ -1,45 +1,86 @@
 #include <iostream>
-#ifdef _USE_GLAD_OPENGL
+#include <memory>
+
 #include <glad/glad.h>
-#endif
-#include <GLFW/glfw3.h>
+
+#include <Logger/Logger.hpp>
+#include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
+#include <Window/GLFW/GLFWWindow.hpp>
+#include <Resource/ResouceManager.hpp>
+#include <Resource/Opengl/OpenglResourceManager.hpp>
+#include <Renderer/IRendererCommand.hpp>
+#include <Renderer/Opengl/OpenglRendererCommand.hpp>
+
+using namespace InputProcessor::Logger;
+using namespace InputProcessor::Window;
+using namespace InputProcessor::Window::GLFW;
+using namespace InputProcessor::Resource;
+using namespace InputProcessor::Resource::Opengl;
+using namespace InputProcessor::Renderer;
+using namespace InputProcessor::Renderer::Opengl;
+
+const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"}\0";
+
+const char* fragmentShaderSource = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"}\0";
+
+float vertices[] = {
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+};
+
+unsigned int indices[] = { 0,1,2 };
 
 int main() {
-	if (!glfwInit()) {
-		std::cerr << "Failed to initialize GLFW" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
+    auto spdlogger = std::make_shared<SpdLog::SpdLogLoggerAdapter>("Main");
+    Logger::SetEngineImplementation(spdlogger);
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+    std::unique_ptr<IWindow> window = std::make_unique<GLFWWindow>();
 
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Hello, World!", NULL, NULL);
-	if (!window) {
-		std::cerr << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
+    WindowConfiguration config{ 800, 600, "Hello, World!" };
 
-	glfwMakeContextCurrent(window);
-	
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
+    window->Init(config);
 
-	while (!glfwWindowShouldClose(window)) {
-		glClear(GL_COLOR_BUFFER_BIT);
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
+    std::shared_ptr<ResourceManager> resourceManager = std::make_shared<OpenglResourceManager>();
+    ResourceManager::SetInstance(resourceManager);
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
-	return 0;
+    ShaderData shaderData = ShaderData({ vertexShaderSource, fragmentShaderSource, "OK" });
+    IShader* shader = ResourceManager::GetShaderFromSource(shaderData);
+
+    IVertexBuffer* vertexBuffer = ResourceManager::CreateVertexBuffer();
+    vertexBuffer->SetData(0, vertices, sizeof(vertices), 3, 3 * sizeof(float), BufferDataType::Float);
+
+    IIndexBuffer* indexBuffer = ResourceManager::CreateIndexBuffer();
+    indexBuffer->SetData(indices, sizeof(indices));
+
+    IRendererCommand* rendererCommand = new OpenglRendererCommand();
+
+    while (!window->CheckShouldClose()) {
+        rendererCommand->SetClearColor({ 1.f, 1.f, 1.f, 1.f });
+        rendererCommand->ClearBuffers(BufferFlag::Color);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        shader->Use();
+        vertexBuffer->Bind();
+        indexBuffer->Bind();
+        rendererCommand->DrawIndex(InputProcessor::Renderer::RenderMode::Triangles, 3);
+        vertexBuffer->UnBind();
+
+        window->SwapBuffers();
+        window->PollEvents();
+    }
+
+    window->Close();
+    delete rendererCommand;
+    return 0;
 }
