@@ -1,12 +1,9 @@
 {
   "dependencies": [
     "glfw3",
-    {
-      "name": "glad",
-      "features": [
-        "gl-api-46"
-      ]
-    },
+    "spdlog",
+    "stb",
+    "glad",
     "glm"
   ]
 }
