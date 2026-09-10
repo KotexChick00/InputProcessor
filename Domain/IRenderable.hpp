@@ -18,11 +18,11 @@ namespace InputProcessor::Domain {
 
 	class IRenderableDecorator : public IRenderable {
 	public:
-		IRenderableDecorator(std::shared_ptr<IRenderable*> renderable) : mRenderable(renderable) {}
+		IRenderableDecorator(std::shared_ptr<IRenderable> renderable) : mRenderable(renderable) {}
 		virtual ~IRenderableDecorator() = default;
 
 		virtual void Render(Transform transform) = 0;
 	protected:
-		std::shared_ptr<IRenderable*> mRenderable;
+		std::shared_ptr<IRenderable> mRenderable;
 	};
 }
