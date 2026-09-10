@@ -172,6 +172,7 @@
     <ClCompile Include="Core\Resource\Opengl\OpenglVertexBuffer.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Domain\Mesh\BaseMeshRender.cpp" />
+    <ClCompile Include="Domain\ModelReader\ModelHandlerProvider\ModelHandlerProvider.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
@@ -200,6 +201,10 @@
     <ClInclude Include="Domain\IRenderable.hpp" />
     <ClInclude Include="Domain\Mesh\BaseMeshRender.hpp" />
     <ClInclude Include="Domain\Mesh\MeshData.hpp" />
+    <ClInclude Include="Domain\ModelReader\IModelReader.hpp" />
+    <ClInclude Include="Domain\ModelReader\ModelHandlerProvider\BaseModelHandler.hpp" />
+    <ClInclude Include="Domain\ModelReader\ModelHandlerProvider\Handlers\ObjModelHandler.hpp" />
+    <ClInclude Include="Domain\ModelReader\ModelHandlerProvider\ModelHandlerProvider.hpp" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
