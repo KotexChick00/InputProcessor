@@ -16,6 +16,7 @@ public:
 	{
 		m_vertIndex[i] = index;
 	}
+	void PrintFaceIndices(unsigned int faceIndex) const;
 private:
 	unsigned int m_vertIndex[3];
 

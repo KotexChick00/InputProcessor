@@ -72,16 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -159,6 +159,19 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglRendererCommand.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglConstantFactory.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglIndexBuffer.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglResourceManager.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglShader.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglTexture.cpp" />
+    <ClCompile Include="Core\Resource\Opengl\OpenglVertexBuffer.cpp" />
+    <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
+    <ClCompile Include="Domain\Mesh\BaseMeshRender.cpp" />
+    <ClCompile Include="src\OBJ\ObjLogger.cpp" />
+    <ClCompile Include="src\OBJ\ObjMeshConverter.cpp" />
+    <ClCompile Include="src\OBJ\ObjTrigFace.cpp" />
     <ClCompile Include="src\OBJ\ObjVertex.cpp" />
     <ClCompile Include="src\PrimitiveType\Vector2.cpp" />
     <ClCompile Include="src\OBJ\ObjParser.cpp" />
@@ -169,7 +182,34 @@
     <ClCompile Include="src\PrimitiveType\Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Logger\Logger.hpp" />
+    <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
+    <ClInclude Include="Core\Model\ModelData.hpp" />
+    <ClInclude Include="Core\Renderer\IRenderer.hpp" />
+    <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglRendererCommand.hpp" />
+    <ClInclude Include="Core\Resource\IIndexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\IShader.hpp" />
+    <ClInclude Include="Core\Resource\ITexture.hpp" />
+    <ClInclude Include="Core\Resource\IVertexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglConstantFactory.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglIndexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglResourceManager.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglShader.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglTexture.hpp" />
+    <ClInclude Include="Core\Resource\Opengl\OpenglVertexBuffer.hpp" />
+    <ClInclude Include="Core\Resource\ResouceManager.hpp" />
+    <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
+    <ClInclude Include="Core\Window\IWindow.hpp" />
+    <ClInclude Include="Domain\Camera\Camera.hpp" />
+    <ClInclude Include="Domain\IRenderable.hpp" />
+    <ClInclude Include="Domain\Mesh\BaseMeshRender.hpp" />
+    <ClInclude Include="Domain\Mesh\MeshData.hpp" />
+    <ClInclude Include="src\OBJ\ObjLogger.h" />
+    <ClInclude Include="src\OBJ\ObjMeshConverter.h" />
+    <ClInclude Include="src\OBJ\ObjTrigFace.h" />
     <ClInclude Include="src\DataTypes.h" />
+    <ClInclude Include="src\OBJ\ObjTools.h" />
     <ClInclude Include="src\OBJ\ObjVertex.h" />
     <ClInclude Include="src\PrimitiveType\Vector2.h" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
@@ -177,6 +217,10 @@
     <ClInclude Include="src\FormatChecker.h" />
     <ClInclude Include="src\PrimitiveType\Vector3.h" />
     <ClInclude Include="src\PrimitiveType\Vector4.h" />
+    <ClInclude Include="src\StringUtils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="example.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

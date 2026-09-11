@@ -15,10 +15,10 @@ void ObjParser::Parse()
 		if (line.empty() || line[0] == '#') {
 			return; // Bỏ qua dòng trống và comment
 		}
-		if (line[0] == 'v' && (line[1] == ' ' || line[1] == '\t')) {
+		if (line[0] == 'v' && (line.size() > 1 && (line[1] == ' ' || line[1] == '\t'))) {
 			ParseVertexLine(line);
 		}
-		else if (line[0] == 'f' && (line[1] == ' ' || line[1] == '\t')) {
+		else if (line[0] == 'f' && (line.size() > 1 && (line[1] == ' ' || line[1] == '\t'))) {
 			ParseFaceLine(line);
 		}
 		// Tạm thời bỏ qua các loại dòng khác (vn, vt, etc.)
@@ -40,16 +40,31 @@ std::vector<std::string> ObjParser::SplitString(const std::string& str, char del
 void ObjParser::ParseVertexLine(const std::string& line)
 {
 	auto tokens = SplitString(line, ' ');
-	if (tokens.size() < 4) {
-		throw std::runtime_error("Invalid vertex line: " + line);
+
+	// Filter out empty tokens produced by consecutive spaces so that
+	// "v  1.0  2.0 3.0" becomes ["v","1.0","2.0","3.0"]
+	std::vector<std::string> parts;
+	parts.reserve(tokens.size());
+	for (const auto& t : tokens) {
+		if (!t.empty()) parts.push_back(t);
 	}
-	float x = StringToFloat(tokens[1]);
-	float y = StringToFloat(tokens[2]);
-	float z = StringToFloat(tokens[3]);
 
-	unsigned int vertexIndex = static_cast<unsigned int>(m_vertices.size()) + 1;
+	if (parts.size() < 4) {
+		throw std::runtime_error("Invalid vertex line (not enough coordinates): " + line);
+	}
 
-	m_vertices.emplace_back(x, y, z, vertexIndex);
+	try {
+		float x = StringToFloat(parts[1]);
+		float y = StringToFloat(parts[2]);
+		float z = StringToFloat(parts[3]);
+
+		unsigned int vertexIndex = static_cast<unsigned int>(m_vertices.size()) + 1;
+		m_vertices.emplace_back(x, y, z, vertexIndex);
+	}
+	catch (const std::runtime_error& e) {
+		// Re-throw with line context for easier debugging
+		throw std::runtime_error(std::string("Failed to parse vertex coordinates: ") + line + " (" + e.what() + ")");
+	}
 }
 
 const ObjVertex& ObjParser::GetVertexAtIndex(unsigned int objIndex) const
