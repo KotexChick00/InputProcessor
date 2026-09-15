@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
+#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
+#endif
 #include <Resource/IIndexBuffer.hpp>
 
 namespace InputProcessor::Resource::Opengl {

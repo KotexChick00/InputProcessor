@@ -1,7 +1,9 @@
 #include <iostream>
 #include <memory>
 
+#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
+#endif
 
 #include <Logger/Logger.hpp>
 #include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>

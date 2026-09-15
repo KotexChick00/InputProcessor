@@ -1,6 +1,8 @@
 #pragma once
 #include <Resource/IShader.hpp>
+#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
+#endif
 
 namespace InputProcessor::Resource::Opengl {
 	class OpenglShader : public IShader {

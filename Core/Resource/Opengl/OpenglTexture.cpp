@@ -1,6 +1,8 @@
 #include <Resource/Opengl/OpenglTexture.hpp>
 #include <Logger/Logger.hpp>
+#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
+#endif
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

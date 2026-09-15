@@ -1,6 +1,8 @@
 #pragma once
 #include <Window/IWindow.hpp>
+#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
+#endif
 #include <GLFW/glfw3.h>
 
 namespace InputProcessor::Window::GLFW {

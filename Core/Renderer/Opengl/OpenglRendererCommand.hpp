@@ -1,8 +1,9 @@
 #pragma once
 #include <iostream>
 #include <Renderer/IRendererCommand.hpp>
+#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
-
+#endif
 
 namespace InputProcessor::Renderer::Opengl {
 	class OpenglRendererCommand : public InputProcessor::Renderer::IRendererCommand {
