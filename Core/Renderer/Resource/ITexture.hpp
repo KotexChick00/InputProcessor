@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
-#include <Resource/IShader.hpp>
+#include <Renderer/Resource/IShader.hpp>
 
-namespace InputProcessor::Resource {
+namespace InputProcessor::Renderer::Resource {
 	enum class WrapMethod {
 		Repeat = 0,
 		MirroedRepeat = 1,
@@ -44,20 +44,14 @@ namespace InputProcessor::Resource {
 			MagFilter(MagFilterMethod::BiLinear) {}
 	};
 
+	typedef unsigned int TextureID;
+
 	class ITexture {
 	public:
 		virtual ~ITexture() = default;
 
 		virtual void Config(const TextureConfiguration& config) = 0;
-
-		/*
-		* Texture idx will automatically be 0
-		*/
-		virtual void SetTexture(const std::string& samplerName, IShader* shader) = 0;
-		
-		/*
-		* Choose texture idx
-		*/
-		virtual void SetTexture(const std::string& samplerName, unsigned int textureIdx, IShader* shader) = 0;
+	
+		virtual TextureID GetTextureId() const = 0;
 	};
 }

@@ -1,11 +1,15 @@
-#include <Resource/Opengl/OpenglShader.hpp>
+#include <Renderer/Opengl/OpenglShader.hpp>
+#include <Renderer/Opengl/OpenglTexture.hpp>
+#include <Renderer/Resource/ITexture.hpp>
 #include <Logger/Logger.hpp>
+#include <fstream>
+#include <sstream>
 
-namespace InputProcessor::Resource::Opengl {
+namespace InputProcessor::Renderer::Resource::Opengl {
 	using namespace InputProcessor::Logger;
 
 	OpenglShader::OpenglShader(const std::string& vertexSource, const std::string& fragmentSource)
-		: mProgramID(0)
+		: mProgramID(0), mTextureUnitCounter(0)
 	{
 		unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexSource);
 		unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
@@ -153,4 +157,105 @@ namespace InputProcessor::Resource::Opengl {
 			IP_ENGINE_WARN("Uniform 4f '{}' not found", name);
 		}
 	}
+
+	ShaderID OpenglShader::GetShaderId() const {
+		return static_cast<ShaderID>(mProgramID);
+	}
+
+	void OpenglShader::SetUniformBuffer(const std::string& name, unsigned int bindingPointIdx) {
+		if (mProgramID == 0) {
+			IP_ENGINE_WARN("SetUniformBuffer called on invalid shader program");
+			return;
+		}
+
+		GLuint blockIndex = glGetUniformBlockIndex(mProgramID, name.c_str());
+		if (blockIndex == GL_INVALID_INDEX) {
+			IP_ENGINE_WARN("Uniform block '{}' not found in shader program {}", name, mProgramID);
+			return;
+		}
+
+		glUniformBlockBinding(mProgramID, blockIndex, static_cast<GLuint>(bindingPointIdx));
+	}
+
+	void OpenglShader::SetUniformTexture(const std::string& name, ITexture* texture) {
+		if (mProgramID == 0) {
+			IP_ENGINE_WARN("SetUniformTexture called on invalid shader program");
+			return;
+		}
+
+		if (texture == nullptr) {
+			IP_ENGINE_WARN("SetUniformTexture called with nullptr texture for '{}'", name);
+			return;
+		}
+
+		int location = glGetUniformLocation(mProgramID, name.c_str());
+		if (location == -1) {
+			IP_ENGINE_WARN("Uniform '{}' not found in shader program {}", name, mProgramID);
+			return;
+		}
+
+		// Determine max available texture units
+		GLint maxUnits = 0;
+		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxUnits);
+		if (maxUnits <= 0) maxUnits = 1;
+
+		GLuint unit = mTextureUnitCounter % static_cast<GLuint>(maxUnits);
+		// Only support OpenglTexture here; skip if texture is another implementation
+		OpenglTexture* oglTex = dynamic_cast<OpenglTexture*>(texture);
+		if (oglTex == nullptr) {
+			IP_ENGINE_WARN("SetUniformTexture only supports OpenglTexture instances for '{}'", name);
+			return;
+		}
+
+		GLuint nativeTexId = oglTex->GetOpenglId();
+		glActiveTexture(GL_TEXTURE0 + unit);
+		glBindTexture(GL_TEXTURE_2D, nativeTexId);
+		glUniform1i(location, static_cast<GLint>(unit));
+
+		// advance counter so next call binds to next unit
+		mTextureUnitCounter = (mTextureUnitCounter + 1) % static_cast<GLuint>(maxUnits);
+	}
+
+	OpenglShader* OpenglShader::FromSource(const std::string& vertexSource, const std::string& fragmentSource) {
+		IP_ENGINE_TRACE("Creating shader from raw sources. Vertex source length: {}, Fragment source length: {}", vertexSource.size(), fragmentSource.size());
+		IP_ENGINE_TRACE("Vertex Source:\n{}", vertexSource);
+		IP_ENGINE_TRACE("Fragment Source:\n{}", fragmentSource);
+
+		OpenglShader* shader = new OpenglShader(vertexSource, fragmentSource);
+		if (shader->GetShaderId() == 0) {
+			delete shader;
+			return nullptr;
+		}
+
+		return shader;
+	}
+
+	OpenglShader* OpenglShader::FromFiles(const std::string& vertexFile, const std::string& fragmentFile) {
+		auto readFile = [](const std::string& path) -> std::string {
+			std::ifstream ifs(path);
+			if (!ifs.is_open()) return std::string();
+			std::stringstream ss;
+			ss << ifs.rdbuf();
+			return ss.str();
+		};
+
+		std::string vertexSrc = readFile(vertexFile);
+		if (vertexSrc.empty()) {
+			IP_ENGINE_ERROR("Failed to read vertex shader file: {}", vertexFile);
+			return nullptr;
+		}
+
+		std::string fragmentSrc = readFile(fragmentFile);
+		if (fragmentSrc.empty()) {
+			IP_ENGINE_ERROR("Failed to read fragment shader file: {}", fragmentFile);
+			return nullptr;
+		}
+
+		IP_ENGINE_TRACE("Loaded shader files. Vertex file: {} ({} bytes), Fragment file: {} ({} bytes)", vertexFile, vertexSrc.size(), fragmentFile, fragmentSrc.size());
+		IP_ENGINE_TRACE("Vertex Source:\n{}", vertexSrc);
+		IP_ENGINE_TRACE("Fragment Source:\n{}", fragmentSrc);
+
+		return FromSource(vertexSrc, fragmentSrc);
+	}
+
 }

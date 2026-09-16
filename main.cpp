@@ -1,25 +1,24 @@
-#include <iostream>
+// Use project IWindow and GLFWWindow to create a black 800x600 window titled "Hello Window"
+
 #include <memory>
-
-#ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
-#endif
-
-#include <Logger/Logger.hpp>
-#include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
 #include <Window/GLFW/GLFWWindow.hpp>
-#include <Resource/ResouceManager.hpp>
-#include <Resource/Opengl/OpenglResourceManager.hpp>
-#include <Renderer/IRendererCommand.hpp>
-#include <Renderer/Opengl/OpenglRendererCommand.hpp>
+#include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
+#include <Renderer/Opengl/OpenglRenderer.hpp>
+using namespace InputProcessor::Logger::SpdLog;
 
-using namespace InputProcessor::Logger;
 using namespace InputProcessor::Window;
 using namespace InputProcessor::Window::GLFW;
-using namespace InputProcessor::Resource;
-using namespace InputProcessor::Resource::Opengl;
-using namespace InputProcessor::Renderer;
 using namespace InputProcessor::Renderer::Opengl;
+using namespace InputProcessor::Renderer::Resource::Opengl;
+using namespace InputProcessor::Renderer;
+using namespace InputProcessor::Renderer::Resource;
+
+float vertices[] = {
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+};
 
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -30,59 +29,42 @@ const char* vertexShaderSource = "#version 330 core\n"
 
 const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
+"\n"
 "void main()\n"
 "{\n"
 "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 "}\0";
 
-float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
-};
-
-unsigned int indices[] = { 0,1,2 };
-
 int main() {
-    auto spdlogger = std::make_shared<SpdLog::SpdLogLoggerAdapter>("Main");
-    Logger::SetEngineImplementation(spdlogger);
-
+    Logger::SetEngineImplementation(std::make_shared<SpdLogLoggerAdapter>("IP_ENGINE"));
     std::unique_ptr<IWindow> window = std::make_unique<GLFWWindow>();
 
-    WindowConfiguration config{ 800, 600, "Hello, World!" };
-
+    WindowConfiguration config{ 800, 600, "Hello Window" };
     window->Init(config);
 
-    std::shared_ptr<ResourceManager> resourceManager = std::make_shared<OpenglResourceManager>();
-    ResourceManager::SetInstance(resourceManager);
+    IRenderer* renderer = OpenglRenderer::GetInstance();
+    RendererConfiguration rendererConfig = renderer->GetConfig();
+    rendererConfig.ClearBufferColor.Red = 0.2f;
+    rendererConfig.ClearBufferColor.Green = 0.3f;
+    rendererConfig.ClearBufferColor.Blue = 0.3f;
+    rendererConfig.ClearBufferColor.Alpha = 1.0f;
 
-    ShaderData shaderData = ShaderData({ vertexShaderSource, fragmentShaderSource, "OK" });
-    IShader* shader = ResourceManager::GetShaderFromSource(shaderData);
-
-    IVertexBuffer* vertexBuffer = ResourceManager::CreateVertexBuffer();
-    vertexBuffer->SetData(0, vertices, sizeof(vertices), 3, 3 * sizeof(float), BufferDataType::Float);
-
-    IIndexBuffer* indexBuffer = ResourceManager::CreateIndexBuffer();
-    indexBuffer->SetData(indices, sizeof(indices));
-
-    IRendererCommand* rendererCommand = new OpenglRendererCommand();
+    renderer->Config(rendererConfig);
+    
+    IShader* shader = OpenglShader::FromSource(vertexShaderSource, fragmentShaderSource);
+    IVertexBuffer* vertexBuffer = OpenglVertexBuffer::Create();
+    vertexBuffer->SetData(0, vertices, sizeof(vertices), 3, 3 * sizeof(float));
 
     while (!window->CheckShouldClose()) {
-        rendererCommand->SetClearColor({ 1.f, 1.f, 1.f, 1.f });
-        rendererCommand->ClearBuffers(BufferFlag::Color);
-        glClear(GL_COLOR_BUFFER_BIT);
-
+        renderer->GetRendererCommand()->ClearBuffers(ClearBufferMasks::Color);
         shader->Use();
         vertexBuffer->Bind();
-        indexBuffer->Bind();
-        rendererCommand->DrawIndex(InputProcessor::Renderer::RenderMode::Triangles, 3);
-        vertexBuffer->UnBind();
-
+        renderer->GetRendererCommand()->Draw(RenderMode::Triangles, 3);
         window->SwapBuffers();
         window->PollEvents();
     }
 
     window->Close();
-    delete rendererCommand;
+    OpenglRenderer::Free();
     return 0;
 }
