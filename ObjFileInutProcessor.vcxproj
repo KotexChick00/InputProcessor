@@ -169,6 +169,7 @@
     <ClCompile Include="Core\Resource\Opengl\OpenglVertexBuffer.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Domain\Mesh\BaseMeshRender.cpp" />
+    <ClCompile Include="src\OBJ\ObjFace.cpp" />
     <ClCompile Include="src\OBJ\ObjLogger.cpp" />
     <ClCompile Include="src\OBJ\ObjMeshConverter.cpp" />
     <ClCompile Include="src\OBJ\ObjTrigFace.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="Domain\IRenderable.hpp" />
     <ClInclude Include="Domain\Mesh\BaseMeshRender.hpp" />
     <ClInclude Include="Domain\Mesh\MeshData.hpp" />
+    <ClInclude Include="src\OBJ\ObjFace.h" />
     <ClInclude Include="src\OBJ\ObjLogger.h" />
     <ClInclude Include="src\OBJ\ObjMeshConverter.h" />
     <ClInclude Include="src\OBJ\ObjTrigFace.h" />
@@ -218,9 +220,6 @@
     <ClInclude Include="src\PrimitiveType\Vector3.h" />
     <ClInclude Include="src\PrimitiveType\Vector4.h" />
     <ClInclude Include="src\StringUtils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="example.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

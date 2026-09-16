@@ -78,6 +78,9 @@
     <ClCompile Include="src\OBJ\ObjLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\OBJ\ObjFace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AsciiReader.h">
@@ -188,8 +191,8 @@
     <ClInclude Include="src\OBJ\ObjLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="example.txt" />
+    <ClInclude Include="src\OBJ\ObjFace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

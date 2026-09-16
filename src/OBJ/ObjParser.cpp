@@ -3,6 +3,7 @@
 #include <StringUtils.h>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 ObjParser::ObjParser(const std::string& filename)
 	: m_filename(filename)
@@ -75,7 +76,7 @@ const ObjVertex& ObjParser::GetVertexAtIndex(unsigned int objIndex) const
 	return m_vertices[objIndex - 1]; // OBJ indices are 1-based
 }
 
-unsigned int ObjParser::ParseFaceIndex(const std::string& token)
+ObjFaceVertex ObjParser::ParseFaceVertex(const std::string& token)
 {
 	// token co the la "v", "v/vt", "v/vt/vn", hoac "v//vn"
 // chi can lay phan v (vi tri vertex)
@@ -85,7 +86,8 @@ unsigned int ObjParser::ParseFaceIndex(const std::string& token)
 		: token.substr(0, slashPos);
 
 	// OBJ index von da bat dau tu 1, giu nguyen khong chuyen doi
-	return StringToUnsignedInt(vertPart);
+	unsigned int vertexIndex = std::stoul(vertPart);
+	return ObjFaceVertex(vertexIndex);
 }
 
 void ObjParser::ParseFaceLine(const std::string& line)
@@ -95,14 +97,10 @@ void ObjParser::ParseFaceLine(const std::string& line)
 		throw std::runtime_error("Dong f khong hop le: " + line);
 	}
 
-	unsigned int i0 = ParseFaceIndex(tokens[1]);
-	unsigned int iPrev = ParseFaceIndex(tokens[2]);
-
-	// Tam giac hoa kieu "fan": (i0, i1, i2), (i0, i2, i3), (i0, i3, i4)...
-	// Voi face tam giac binh thuong (4 token), vong lap chi chay 1 lan.
-	for (size_t k = 3; k < tokens.size(); ++k) {
-		unsigned int iCur = ParseFaceIndex(tokens[k]);
-		m_faces.emplace_back(i0, iPrev, iCur);
-		iPrev = iCur;
+	std::vector<ObjFaceVertex> faceVertices;
+	faceVertices.reserve(tokens.size() - 1); // tokens[0] la "f", nen chi can reserve tokens.size() - 1
+	for (size_t i = 1; i < tokens.size(); ++i) {
+		faceVertices.push_back(ParseFaceVertex(tokens[i]));
 	}
+	m_faces.push_back(ObjFace(faceVertices));
 }

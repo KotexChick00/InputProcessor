@@ -58,7 +58,7 @@ int main() {
     IShader* shader = ResourceManager::GetShaderFromSource(shaderData);
 
     // --- Nạp dữ liệu từ file OBJ ---
-    ObjParser objParser("main.obj");
+    ObjParser objParser("concave.obj");
     objParser.Parse();
     MeshRenderData meshData = ObjMeshConverter::ConvertToMeshRenderData(objParser);
 
@@ -97,10 +97,10 @@ int main() {
     float fovDegrees = 45.0f;
     float distance = radius / sin(glm::radians(fovDegrees * 0.5f)) * 1.2f;
 
-    glm::vec3 cameraPos = center + glm::vec3(0.0f, 0.0f, distance);
+    glm::vec3 cameraPos = center + glm::vec3(0.0f, distance, 0.0f );
 
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::lookAt(cameraPos, center, glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 view = glm::lookAt(cameraPos, center, glm::vec3(0.0f, 0.0f, -1.0f));
     glm::mat4 projection = glm::perspective(
         glm::radians(fovDegrees),
         800.0f / 600.0f,
@@ -123,6 +123,7 @@ int main() {
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     while (!window->CheckShouldClose()) {
         rendererCommand->SetClearColor({ 1.f, 1.f, 1.f, 1.f });
@@ -141,6 +142,7 @@ int main() {
         window->SwapBuffers();
         window->PollEvents();
     }
+    std::cout << "GL version: " << glGetString(GL_VERSION) << std::endl;
 
     window->Close();
     delete rendererCommand;
