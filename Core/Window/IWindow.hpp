@@ -8,6 +8,8 @@ namespace InputProcessor::Window {
 		std::string Title;
 		WindowConfiguration(int width, int height, std::string title) : Width(width), Height(height), Title(title) {}
 	};
+
+	class IWindowVisitor;
 	
 	class IWindow {
 	public:
@@ -16,7 +18,7 @@ namespace InputProcessor::Window {
 		virtual void SwapBuffers() = 0;
 		virtual bool CheckShouldClose() = 0;
 		virtual void Close() = 0;
-		// Return native window handle (platform specific). May be nullptr if not available.
-		virtual void* GetNativeWindow() = 0;
+
+		virtual void Accept(IWindowVisitor* visitor) = 0;
 	};
 }

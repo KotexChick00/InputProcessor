@@ -5,11 +5,13 @@
 #include <Window/GLFW/GLFWWindow.hpp>
 #include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
 #include <Renderer/Opengl/OpenglRenderer.hpp>
-
+#include <UI/Imgui/ImguiUIRenderer.hpp>
+#include <UI/Imgui/ImguiUIWindowVisitor.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_internal.h>
 // do not include <imgui_impl_opengl3_loader.h> because glad is already included
 
 using namespace InputProcessor::Logger::SpdLog;
@@ -20,6 +22,8 @@ using namespace InputProcessor::Renderer::Opengl;
 using namespace InputProcessor::Renderer::Resource::Opengl;
 using namespace InputProcessor::Renderer;
 using namespace InputProcessor::Renderer::Resource;
+using namespace InputProcessor::UI::Imgui;
+using namespace InputProcessor::UI;
 
 float vertices[] = {
      0.5f,  0.5f, 0.0f,  // top right
@@ -48,11 +52,14 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 "}\0";
 
+const unsigned int WINDOW_WIDTH = 1000;
+const unsigned int WINDOW_HEIGHT = 1000;
+
 int main() {
     Logger::SetEngineImplementation(std::make_shared<SpdLogLoggerAdapter>("IP_ENGINE"));
-    std::unique_ptr<IWindow> window = std::make_unique<GLFWWindow>();
+    std::unique_ptr<GLFWWindow> window = std::make_unique<GLFWWindow>();
 
-    WindowConfiguration config{ 800, 600, "Hello Window" };
+    WindowConfiguration config{ WINDOW_WIDTH, WINDOW_HEIGHT, "Hello Window" };
     window->Init(config);
 
     IRenderer* renderer = OpenglRenderer::GetInstance();
@@ -61,8 +68,8 @@ int main() {
     rendererConfig.ClearBufferColor.Green = 0.3f;
     rendererConfig.ClearBufferColor.Blue = 0.3f;
     rendererConfig.ClearBufferColor.Alpha = 1.0f;
-    rendererConfig.ViewPortOptions.Width = 800;
-    rendererConfig.ViewPortOptions.Height = 600;
+    rendererConfig.ViewPortOptions.Width = WINDOW_WIDTH;
+    rendererConfig.ViewPortOptions.Height = WINDOW_HEIGHT;
 
     renderer->Config(rendererConfig);
     
@@ -75,39 +82,15 @@ int main() {
 
 
 	// Init ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(window->GetNativeWindow()), true);    
-	ImGui_ImplOpenGL3_Init("#version 460");
+    ImguiWindowContextInitVisitor* contextVisitor = new ImguiWindowContextInitVisitor();
+    ImguiWindowRenderVisitor* renderVisitor = new ImguiWindowRenderVisitor();
+    ImguiWindowShutdownVisitor* shutdownVisitor = new ImguiWindowShutdownVisitor();
+    IUIRenderer* uiRenderer = new ImguiUIRenderer(contextVisitor, renderVisitor, shutdownVisitor);
+    uiRenderer->Init(window.get());
 
-
-
-
-
-
-
-    // Main loop
-
-    bool show_demo_window = true;
     while (!window->CheckShouldClose()) {
         // Poll events first
         window->PollEvents();
-
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        // Example UI: demo window and a simple window
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        ImGui::Begin("Simple Window");
-        ImGui::Text("Hello from ImGui integrated into the app");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        ImGui::End();
 
         // Render scene (triangle)
         renderer->GetRendererCommand()->ClearBuffers(ClearBufferMasks::Color);
@@ -116,20 +99,16 @@ int main() {
         indexBuffer->Bind();
         renderer->GetRendererCommand()->DrawIndex(RenderMode::Triangles, 6);
 
-        // Rendering ImGui
-        ImGui::Render();
-        int display_w = rendererConfig.ViewPortOptions.Width;
-        int display_h = rendererConfig.ViewPortOptions.Height;
-        // If window size can change, query it from GLFW; here the project uses a fixed size
-        glViewport(0, 0, display_w, display_h);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        uiRenderer->Render();
 
         window->SwapBuffers();
     }
 
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+    uiRenderer->Free();
+    delete uiRenderer;
+    delete contextVisitor;
+    delete renderVisitor;
+    delete shutdownVisitor;
 
     window->Close();
     OpenglRenderer::Free();

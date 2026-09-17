@@ -179,6 +179,8 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglTexture.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
+    <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
+    <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
     <ClCompile Include="Domain\RenderModel.cpp" />
@@ -221,8 +223,10 @@
     <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
+    <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
+    <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporterAdapter.hpp" />
     <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />
@@ -242,6 +246,9 @@
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
+    <ClInclude Include="UI\ImGuiUIRendererAdapter.hpp" />
+    <ClInclude Include="Core\UI\Imgui\ImguiUIRenderer.hpp" />
+    <ClInclude Include="Core\UI\IUIRenderer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
