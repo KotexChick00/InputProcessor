@@ -19,6 +19,8 @@
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp" />
+    <ClCompile Include="Domain\RenderModel.cpp" />
+    <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -51,7 +53,13 @@
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
-    <ClInclude Include="src\OBJ\Vect4.h" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglUniformBuffer.hpp" />
+    <ClInclude Include="Domain\Model\IMaterial.hpp" />
+    <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />
+    <ClInclude Include="Domain\Model\Mesh.hpp" />
+    <ClInclude Include="Domain\Model\RenderModel.hpp" />
+    <ClInclude Include="Domain\Model\IRenderResourceFactory.hpp" />
+    <ClInclude Include="Domain\Model\OpenglRenderResourceFactory.hpp" />
+    <ClInclude Include="Domain\Model\Importers\AssimpModelImporterAdapter.hpp" />
   </ItemGroup>
 </Project>

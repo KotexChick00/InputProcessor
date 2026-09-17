@@ -176,6 +176,8 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
+    <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
+    <ClCompile Include="Domain\RenderModel.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
@@ -210,6 +212,13 @@
     <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
+    <ClInclude Include="Domain\Model\IMaterial.hpp" />
+    <ClInclude Include="Domain\Model\Importers\AssimpModelImporterAdapter.hpp" />
+    <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />
+    <ClInclude Include="Domain\Model\IRenderResourceFactory.hpp" />
+    <ClInclude Include="Domain\Model\Mesh.hpp" />
+    <ClInclude Include="Domain\Model\OpenglRenderResourceFactory.hpp" />
+    <ClInclude Include="Domain\Model\RenderModel.hpp" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
