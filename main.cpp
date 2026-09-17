@@ -54,6 +54,8 @@ int main() {
     rendererConfig.ClearBufferColor.Green = 0.3f;
     rendererConfig.ClearBufferColor.Blue = 0.3f;
     rendererConfig.ClearBufferColor.Alpha = 1.0f;
+    rendererConfig.ViewPortOptions.Width = 800;
+    rendererConfig.ViewPortOptions.Height = 600;
 
     renderer->Config(rendererConfig);
     
