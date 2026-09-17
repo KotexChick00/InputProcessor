@@ -14,6 +14,7 @@ public:
 	const std::vector<ObjVertex>& GetVertices() const { return m_vertices; }
 	const std::vector<ObjFace>& GetFaces() const { return m_faces; }
 	const ObjVertex& GetVertexAtIndex(unsigned int objIndex) const;
+	const unsigned int RelativeToAbsoluteVertexIndex(int negativeIndex) const;
 
 private:
 	void ParseVertexLine(const std::string& line);
