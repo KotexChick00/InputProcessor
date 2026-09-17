@@ -30,6 +30,7 @@ namespace InputProcessor::Renderer::Resource::Opengl {
 
 		IFrameTextureAttachment* GetFrameTextureAttachment() override;
 		FrameBufferID GetFrameBufferId() const override;
+		ViewPortSize GetViewPortSize() override;
 
 	private:
 		OpenglColorFrameBuffer(unsigned int width, unsigned int height);
@@ -54,6 +55,7 @@ namespace InputProcessor::Renderer::Resource::Opengl {
 
 		IFrameTextureAttachment* GetFrameTextureAttachment() override;
 		FrameBufferID GetFrameBufferId() const override;
+		ViewPortSize GetViewPortSize() override;
 
 	private:
 		OpenglDepthFrameBuffer(unsigned int width, unsigned int height);
