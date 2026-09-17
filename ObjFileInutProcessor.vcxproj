@@ -72,10 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)src;$(IncludePath)</IncludePath>
+    <IncludePath>D:\DoAnChuyenNganh\InputProcessor\Core;D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)src;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -120,9 +126,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_GLAD_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,12 +162,54 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\OBJ\ObjParser.cpp" />
+    <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBuffer.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBufferManager.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglIndexBuffer.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglRenderer.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglRendererCommand.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglResourceManager.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglTexture.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
+    <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
+    <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
+    <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Logger\Logger.hpp" />
+    <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
+    <ClInclude Include="Core\Renderer\IRenderer.hpp" />
+    <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglConstantFactory.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglCubeMap.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglFrameBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglFrameBufferManager.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglIndexBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglRenderer.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglRendererCommand.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglResourceManager.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglShader.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglTexture.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglUniformBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Opengl\OpenglVertexBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\RendererPrimitives.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\ICubeMap.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IFrameBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IFrameBufferManager.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IIndexBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IShader.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\ITexture.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
+    <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
+    <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
