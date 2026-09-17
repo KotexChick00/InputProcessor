@@ -39,9 +39,6 @@
     <ClCompile Include="Import\OBJ\ObjVertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Import\OBJ\ObjTrigFace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Renderer\Opengl\OpenglRendererCommand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -123,9 +120,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Import\StringUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Import\OBJ\ObjTrigFace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Resource\Opengl\OpenglVertexBuffer.hpp">

@@ -176,7 +176,6 @@
     <ClCompile Include="Import\OBJ\ObjFace.cpp" />
     <ClCompile Include="Import\OBJ\ObjLogger.cpp" />
     <ClCompile Include="Import\OBJ\ObjMeshConverter.cpp" />
-    <ClCompile Include="Import\OBJ\ObjTrigFace.cpp" />
     <ClCompile Include="Import\OBJ\ObjVertex.cpp" />
     <ClCompile Include="Import\PrimitiveType\Vector2.cpp" />
     <ClCompile Include="Import\OBJ\ObjParser.cpp" />
@@ -233,7 +232,6 @@
     <ClInclude Include="Import\OBJ\ObjFace.h" />
     <ClInclude Include="Import\OBJ\ObjLogger.h" />
     <ClInclude Include="Import\OBJ\ObjMeshConverter.h" />
-    <ClInclude Include="Import\OBJ\ObjTrigFace.h" />
     <ClInclude Include="Import\DataTypes.h" />
     <ClInclude Include="Import\OBJ\ObjTools.h" />
     <ClInclude Include="Import\OBJ\ObjVertex.h" />
