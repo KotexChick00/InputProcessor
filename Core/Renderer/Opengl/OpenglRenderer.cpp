@@ -37,6 +37,14 @@ namespace InputProcessor::Renderer::Opengl {
 			mConfiguration.ClearBufferColor.Alpha
 		);
 
+		// Viewport
+		glViewport(
+			mConfiguration.ViewPortOptions.X,
+			mConfiguration.ViewPortOptions.Y,
+			mConfiguration.ViewPortOptions.Width,
+			mConfiguration.ViewPortOptions.Height
+		);
+
 		// Depth
 		if (mConfiguration.DepthOptions.Enabled) {
 			glEnable(GL_DEPTH_TEST);

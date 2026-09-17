@@ -94,6 +94,10 @@ namespace InputProcessor::Renderer::Resource::Opengl {
 		return static_cast<FrameBufferID>(mFbo);
 	}
 
+	ViewPortSize OpenglColorFrameBuffer::GetViewPortSize() {
+		return { mWidth, mHeight };
+	}
+
 	OpenglColorFrameBuffer* OpenglColorFrameBuffer::Create(FrameBufferCreateInfo createInfo) {
 		OpenglColorFrameBuffer* newColorFrameBuffer = new OpenglColorFrameBuffer(createInfo.Width, createInfo.Height);
 		OpenglFrameBufferManager::GetInstance()->InsertFrameBuffer(newColorFrameBuffer);
@@ -161,6 +165,10 @@ namespace InputProcessor::Renderer::Resource::Opengl {
 
 	FrameBufferID OpenglDepthFrameBuffer::GetFrameBufferId() const {
 		return static_cast<FrameBufferID>(mFbo);
+	}
+
+	ViewPortSize OpenglDepthFrameBuffer::GetViewPortSize() {
+		return { mWidth, mHeight };
 	}
 
 	OpenglDepthFrameBuffer* OpenglDepthFrameBuffer::Create(FrameBufferCreateInfo createInfo) {
