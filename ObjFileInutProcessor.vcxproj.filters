@@ -19,6 +19,15 @@
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp" />
+    <ClCompile Include="src\OBJ\ObjFace.cpp" />
+    <ClCompile Include="src\OBJ\ObjLogger.cpp" />
+    <ClCompile Include="src\OBJ\ObjMeshConverter.cpp" />
+    <ClCompile Include="src\OBJ\ObjParser.cpp" />
+    <ClCompile Include="src\OBJ\ObjTrigFace.cpp" />
+    <ClCompile Include="src\OBJ\ObjVertex.cpp" />
+    <ClCompile Include="src\PrimitiveType\Vector2.cpp" />
+    <ClCompile Include="src\PrimitiveType\Vector3.cpp" />
+    <ClCompile Include="src\PrimitiveType\Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -53,5 +62,16 @@
     <ClInclude Include="src\FormatChecker.h" />
     <ClInclude Include="src\OBJ\Vect4.h" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglUniformBuffer.hpp" />
+    <ClInclude Include="src\OBJ\ObjFace.h" />
+    <ClInclude Include="src\OBJ\ObjLogger.h" />
+    <ClInclude Include="src\OBJ\ObjMeshConverter.h" />
+    <ClInclude Include="src\OBJ\ObjTools.h" />
+    <ClInclude Include="src\OBJ\ObjTrigFace.h" />
+    <ClInclude Include="src\OBJ\ObjVertex.h" />
+    <ClInclude Include="src\PrimitiveType\Vector2.h" />
+    <ClInclude Include="src\PrimitiveType\Vector3.h" />
+    <ClInclude Include="src\PrimitiveType\Vector4.h" />
+    <ClInclude Include="src\DataTypes.h" />
+    <ClInclude Include="src\StringUtils.h" />
   </ItemGroup>
 </Project>
