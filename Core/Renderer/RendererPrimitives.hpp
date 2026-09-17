@@ -158,9 +158,17 @@ namespace InputProcessor::Renderer {
 	};
 
 #pragma endregion
-
+#pragma region Viewport
+	struct ViewPortOptions {
+		unsigned int X = 0;
+		unsigned int Y = 0;
+		unsigned int Width;
+		unsigned int Height;
+	};
+#pragma endregion
 	struct RendererConfiguration {
 		ColorRGBA ClearBufferColor;
+		ViewPortOptions ViewPortOptions;
 		DepthOptions DepthOptions;
 		CullFaceOptions CullFaceOptions;
 		StencilOptions StencilOptions;

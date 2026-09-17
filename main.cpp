@@ -15,9 +15,15 @@ using namespace InputProcessor::Renderer;
 using namespace InputProcessor::Renderer::Resource;
 
 float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+     0.5f,  0.5f, 0.0f,  // top right
+     0.5f, -0.5f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  // bottom left
+    -0.5f,  0.5f, 0.0f   // top left 
+};
+
+unsigned int indices[] = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
 };
 
 const char* vertexShaderSource = "#version 330 core\n"
@@ -55,11 +61,15 @@ int main() {
     IVertexBuffer* vertexBuffer = OpenglVertexBuffer::Create();
     vertexBuffer->SetData(0, vertices, sizeof(vertices), 3, 3 * sizeof(float));
 
+    IIndexBuffer* indexBuffer = OpenglIndexBuffer::Create();
+    indexBuffer->SetData(indices, sizeof(indices));
+
     while (!window->CheckShouldClose()) {
         renderer->GetRendererCommand()->ClearBuffers(ClearBufferMasks::Color);
         shader->Use();
         vertexBuffer->Bind();
-        renderer->GetRendererCommand()->Draw(RenderMode::Triangles, 3);
+        indexBuffer->Bind();
+        renderer->GetRendererCommand()->DrawIndex(RenderMode::Triangles, 6);
         window->SwapBuffers();
         window->PollEvents();
     }
