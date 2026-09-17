@@ -1,19 +1,21 @@
 #pragma once
 #include <iostream>
 
-namespace InputProcessor::Resource {
-	enum class RenderMode {
+namespace InputProcessor::Renderer::Resource {
+	enum class VertexBufferRenderMode {
 		Static = 0,
 		Stream = 1,
 		Dynamic = 2
 	};
 
-	enum class BufferDataType {
+	enum class VertexBufferDataType {
 		Float = 0,
 		Int = 1,
 		UnsignedInt = 2,
 		Byte = 3
 	};
+	
+	typedef unsigned int VertexBufferID;
 
 	class IVertexBuffer {
 	public:
@@ -25,8 +27,8 @@ namespace InputProcessor::Resource {
 			unsigned int size,
 			unsigned int count,
 			unsigned int stride,
-			BufferDataType dataType = BufferDataType::Float,
-			RenderMode renderMode = RenderMode::Static
+			VertexBufferDataType dataType = VertexBufferDataType::Float,
+			VertexBufferRenderMode renderMode = VertexBufferRenderMode::Static
 		) = 0;
 
 		virtual void SetData(
@@ -36,8 +38,8 @@ namespace InputProcessor::Resource {
 			unsigned int count,
 			unsigned int stride,
 			unsigned int offset,
-			BufferDataType dataType = BufferDataType::Float,
-			RenderMode renderMode = RenderMode::Static
+			VertexBufferDataType dataType = VertexBufferDataType::Float,
+			VertexBufferRenderMode renderMode = VertexBufferRenderMode::Static
 		) = 0;
 
 		virtual void Bind() = 0;
@@ -45,5 +47,7 @@ namespace InputProcessor::Resource {
 
 		virtual void EnableAttrib(unsigned int indx) = 0;
 		virtual void DisableAttrib(unsigned int indx) = 0;
+
+		virtual VertexBufferID GetVertexBufferId() const = 0;
 	};
 }

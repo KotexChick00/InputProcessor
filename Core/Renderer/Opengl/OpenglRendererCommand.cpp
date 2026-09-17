@@ -4,17 +4,25 @@
 namespace InputProcessor::Renderer::Opengl {
 	using namespace InputProcessor::Logger;
 
-	void OpenglRendererCommand::SetClearColor(ColorRGBA color) {
-		glClearColor(color.Red, color.Green, color.Blue, color.Alpha);
+	OpenglRendererCommand* OpenglRendererCommand::GetInstance() {
+		if (sInstance == nullptr) sInstance = new OpenglRendererCommand();
+		return sInstance;
 	}
 
-	void OpenglRendererCommand::ClearBuffers(BufferFlag bufferFlag) {
+	void OpenglRendererCommand::Free() {
+		if (sInstance != nullptr) {
+			delete sInstance;
+			sInstance = nullptr;
+		}
+	}
+
+	void OpenglRendererCommand::ClearBuffers(ClearBufferMasks clearBufferMasks) {
 		unsigned int bitWise = 0;
-		if (HasFlag(bufferFlag, BufferFlag::Color)) {
+		if (HasFlag(clearBufferMasks, ClearBufferMasks::Color)) {
 			bitWise |= GL_COLOR_BUFFER_BIT;
 		}
 
-		if (HasFlag(bufferFlag, BufferFlag::Depth)) {
+		if (HasFlag(clearBufferMasks, ClearBufferMasks::Depth)) {
 			bitWise |= GL_DEPTH_BUFFER_BIT;
 		}
 

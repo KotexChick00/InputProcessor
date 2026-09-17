@@ -5,14 +5,19 @@
 
 
 namespace InputProcessor::Renderer::Opengl {
-	class OpenglRendererCommand : public InputProcessor::Renderer::IRendererCommand {
+	class OpenglRendererCommand : public IRendererCommand {
 	public:
+		static OpenglRendererCommand* GetInstance();
+		static void Free();
+
+		void ClearBuffers(ClearBufferMasks clearBufferMasks) override;
+		void Draw(RenderMode renderMode, unsigned int count, unsigned int start = 0) override;
+		void DrawIndex(RenderMode renderMode, unsigned int count, unsigned int start = 0) override;
+
+	private:
 		OpenglRendererCommand() = default;
 		~OpenglRendererCommand() = default;
 
-		void SetClearColor(ColorRGBA color) override;
-		void ClearBuffers(BufferFlag bufferFlag) override;
-		void Draw(RenderMode renderMode, unsigned int count, unsigned int start = 0) override;
-		void DrawIndex(RenderMode renderMode, unsigned int count, unsigned int start = 0) override;
+		inline static OpenglRendererCommand* sInstance = nullptr;
 	};
 }

@@ -1,8 +1,9 @@
-#include <Resource/Opengl/OpenglVertexBuffer.hpp>
-#include <Resource/Opengl/OpenglConstantFactory.hpp>
+#include <Renderer/Opengl/OpenglVertexBuffer.hpp>
+#include <Renderer/Opengl/OpenglConstantFactory.hpp>
+#include <Renderer/Opengl/OpenglResourceManager.hpp>
 #include <Logger/Logger.hpp>
 
-namespace InputProcessor::Resource::Opengl {
+namespace InputProcessor::Renderer::Resource::Opengl {
 	using namespace InputProcessor::Logger;
 
 	OpenglVertexBuffer::OpenglVertexBuffer() {
@@ -18,7 +19,9 @@ namespace InputProcessor::Resource::Opengl {
 	}
 
 	OpenglVertexBuffer::~OpenglVertexBuffer() {
+		OpenglResourceManager::GetInstance()->RemoveVertexBuffer(GetVertexBufferId());
 		IP_ENGINE_TRACE("Opengl Vertex Array destroy with id: {}", mVaoID);
+
 		for (std::unordered_map<unsigned int, unsigned int>::iterator it = mVboIds.begin(); it != mVboIds.end(); ++it) {
 			unsigned int vboId = it->second;
 			glDeleteBuffers(1, &vboId);
@@ -33,15 +36,15 @@ namespace InputProcessor::Resource::Opengl {
 		unsigned int size,
 		unsigned int count,
 		unsigned int stride,
-		BufferDataType dataType,
-		RenderMode renderMode
+		VertexBufferDataType dataType,
+		VertexBufferRenderMode renderMode
 	) {
 		if (mVboIds.find(location) != mVboIds.end()) {
-			unsigned int vboId = mVboIds.at(location);
+			GLuint vboId = mVboIds.at(location);
 			glDeleteBuffers(1, &vboId);
 		}
 
-		unsigned int newVboId = 0;
+		GLuint newVboId = 0;
 		glGenBuffers(1, &newVboId);
 		if (newVboId == 0) {
 			IP_ENGINE_ERROR("Can't create new Vertex Buffer Object");
@@ -64,11 +67,11 @@ namespace InputProcessor::Resource::Opengl {
 		unsigned int count,
 		unsigned int stride,
 		unsigned int offset,
-		BufferDataType dataType,
-		RenderMode renderMode
+		VertexBufferDataType dataType,
+		VertexBufferRenderMode renderMode
 	) {
 		if (mVboIds.find(location) != mVboIds.end()) {
-			unsigned int vboId = mVboIds.at(location);
+			GLuint vboId = mVboIds.at(location);
 			glDeleteBuffers(1, &vboId);
 		}
 
@@ -102,5 +105,15 @@ namespace InputProcessor::Resource::Opengl {
 
 	void OpenglVertexBuffer::DisableAttrib(unsigned int indx) {
 		glDisableVertexAttribArray(indx);
+	}
+
+	VertexBufferID OpenglVertexBuffer::GetVertexBufferId() const {
+		return static_cast<VertexBufferID>(mVaoID);
+	}
+
+	OpenglVertexBuffer* OpenglVertexBuffer::Create() {
+		OpenglVertexBuffer* newVertexBuffer = new OpenglVertexBuffer();
+		OpenglResourceManager::GetInstance()->InsertVertexBuffer(newVertexBuffer);
+		return newVertexBuffer;
 	}
 }

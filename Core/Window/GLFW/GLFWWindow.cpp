@@ -1,3 +1,4 @@
+#include <glad/glad.h>
 #include <Window/GLFW/GLFWWindow.hpp>
 #include <Logger/Logger.hpp>
 
