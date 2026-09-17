@@ -18,43 +18,31 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\AsciiReader.cpp">
+    <ClCompile Include="Import\AsciiReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\FormatChecker.cpp">
+    <ClCompile Include="Import\FormatChecker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\OBJ\ObjParser.cpp">
+    <ClCompile Include="Import\OBJ\ObjParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PrimitiveType\Vector2.cpp">
+    <ClCompile Include="Import\PrimitiveType\Vector2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PrimitiveType\Vector3.cpp">
+    <ClCompile Include="Import\PrimitiveType\Vector3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PrimitiveType\Vector4.cpp">
+    <ClCompile Include="Import\PrimitiveType\Vector4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\OBJ\ObjVertex.cpp">
+    <ClCompile Include="Import\OBJ\ObjVertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\OBJ\ObjTrigFace.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Resource\Opengl\OpenglIndexBuffer.cpp">
+    <ClCompile Include="Import\OBJ\ObjTrigFace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Renderer\Opengl\OpenglRendererCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Resource\Opengl\OpenglResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Resource\Opengl\OpenglShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Resource\Opengl\OpenglTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp">
@@ -63,57 +51,81 @@
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\Opengl\OpenglVertexBuffer.cpp">
+    <ClCompile Include="Import\OBJ\ObjMeshConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Resource\Opengl\OpenglConstantFactory.cpp">
+    <ClCompile Include="Import\OBJ\ObjLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Domain\Mesh\BaseMeshRender.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\OBJ\ObjMeshConverter.cpp">
+    <ClCompile Include="Import\OBJ\ObjFace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\OBJ\ObjLogger.cpp">
+    <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\OBJ\ObjFace.cpp">
+    <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBufferManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglIndexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\AsciiReader.h">
+    <ClInclude Include="Import\AsciiReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\FormatChecker.h">
+    <ClInclude Include="Import\FormatChecker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OBJ\ObjParser.h">
+    <ClInclude Include="Import\OBJ\ObjParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PrimitiveType\Vector2.h">
+    <ClInclude Include="Import\PrimitiveType\Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PrimitiveType\Vector3.h">
+    <ClInclude Include="Import\PrimitiveType\Vector3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\DataTypes.h">
+    <ClInclude Include="Import\DataTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PrimitiveType\Vector4.h">
+    <ClInclude Include="Import\PrimitiveType\Vector4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OBJ\ObjVertex.h">
+    <ClInclude Include="Import\OBJ\ObjVertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OBJ\ObjTools.h">
+    <ClInclude Include="Import\OBJ\ObjTools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\StringUtils.h">
+    <ClInclude Include="Import\StringUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OBJ\ObjTrigFace.h">
+    <ClInclude Include="Import\OBJ\ObjTrigFace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Resource\Opengl\OpenglVertexBuffer.hpp">
@@ -173,9 +185,6 @@
     <ClInclude Include="Core\Resource\ResouceManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Domain\Mesh\BaseMeshRender.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Domain\Camera\Camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -185,13 +194,76 @@
     <ClInclude Include="Domain\Mesh\MeshData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OBJ\ObjMeshConverter.h">
+    <ClInclude Include="Import\OBJ\ObjMeshConverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OBJ\ObjLogger.h">
+    <ClInclude Include="Import\OBJ\ObjLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OBJ\ObjFace.h">
+    <ClInclude Include="Import\OBJ\ObjFace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglConstantFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglCubeMap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglFrameBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglFrameBufferManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglIndexBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglResourceManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglTexture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglUniformBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Opengl\OpenglVertexBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\RendererPrimitives.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\ICubeMap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\IFrameBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\IFrameBufferManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\IIndexBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\IShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\ITexture.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

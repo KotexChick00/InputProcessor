@@ -72,16 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)Import;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)Import;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)Import;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)src;$(ProjectDir)Core;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)Import;$(ProjectDir)Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -173,18 +173,18 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
-    <ClCompile Include="src\OBJ\ObjFace.cpp" />
-    <ClCompile Include="src\OBJ\ObjLogger.cpp" />
-    <ClCompile Include="src\OBJ\ObjMeshConverter.cpp" />
-    <ClCompile Include="src\OBJ\ObjTrigFace.cpp" />
-    <ClCompile Include="src\OBJ\ObjVertex.cpp" />
-    <ClCompile Include="src\PrimitiveType\Vector2.cpp" />
-    <ClCompile Include="src\OBJ\ObjParser.cpp" />
-    <ClCompile Include="src\AsciiReader.cpp" />
-    <ClCompile Include="src\FormatChecker.cpp" />
+    <ClCompile Include="Import\OBJ\ObjFace.cpp" />
+    <ClCompile Include="Import\OBJ\ObjLogger.cpp" />
+    <ClCompile Include="Import\OBJ\ObjMeshConverter.cpp" />
+    <ClCompile Include="Import\OBJ\ObjTrigFace.cpp" />
+    <ClCompile Include="Import\OBJ\ObjVertex.cpp" />
+    <ClCompile Include="Import\PrimitiveType\Vector2.cpp" />
+    <ClCompile Include="Import\OBJ\ObjParser.cpp" />
+    <ClCompile Include="Import\AsciiReader.cpp" />
+    <ClCompile Include="Import\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\PrimitiveType\Vector3.cpp" />
-    <ClCompile Include="src\PrimitiveType\Vector4.cpp" />
+    <ClCompile Include="Import\PrimitiveType\Vector3.cpp" />
+    <ClCompile Include="Import\PrimitiveType\Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -230,20 +230,20 @@
     <ClInclude Include="Domain\Camera\Camera.hpp" />
     <ClInclude Include="Domain\IRenderable.hpp" />
     <ClInclude Include="Domain\Mesh\MeshData.hpp" />
-    <ClInclude Include="src\OBJ\ObjFace.h" />
-    <ClInclude Include="src\OBJ\ObjLogger.h" />
-    <ClInclude Include="src\OBJ\ObjMeshConverter.h" />
-    <ClInclude Include="src\OBJ\ObjTrigFace.h" />
-    <ClInclude Include="src\DataTypes.h" />
-    <ClInclude Include="src\OBJ\ObjTools.h" />
-    <ClInclude Include="src\OBJ\ObjVertex.h" />
-    <ClInclude Include="src\PrimitiveType\Vector2.h" />
-    <ClInclude Include="src\OBJ\ObjParser.h" />
-    <ClInclude Include="src\AsciiReader.h" />
-    <ClInclude Include="src\FormatChecker.h" />
-    <ClInclude Include="src\PrimitiveType\Vector3.h" />
-    <ClInclude Include="src\PrimitiveType\Vector4.h" />
-    <ClInclude Include="src\StringUtils.h" />
+    <ClInclude Include="Import\OBJ\ObjFace.h" />
+    <ClInclude Include="Import\OBJ\ObjLogger.h" />
+    <ClInclude Include="Import\OBJ\ObjMeshConverter.h" />
+    <ClInclude Include="Import\OBJ\ObjTrigFace.h" />
+    <ClInclude Include="Import\DataTypes.h" />
+    <ClInclude Include="Import\OBJ\ObjTools.h" />
+    <ClInclude Include="Import\OBJ\ObjVertex.h" />
+    <ClInclude Include="Import\PrimitiveType\Vector2.h" />
+    <ClInclude Include="Import\OBJ\ObjParser.h" />
+    <ClInclude Include="Import\AsciiReader.h" />
+    <ClInclude Include="Import\FormatChecker.h" />
+    <ClInclude Include="Import\PrimitiveType\Vector3.h" />
+    <ClInclude Include="Import\PrimitiveType\Vector4.h" />
+    <ClInclude Include="Import\StringUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
