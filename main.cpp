@@ -5,6 +5,13 @@
 #include <Window/GLFW/GLFWWindow.hpp>
 #include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
 #include <Renderer/Opengl/OpenglRenderer.hpp>
+
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+// do not include <imgui_impl_opengl3_loader.h> because glad is already included
+
 using namespace InputProcessor::Logger::SpdLog;
 
 using namespace InputProcessor::Window;
@@ -66,15 +73,63 @@ int main() {
     IIndexBuffer* indexBuffer = OpenglIndexBuffer::Create();
     indexBuffer->SetData(indices, sizeof(indices));
 
+
+	// Init ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(window->GetNativeWindow()), true);    
+	ImGui_ImplOpenGL3_Init("#version 460");
+
+
+
+
+
+
+
+    // Main loop
+
+    bool show_demo_window = true;
     while (!window->CheckShouldClose()) {
+        // Poll events first
+        window->PollEvents();
+
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        // Example UI: demo window and a simple window
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+
+        ImGui::Begin("Simple Window");
+        ImGui::Text("Hello from ImGui integrated into the app");
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+
+        // Render scene (triangle)
         renderer->GetRendererCommand()->ClearBuffers(ClearBufferMasks::Color);
         shader->Use();
         vertexBuffer->Bind();
         indexBuffer->Bind();
         renderer->GetRendererCommand()->DrawIndex(RenderMode::Triangles, 6);
+
+        // Rendering ImGui
+        ImGui::Render();
+        int display_w = rendererConfig.ViewPortOptions.Width;
+        int display_h = rendererConfig.ViewPortOptions.Height;
+        // If window size can change, query it from GLFW; here the project uses a fixed size
+        glViewport(0, 0, display_w, display_h);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         window->SwapBuffers();
-        window->PollEvents();
     }
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
     window->Close();
     OpenglRenderer::Free();
