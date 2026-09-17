@@ -48,6 +48,10 @@ namespace InputProcessor::Window::GLFW {
 		glfwPollEvents();
 	}
 
+	void* GLFWWindow::GetNativeWindow() {
+		return static_cast<void*>(mWindow);
+	}
+
 	void GLFWWindow::SwapBuffers() {
 		if (mWindow) {
 			glfwSwapBuffers(mWindow);
