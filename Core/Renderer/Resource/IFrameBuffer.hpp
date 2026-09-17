@@ -13,6 +13,11 @@ namespace InputProcessor::Renderer::Resource {
 
 	typedef unsigned int FrameBufferID;
 
+	struct ViewPortSize {
+		unsigned int Width;
+		unsigned int Height;
+	};
+
 	// Currently support Color Attachment and Depth Attachment
 	class IFrameBuffer {
 	public:
@@ -22,6 +27,8 @@ namespace InputProcessor::Renderer::Resource {
 		virtual void Unbind() = 0;
 
 		virtual IFrameTextureAttachment* GetFrameTextureAttachment() = 0;
+
+		virtual ViewPortSize GetViewPortSize() = 0;
 
 		virtual FrameBufferID GetFrameBufferId() const = 0;
 	};
