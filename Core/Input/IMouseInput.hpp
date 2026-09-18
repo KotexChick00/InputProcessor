@@ -6,9 +6,9 @@ namespace InputProcessor::Input {
 		Button1, // Left
 		Button2, // Right
 		Button3, // Middle
-		Button4,
-		Button5,
-		Button6,
+		Button4, // Thumb back or Thumb button 1
+		Button5, // Thumb forward or Thumb button 2
+		Button6, 
 		Button7,
 		Button8,
 		ButtonLast = Button8,
@@ -24,12 +24,33 @@ namespace InputProcessor::Input {
 		Released
 	};
 
+	enum class MouseScroll {
+		ScrollNeutral,
+		ScrollUp,
+		ScrollDown,
+		ScrollLeft,
+		ScrollRight
+	};
+	
+	enum class MouseDeviceType {
+		Mouse,
+		Touchpad,
+		Unknown
+	};
+
+
+
 	class IMouseInput {
 	public:
 		virtual ~IMouseInput() = default;
 
 		virtual bool CheckIsPressed(MouseButton mouseButton) = 0;
 		virtual bool CheckIsReleased(MouseButton mouseButton) = 0;
+		virtual bool CheckIsScrolled(MouseScroll mouseScroll) = 0;
+		virtual int GetMouseDeviceType() {
+			// This is a placeholder implementation. In a real scenario, you would query the actual device type.
+			return static_cast<int>(MouseDeviceType::Mouse);
+		}
 	};
 
 	class IMouseInputCheckIsHeldable {

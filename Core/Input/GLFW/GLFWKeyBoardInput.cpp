@@ -41,16 +41,16 @@ namespace InputProcessor::Input::GLFW {
 		case KeyboardKey::World1: return GLFW_KEY_WORLD_1;
 		case KeyboardKey::World2: return GLFW_KEY_WORLD_2;
 
-		case KeyboardKey::Num0: return GLFW_KEY_0;
-		case KeyboardKey::Num1: return GLFW_KEY_1;
-		case KeyboardKey::Num2: return GLFW_KEY_2;
-		case KeyboardKey::Num3: return GLFW_KEY_3;
-		case KeyboardKey::Num4: return GLFW_KEY_4;
-		case KeyboardKey::Num5: return GLFW_KEY_5;
-		case KeyboardKey::Num6: return GLFW_KEY_6;
-		case KeyboardKey::Num7: return GLFW_KEY_7;
-		case KeyboardKey::Num8: return GLFW_KEY_8;
-		case KeyboardKey::Num9: return GLFW_KEY_9;
+		case KeyboardKey::Zero: return GLFW_KEY_0;
+		case KeyboardKey::One: return GLFW_KEY_1;
+		case KeyboardKey::Two: return GLFW_KEY_2;
+		case KeyboardKey::Three: return GLFW_KEY_3;
+		case KeyboardKey::Four: return GLFW_KEY_4;
+		case KeyboardKey::Five: return GLFW_KEY_5;
+		case KeyboardKey::Six: return GLFW_KEY_6;
+		case KeyboardKey::Seven: return GLFW_KEY_7;
+		case KeyboardKey::Eight: return GLFW_KEY_8;
+		case KeyboardKey::Nine: return GLFW_KEY_9;
 
 		case KeyboardKey::A: return GLFW_KEY_A;
 		case KeyboardKey::B: return GLFW_KEY_B;

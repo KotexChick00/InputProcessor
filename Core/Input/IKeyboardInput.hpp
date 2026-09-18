@@ -13,10 +13,10 @@ namespace InputProcessor::Input {
         // Special Keys and notations
 		Unknow,
         Space,
-        Apostrophe,
+        Apostrophe, /* The apostrophe (') key */
         Comma,
         Minus,
-        Period,
+		Period, /* The period or full stop or dot (.) key */
         Slash,
         Semicolon,
         Equal,
@@ -24,20 +24,25 @@ namespace InputProcessor::Input {
         Backslash,
         RightBracket,
         GraveAccent,
-        World1,
-        World2,
+		World1, /* Bounded to OEM-102 key */
+		World2, /* Bounded to OEM-102 key */
+		// Both World1 and World2 keys are bounded to OEM-102 key, 
+        // which is located between the left Shift and Z keys on a standard US keyboard layout. 
+        // Theirs equivalent key in SDL3 is named SDL_SCANCODE_NONUSBACKSLASH.
+		//NonUS_Backslash, // The Non-US Backslash key is located between the left Shift and Z keys on a standard US keyboard layout.
+
 
         // Numbers in the upper character parts
-        Num0,
-        Num1,
-        Num2,
-        Num3,
-        Num4,
-        Num5,
-        Num6,
-        Num7,
-        Num8,
-        Num9,
+        Zero,
+        One,
+        Two,
+        Three,
+        Four,
+        Five,
+        Six,
+        Seven,
+        Eight,
+        Nine,
 
         // Characters
         A,

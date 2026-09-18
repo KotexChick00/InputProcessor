@@ -55,6 +55,17 @@ const char* fragmentShaderSource = "#version 330 core\n"
 const unsigned int WINDOW_WIDTH = 1000;
 const unsigned int WINDOW_HEIGHT = 1000;
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    // yoffset báo cáo hành động cuộn dọc
+    if (yoffset > 0) {
+        std::cout << "Cuon len: " << yoffset << std::endl;
+    }
+    else if (yoffset < 0) {
+        std::cout << "Cuon xuong: " << yoffset << std::endl;
+    }
+}
+
 int main() {
     Logger::SetEngineImplementation(std::make_shared<SpdLogLoggerAdapter>("IP_ENGINE"));
     std::unique_ptr<GLFWWindow> window = std::make_unique<GLFWWindow>();
@@ -72,6 +83,8 @@ int main() {
     rendererConfig.ViewPortOptions.Height = WINDOW_HEIGHT;
 
     renderer->Config(rendererConfig);
+
+	glfwSetScrollCallback(window->GetNativeWindow(), scroll_callback);
     
     IShader* shader = OpenglShader::FromSource(vertexShaderSource, fragmentShaderSource);
     IVertexBuffer* vertexBuffer = OpenglVertexBuffer::Create();
