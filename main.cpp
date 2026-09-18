@@ -3,6 +3,7 @@
 #include <memory>
 #include <glad/glad.h>
 #include <Window/GLFW/GLFWWindow.hpp>
+#include <Window/FrameLimiter.hpp>
 #include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
 #include <Renderer/Opengl/OpenglRenderer.hpp>
 #include <UI/Imgui/ImguiUIRenderer.hpp>
@@ -61,6 +62,7 @@ int main() {
 
     WindowConfiguration config{ WINDOW_WIDTH, WINDOW_HEIGHT, "Hello Window" };
     window->Init(config);
+    FrameLimiter frameLimiter(config.TargetFPS);
 
     IRenderer* renderer = OpenglRenderer::GetInstance();
     RendererConfiguration rendererConfig = renderer->GetConfig();
@@ -89,8 +91,7 @@ int main() {
     uiRenderer->Init(window.get());
 
     while (!window->CheckShouldClose()) {
-        // Poll events first
-        window->PollEvents();
+        frameLimiter.BeginFrame();
 
         // Render scene (triangle)
         renderer->GetRendererCommand()->ClearBuffers(ClearBufferMasks::Color);
@@ -102,6 +103,8 @@ int main() {
         uiRenderer->Render();
 
         window->SwapBuffers();
+        window->PollEvents();
+        frameLimiter.EndFrame();
     }
 
     uiRenderer->Free();

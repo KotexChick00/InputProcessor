@@ -6,7 +6,9 @@ namespace InputProcessor::Window {
 		unsigned int Width;
 		unsigned int Height;
 		std::string Title;
-		WindowConfiguration(int width, int height, std::string title) : Width(width), Height(height), Title(title) {}
+		unsigned int TargetFPS;
+		WindowConfiguration(int width, int height, std::string title, unsigned int targetFPS = 0)
+			: Width(width), Height(height), Title(title), TargetFPS(targetFPS) {}
 	};
 
 	class IWindowVisitor;

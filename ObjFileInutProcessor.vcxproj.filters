@@ -30,6 +30,7 @@
     <ClCompile Include="Library\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
+    <ClCompile Include="Core\Window\FrameLimiter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -84,5 +85,6 @@
     <ClInclude Include="Core\UI\IUIRenderer.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIRenderer.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
+    <ClInclude Include="Core\Window\FrameLimiter.hpp" />
   </ItemGroup>
 </Project>
