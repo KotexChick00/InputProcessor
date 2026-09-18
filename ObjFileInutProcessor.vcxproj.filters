@@ -90,5 +90,7 @@
     <ClInclude Include="Core\Event\EventContext.hpp" />
     <ClInclude Include="Core\Event\EventAction.hpp" />
     <ClInclude Include="Core\Event\EventDispatcher.hpp" />
+    <ClInclude Include="Core\UI\Elements\IUIElement.hpp" />
+    <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
   </ItemGroup>
 </Project>

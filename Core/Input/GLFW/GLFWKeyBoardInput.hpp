@@ -9,7 +9,6 @@ namespace InputProcessor::Input::GLFW {
 
 		bool CheckIsPressed(Key key) override;
 		bool CheckIsReleased(Key key) override;
-		bool CheckIsHeld(Key key) override;
 
 		KeyState GetKeyState(Key key) override;
 	private:

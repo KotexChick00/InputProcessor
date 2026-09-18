@@ -229,6 +229,8 @@
     <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
+    <ClInclude Include="Core\UI\Elements\IUIElement.hpp" />
+    <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />

@@ -148,8 +148,12 @@ namespace InputProcessor::Input {
 
         virtual bool CheckIsPressed(Key key) = 0;
         virtual bool CheckIsReleased(Key key) = 0;
-        virtual bool CheckIsHeld(Key key) = 0;
 
         virtual KeyState GetKeyState(Key key) = 0;
+    };
+
+    class CheckIsHeldable {
+    public:
+        virtual bool CheckIsHeld(Key key) = 0;
     };
 }

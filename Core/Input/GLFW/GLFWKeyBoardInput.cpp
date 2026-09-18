@@ -17,16 +17,6 @@ namespace InputProcessor::Input::GLFW {
 		return state == GLFW_RELEASE;
 	}
 
-	bool GLFWKeyBoardInput::CheckIsHeld(Key key) {
-		// glfwGetKey reports GLFW_PRESS while the key is down. GLFW_REPEAT is provided
-		// only to the key callback. We treat Held the same as Pressed here since
-		// there's no per-frame previous-state tracking in this class.
-		int glfwKey = ToGLFWKey(key);
-		if (glfwKey == GLFW_KEY_UNKNOWN || mWindow == nullptr) return false;
-		int state = glfwGetKey(mWindow, glfwKey);
-		return state == GLFW_PRESS;
-	}
-
 	KeyState GLFWKeyBoardInput::GetKeyState(Key key) {
 		if (CheckIsPressed(key)) return KeyState::Pressed;
 		if (CheckIsReleased(key)) return KeyState::Released;
