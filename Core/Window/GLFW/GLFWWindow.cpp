@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <Window/IWindowVisitor.hpp>
 #include <Window/GLFW/GLFWWindow.hpp>
 #include <Logger/Logger.hpp>
 
@@ -48,8 +49,8 @@ namespace InputProcessor::Window::GLFW {
 		glfwPollEvents();
 	}
 
-	void* GLFWWindow::GetNativeWindow() {
-		return static_cast<void*>(mWindow);
+	GLFWwindow* GLFWWindow::GetNativeWindow() {
+		return mWindow;
 	}
 
 	void GLFWWindow::SwapBuffers() {
@@ -69,5 +70,9 @@ namespace InputProcessor::Window::GLFW {
 			glfwTerminate();
 			IP_ENGINE_TRACE("Window closed and GLFW terminated.");
 		}
+	}
+
+	void GLFWWindow::Accept(IWindowVisitor* visitor) {
+		visitor->VisitGlfwWindow(this);
 	}
 }

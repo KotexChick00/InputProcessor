@@ -13,7 +13,10 @@ namespace InputProcessor::Window::GLFW {
 		void SwapBuffers() override;
 		bool CheckShouldClose() override;
 		void Close() override;
-		void* GetNativeWindow() override;
+
+		void Accept(IWindowVisitor* visitor) override;
+
+		GLFWwindow* GetNativeWindow();
 
 	private:
 		GLFWwindow* mWindow{ nullptr };
