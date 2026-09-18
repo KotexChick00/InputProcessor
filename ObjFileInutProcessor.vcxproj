@@ -181,6 +181,7 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
+    <ClCompile Include="Core\Window\FrameLimiter.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
     <ClCompile Include="Domain\RenderModel.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
+    <ClInclude Include="Core\Window\FrameLimiter.hpp" />
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
