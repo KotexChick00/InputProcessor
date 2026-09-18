@@ -9,7 +9,7 @@ namespace InputProcessor::Input {
 		Released
 	};
 
-	enum class Key {
+	enum class KeyboardKey {
         // Special Keys and notations
 		Unknow,
         Space,
@@ -113,32 +113,32 @@ namespace InputProcessor::Input {
         F24,
         F25,
 
-        KP0,
-        KP1,
-        KP2,
-        KP3,
-        KP4,
-        KP5,
-        KP6,
-        KP7,
-        KP8,
-        KP9,
-        KPDecimal,
-        KPDivide,
-        KPMultiply,
-        KPSubtract,
-        KPAdd,
-        KPEnter,
-        KPEqual,
+        Numpad0,
+        Numpad1,
+        Numpad2,
+        Numpad3,
+        Numpad4,
+        Numpad5,
+        Numpad6,
+        Numpad7,
+        Numpad8,
+        Numpad9,
+        NumpadDecimal,
+        NumpadDivide,
+        NumpadMultiply,
+        NumpadSubtract,
+        NumpadAdd,
+        NumpadEnter,
+        NumpadEqual,
 
         LeftShift,
         LeftControl,
         LeftAlt,
-        LeftSuper,
+        LeftSuper, // Window left key
         RightShift,
         RightControl,
         RightAlt,
-        RightSuper,
+        RightSuper, // Window right key
         Menu
 	};
 
@@ -146,14 +146,14 @@ namespace InputProcessor::Input {
     public:
         virtual ~IKeyboardInput() = default;
 
-        virtual bool CheckIsPressed(Key key) = 0;
-        virtual bool CheckIsReleased(Key key) = 0;
+        virtual bool CheckIsPressed(KeyboardKey key) = 0;
+        virtual bool CheckIsReleased(KeyboardKey key) = 0;
 
-        virtual KeyState GetKeyState(Key key) = 0;
+        virtual KeyState GetKeyState(KeyboardKey key) = 0;
     };
 
-    class CheckIsHeldable {
+    class IKeyboardInputCheckIsHeldable {
     public:
-        virtual bool CheckIsHeld(Key key) = 0;
+        virtual bool CheckIsHeld(KeyboardKey key) = 0;
     };
 }

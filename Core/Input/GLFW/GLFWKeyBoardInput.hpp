@@ -7,14 +7,14 @@ namespace InputProcessor::Input::GLFW {
 	public:
 		GLFWKeyBoardInput(GLFWwindow* window);
 
-		bool CheckIsPressed(Key key) override;
-		bool CheckIsReleased(Key key) override;
+		bool CheckIsPressed(KeyboardKey key) override;
+		bool CheckIsReleased(KeyboardKey key) override;
 
-		KeyState GetKeyState(Key key) override;
+		KeyState GetKeyState(KeyboardKey key) override;
 	private:
 		GLFWwindow* mWindow = nullptr;
 
 	private:
-		static int ToGLFWKey(Key key);
+		static int ToGLFWKey(KeyboardKey key);
 	};
 }

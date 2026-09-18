@@ -31,6 +31,7 @@
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
+    <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -92,5 +93,7 @@
     <ClInclude Include="Core\Event\EventDispatcher.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElement.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
+    <ClInclude Include="Core\Input\IMouseInput.hpp" />
+    <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
   </ItemGroup>
 </Project>
