@@ -1,14 +1,12 @@
 #include <UI/Imgui/ImguiUIRenderer.hpp>
 
 namespace InputProcessor::UI::Imgui {
-	ImguiUIRenderer::ImguiUIRenderer(
-		ImguiWindowContextInitVisitor* contextVisitor,
-		ImguiWindowRenderVisitor* renderVisitor,
-		ImguiWindowShutdownVisitor* shutdownVisitor
-	) : mContextVisitor(contextVisitor), mRenderVisitor(renderVisitor), mShutdownVisitor(shutdownVisitor) { }
+	ImguiUIRenderer::ImguiUIRenderer(InputProcessor::Window::IWindow* window) : mWindow(window) { }
 
-	void ImguiUIRenderer::Init(InputProcessor::Window::IWindow* window) {
-		mWindow = window;
+	void ImguiUIRenderer::Init() {
+		mContextVisitor = new ImguiWindowContextInitVisitor();
+		mRenderVisitor = new ImguiWindowRenderVisitor();
+		mShutdownVisitor = new ImguiWindowShutdownVisitor();
 		mContextVisitor->Visit(mWindow);
 	}
 
@@ -18,5 +16,8 @@ namespace InputProcessor::UI::Imgui {
 
 	void ImguiUIRenderer::Free() {
 		mShutdownVisitor->Visit(mWindow);
+		delete mContextVisitor;
+		delete mRenderVisitor;
+		delete mShutdownVisitor;
 	}
 }

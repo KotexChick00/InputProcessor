@@ -23,7 +23,7 @@ void ImguiWindowContextInitVisitor::VisitGlfwWindow(GLFWWindow* window) {
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(window->GetNativeWindow(), true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-	ImGui_ImplOpenGL3_Init("#version 460 core");
+	ImGui_ImplOpenGL3_Init("#version 460");
 }
 
 void ImguiWindowRenderVisitor::Visit(IWindow* window) {

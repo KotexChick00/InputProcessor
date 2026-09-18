@@ -82,11 +82,8 @@ int main() {
 
 
 	// Init ImGui
-    ImguiWindowContextInitVisitor* contextVisitor = new ImguiWindowContextInitVisitor();
-    ImguiWindowRenderVisitor* renderVisitor = new ImguiWindowRenderVisitor();
-    ImguiWindowShutdownVisitor* shutdownVisitor = new ImguiWindowShutdownVisitor();
-    IUIRenderer* uiRenderer = new ImguiUIRenderer(contextVisitor, renderVisitor, shutdownVisitor);
-    uiRenderer->Init(window.get());
+    IUIRenderer* uiRenderer = new ImguiUIRenderer(window.get());
+    uiRenderer->Init();
 
     while (!window->CheckShouldClose()) {
         // Poll events first
@@ -106,9 +103,6 @@ int main() {
 
     uiRenderer->Free();
     delete uiRenderer;
-    delete contextVisitor;
-    delete renderVisitor;
-    delete shutdownVisitor;
 
     window->Close();
     OpenglRenderer::Free();

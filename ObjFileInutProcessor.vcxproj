@@ -166,6 +166,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
     <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
@@ -197,6 +198,11 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Event\EventAction.hpp" />
+    <ClInclude Include="Core\Event\EventContext.hpp" />
+    <ClInclude Include="Core\Event\EventDispatcher.hpp" />
+    <ClInclude Include="Core\Input\GLFW\GLFWKeyBoardInput.hpp" />
+    <ClInclude Include="Core\Input\IKeyboardInput.hpp" />
     <ClInclude Include="Core\Logger\Logger.hpp" />
     <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />

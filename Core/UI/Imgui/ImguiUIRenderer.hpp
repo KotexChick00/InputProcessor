@@ -5,11 +5,14 @@
 namespace InputProcessor::UI::Imgui {
 	class ImguiUIRenderer : public IUIRenderer {
 	public:
-		ImguiUIRenderer(ImguiWindowContextInitVisitor* contextVisitor, ImguiWindowRenderVisitor* renderVisitor, ImguiWindowShutdownVisitor* shutdownVisitor);
+		ImguiUIRenderer(InputProcessor::Window::IWindow* window);
 
-		void Init(InputProcessor::Window::IWindow* window) override;
+		void Init() override;
 		void Render() override;
 		void Free() override;
+
+		~ImguiUIRenderer();
+
 	private:
 		ImguiWindowContextInitVisitor* mContextVisitor = nullptr;
 		ImguiWindowRenderVisitor* mRenderVisitor = nullptr;
