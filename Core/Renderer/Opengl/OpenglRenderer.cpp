@@ -112,11 +112,11 @@ namespace CoreEngine::Renderer::Opengl {
 	}
 
 	IResourceManager* OpenglRenderer::GetResourceManager() {
-		return InputProcessor::Renderer::Resource::Opengl::OpenglResourceManager::GetInstance();
+		return OpenglResourceManager::GetInstance();
 	}
 
 	IFrameBufferManager* OpenglRenderer::GetFrameBufferManager() {
-		return InputProcessor::Renderer::Resource::Opengl::OpenglFrameBufferManager::GetInstance();
+		return OpenglFrameBufferManager::GetInstance();
 	}
 
 	RendererConfiguration OpenglRenderer::GetConfig() {

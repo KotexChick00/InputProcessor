@@ -5,8 +5,6 @@
 #include <Renderer/Resource/IFrameBufferManager.hpp>
 
 namespace CoreEngine::Renderer {
-	using namespace CoreEngine::Renderer::Resource;
-
 	class IRenderer {
 	public:
 		virtual void Config(RendererConfiguration configuration) = 0;
