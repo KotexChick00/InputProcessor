@@ -72,10 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)Domain;D:\DoAnChuyenNganh\InputProcessor\Core;D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)Core;D:\DoAnChuyenNganh\InputProcessor\Core;D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)Core;$(ProjectDir)src;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)Core;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(ProjectDir)src;$(ProjectDir)Core;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
