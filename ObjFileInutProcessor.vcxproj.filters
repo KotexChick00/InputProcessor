@@ -95,5 +95,6 @@
     <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
     <ClInclude Include="Core\Input\IMouseInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
+    <ClInclude Include="Core\Input\InputState.hpp" />
   </ItemGroup>
 </Project>

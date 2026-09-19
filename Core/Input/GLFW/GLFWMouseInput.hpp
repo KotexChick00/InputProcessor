@@ -10,7 +10,6 @@ namespace InputProcessor::Input::GLFW {
 
 		bool CheckIsPressed(MouseButton mouseButton) override;
 		bool CheckIsReleased(MouseButton mouseButton) override;
-		bool CheckIsScrolled(MouseScroll mouseScroll) override;
 
 	private:
 		static int ToGLFWMouseButton(MouseButton mouseButton);

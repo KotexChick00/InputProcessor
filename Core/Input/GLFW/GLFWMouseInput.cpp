@@ -18,12 +18,6 @@ namespace InputProcessor::Input::GLFW {
 		return state == GLFW_RELEASE;
 	}
 
-	bool GLFWMouseInput::CheckIsScrolled(MouseScroll mouseScroll) {
-		// GLFW does not provide a direct way to check if a mouse button is scrolled.
-		// Scrolling is typically handled via scroll callbacks, so this function may not be applicable.
-		return false;
-	}
-
 	int GLFWMouseInput::ToGLFWMouseButton(MouseButton mouseButton) {
 		switch (mouseButton) {
 		case MouseButton::Button1: return GLFW_MOUSE_BUTTON_1;
@@ -52,10 +46,4 @@ namespace InputProcessor::Input::GLFW {
 	* Tuy nhien, neu dung thao tac phong to thu nho tren touchpad, delta luon la 1 neu phong to
 	* va -1 neu thu nho, nen khong the phan biet duoc loai chuot.
 	*/
-
-	int GLFWMouseInput::GetMouseDeviceType() {
-		// This is a placeholder implementation. In a real scenario, you would query the actual device type.
-		return static_cast<int>(MouseDeviceType::Mouse);
-	}
-
 }
