@@ -10,6 +10,7 @@
       ]
     },
     "spdlog",
-    "stb"
+    "stb",
+    "sdl3"
   ]
 }
