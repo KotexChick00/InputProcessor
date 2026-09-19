@@ -96,5 +96,6 @@
     <ClInclude Include="Core\Input\IMouseInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
     <ClInclude Include="Core\Input\InputState.hpp" />
+    <ClInclude Include="Core\pch.h" />
   </ItemGroup>
 </Project>
