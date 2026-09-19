@@ -3,8 +3,13 @@
     "glad",
     "glfw3",
     "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental"
+      ]
+    },
     "spdlog",
-    "stb",
-    "imgui"
+    "stb"
   ]
 }

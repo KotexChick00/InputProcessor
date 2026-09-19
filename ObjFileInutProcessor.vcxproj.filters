@@ -15,8 +15,6 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
-    <ClCompile Include="src\AsciiReader.cpp" />
-    <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp" />
     <ClCompile Include="Domain\RenderModel.cpp" />
@@ -32,6 +30,18 @@
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
+    <ClCompile Include="Core\Window\FrameLimiter.cpp" />
+    <ClCompile Include="Import\AsciiReader.cpp" />
+    <ClCompile Include="Import\FormatChecker.cpp" />
+    <ClCompile Include="Import\OBJ\ObjFace.cpp" />
+    <ClCompile Include="Import\OBJ\ObjLogger.cpp" />
+    <ClCompile Include="Import\OBJ\ObjMeshConverter.cpp" />
+    <ClCompile Include="Import\OBJ\ObjParser.cpp" />
+    <ClCompile Include="Import\OBJ\ObjVertex.cpp" />
+    <ClCompile Include="Import\PrimitiveType\Vector2.cpp" />
+    <ClCompile Include="Import\PrimitiveType\Vector3.cpp" />
+    <ClCompile Include="Import\PrimitiveType\Vector4.cpp" />
+    <ClCompile Include="Library\ImGui\imgui_impl_sdl3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -62,8 +72,6 @@
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
-    <ClInclude Include="src\AsciiReader.h" />
-    <ClInclude Include="src\FormatChecker.h" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglUniformBuffer.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />
     <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />
@@ -95,5 +103,20 @@
     <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
     <ClInclude Include="Core\Input\IMouseInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
+    <ClInclude Include="Core\Window\FrameLimiter.hpp" />
+    <ClInclude Include="Import\AsciiReader.h" />
+    <ClInclude Include="Import\DataTypes.h" />
+    <ClInclude Include="Import\FormatChecker.h" />
+    <ClInclude Include="Import\OBJ\ObjFace.h" />
+    <ClInclude Include="Import\OBJ\ObjLogger.h" />
+    <ClInclude Include="Import\OBJ\ObjMeshConverter.h" />
+    <ClInclude Include="Import\OBJ\ObjParser.h" />
+    <ClInclude Include="Import\OBJ\ObjTools.h" />
+    <ClInclude Include="Import\OBJ\ObjVertex.h" />
+    <ClInclude Include="Import\PrimitiveType\Vector2.h" />
+    <ClInclude Include="Import\PrimitiveType\Vector3.h" />
+    <ClInclude Include="Import\PrimitiveType\Vector4.h" />
+    <ClInclude Include="Import\StringUtils.h" />
+    <ClInclude Include="Library\ImGui\imgui_impl_sdl3.h" />
   </ItemGroup>
 </Project>
