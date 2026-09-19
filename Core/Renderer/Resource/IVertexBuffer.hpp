@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-namespace InputProcessor::Renderer::Resource {
+namespace CoreEngine::Renderer {
 	enum class VertexBufferRenderMode {
 		Static = 0,
 		Stream = 1,

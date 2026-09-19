@@ -5,8 +5,8 @@
 #include <Renderer/Opengl/OpenglFrameBufferManager.hpp>
 #include <memory>
 
-namespace InputProcessor::Renderer::Opengl {
-	class OpenglRenderer : public InputProcessor::Renderer::IRenderer {
+namespace CoreEngine::Renderer::Opengl {
+	class OpenglRenderer : public IRenderer {
 	public:
 		static OpenglRenderer* GetInstance();
 		static void Free();

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Renderer/Resource/IShader.hpp>
 
-namespace InputProcessor::Renderer::Resource {
+namespace CoreEngine::Renderer {
 	enum class WrapMethod {
 		Repeat = 0,
 		MirroedRepeat = 1,

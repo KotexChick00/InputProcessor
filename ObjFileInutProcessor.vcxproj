@@ -72,16 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>D:\DoAnChuyenNganh\InputProcessor\Core;D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;D:\DoAnChuyenNganh\InputProcessor\Core;D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
@@ -93,6 +93,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -112,6 +113,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,6 +134,7 @@
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +154,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,6 +166,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
+    <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
     <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
@@ -175,15 +181,34 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglTexture.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
+    <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
+    <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
+    <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
+    <ClCompile Include="Library\ImGui\imgui.cpp" />
+    <ClCompile Include="Library\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="Library\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Library\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="Library\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="Library\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Library\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Event\EventAction.hpp" />
+    <ClInclude Include="Core\Event\EventContext.hpp" />
+    <ClInclude Include="Core\Event\EventDispatcher.hpp" />
+    <ClInclude Include="Core\Input\GLFW\GLFWKeyBoardInput.hpp" />
+    <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
+    <ClInclude Include="Core\Input\IKeyboardInput.hpp" />
+    <ClInclude Include="Core\Input\IMouseInput.hpp" />
+    <ClInclude Include="Core\Input\InputState.hpp" />
     <ClInclude Include="Core\Logger\Logger.hpp" />
     <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
+    <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />
     <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglConstantFactory.hpp" />
@@ -208,11 +233,34 @@
     <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
+    <ClInclude Include="Core\UI\Elements\IUIElement.hpp" />
+    <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
+    <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
+    <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
+    <ClInclude Include="Domain\Model\IMaterial.hpp" />
+    <ClInclude Include="Domain\Model\Importers\AssimpModelImporterAdapter.hpp" />
+    <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />
+    <ClInclude Include="Domain\Model\IRenderResourceFactory.hpp" />
+    <ClInclude Include="Domain\Model\Mesh.hpp" />
+    <ClInclude Include="Domain\Model\OpenglRenderResourceFactory.hpp" />
+    <ClInclude Include="Domain\Model\RenderModel.hpp" />
+    <ClInclude Include="Library\ImGui\imconfig.h" />
+    <ClInclude Include="Library\ImGui\imgui.h" />
+    <ClInclude Include="Library\ImGui\imgui_impl_glfw.h" />
+    <ClInclude Include="Library\ImGui\imgui_impl_opengl3.h" />
+    <ClInclude Include="Library\ImGui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="Library\ImGui\imgui_internal.h" />
+    <ClInclude Include="Library\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Library\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Library\ImGui\imstb_truetype.h" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
     <ClInclude Include="src\AsciiReader.h" />
     <ClInclude Include="src\FormatChecker.h" />
+    <ClInclude Include="UI\ImGuiUIRendererAdapter.hpp" />
+    <ClInclude Include="Core\UI\Imgui\ImguiUIRenderer.hpp" />
+    <ClInclude Include="Core\UI\IUIRenderer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

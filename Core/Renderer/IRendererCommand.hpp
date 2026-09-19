@@ -1,7 +1,7 @@
 #pragma once
 #include <Renderer/RendererPrimitives.hpp>
 
-namespace InputProcessor::Renderer {
+namespace CoreEngine::Renderer {
 
 	class IRendererCommand {
 	public:

@@ -5,8 +5,9 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-namespace InputProcessor::Logger::SpdLog {
-	class SpdLogLoggerAdapter : public InputProcessor::Logger::ILoggerImplentation {
+#define SPDLOG_COMPILED_LIB
+namespace CoreEngine::Logger::SpdLog {
+	class SpdLogLoggerAdapter : public CoreEngine::Logger::ILoggerImplentation {
 	public:
 		SpdLogLoggerAdapter(const std::string& loggerName);
 

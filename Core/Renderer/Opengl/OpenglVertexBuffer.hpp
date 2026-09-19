@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 #include <unordered_map>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	class OpenglVertexBuffer : public InputProcessor::Renderer::Resource::IVertexBuffer {
+namespace CoreEngine::Renderer::Opengl {
+	class OpenglVertexBuffer : public IVertexBuffer {
 	public:
 		~OpenglVertexBuffer();
 

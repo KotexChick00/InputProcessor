@@ -3,7 +3,7 @@
 #include <Renderer/Resource/ICubeMap.hpp>
 #include <glad/glad.h>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	struct CubeMapFiles {
 		std::string Front;
 		std::string Back;

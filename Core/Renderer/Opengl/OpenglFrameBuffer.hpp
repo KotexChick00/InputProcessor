@@ -2,7 +2,7 @@
 #include <Renderer/Resource/IFrameBuffer.hpp>
 #include <glad/glad.h>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	class OpenglFrameTextureAttachment : public IFrameTextureAttachment {
 	public:
 		OpenglFrameTextureAttachment(GLuint texId, GLenum target = GL_TEXTURE_2D);

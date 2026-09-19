@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <string>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	class OpenglUniformBuffer : public IUniformBuffer {
 	public:
 		~OpenglUniformBuffer();

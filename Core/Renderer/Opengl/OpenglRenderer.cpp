@@ -3,8 +3,8 @@
 #include <Logger/Logger.hpp>
 #include <glad/glad.h>
 
-namespace InputProcessor::Renderer::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	OpenglRenderer* OpenglRenderer::GetInstance() {
 		if (sInstance == nullptr) sInstance = new OpenglRenderer();
@@ -22,8 +22,8 @@ namespace InputProcessor::Renderer::Opengl {
 
 	OpenglRenderer::~OpenglRenderer() {
 		OpenglRendererCommand::Free();
-		InputProcessor::Renderer::Resource::Opengl::OpenglResourceManager::Free();
-		InputProcessor::Renderer::Resource::Opengl::OpenglFrameBufferManager::Free();
+		OpenglResourceManager::Free();
+		OpenglFrameBufferManager::Free();
 	}
 
 	void OpenglRenderer::Config(RendererConfiguration configuration) {
@@ -112,11 +112,11 @@ namespace InputProcessor::Renderer::Opengl {
 	}
 
 	IResourceManager* OpenglRenderer::GetResourceManager() {
-		return InputProcessor::Renderer::Resource::Opengl::OpenglResourceManager::GetInstance();
+		return OpenglResourceManager::GetInstance();
 	}
 
 	IFrameBufferManager* OpenglRenderer::GetFrameBufferManager() {
-		return InputProcessor::Renderer::Resource::Opengl::OpenglFrameBufferManager::GetInstance();
+		return OpenglFrameBufferManager::GetInstance();
 	}
 
 	RendererConfiguration OpenglRenderer::GetConfig() {

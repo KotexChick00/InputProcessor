@@ -2,7 +2,7 @@
 #include <Renderer/Resource/IShader.hpp>
 #include <glad/glad.h>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	class OpenglShader : public IShader {
 	public:
 		virtual ~OpenglShader() override;

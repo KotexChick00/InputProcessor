@@ -1,9 +1,10 @@
 {
   "dependencies": [
+    "glad",
     "glfw3",
+    "glm",
     "spdlog",
     "stb",
-    "glad",
-    "glm"
+    "imgui"
   ]
 }

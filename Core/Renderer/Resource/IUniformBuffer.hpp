@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Renderer/Resource/IShader.hpp>
 
-namespace InputProcessor::Renderer::Resource {
+namespace CoreEngine::Renderer {
 	enum class UniformBufferRenderMode {
 		Static = 0,
 		Stream = 1,

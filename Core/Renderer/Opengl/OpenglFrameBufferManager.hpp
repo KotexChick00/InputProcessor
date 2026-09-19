@@ -6,7 +6,7 @@
 #include <Renderer/Resource/IFrameBufferManager.hpp>
 #include <Renderer/Opengl/OpenglFrameBuffer.hpp>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	class OpenglFrameBufferManager : public IFrameBufferManager {
 	public:
 		static OpenglFrameBufferManager* GetInstance();

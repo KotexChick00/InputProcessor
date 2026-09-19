@@ -4,9 +4,7 @@
 #include <Renderer/Resource/IResouceManager.hpp>
 #include <Renderer/Resource/IFrameBufferManager.hpp>
 
-namespace InputProcessor::Renderer {
-	using namespace InputProcessor::Renderer::Resource;
-
+namespace CoreEngine::Renderer {
 	class IRenderer {
 	public:
 		virtual void Config(RendererConfiguration configuration) = 0;

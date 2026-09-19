@@ -5,8 +5,8 @@
 #include <fstream>
 #include <sstream>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	OpenglShader::OpenglShader(const std::string& vertexSource, const std::string& fragmentSource)
 		: mProgramID(0), mTextureUnitCounter(0)

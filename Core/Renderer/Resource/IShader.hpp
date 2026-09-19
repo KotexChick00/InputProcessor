@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace InputProcessor::Renderer::Resource {
+namespace CoreEngine::Renderer {
 	typedef unsigned int ShaderID;
 
 	// Forward declare ITexture to avoid circular include
