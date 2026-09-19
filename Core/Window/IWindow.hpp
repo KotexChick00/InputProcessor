@@ -1,7 +1,7 @@
 #pragma once
 #include <pch.h>
 
-namespace InputProcessor::Window {
+namespace CoreEngine::Window {
 	struct WindowConfiguration {
 		unsigned int Width;
 		unsigned int Height;

@@ -3,7 +3,7 @@
 #include <functional>
 #include <Event/EventContext.hpp>
 
-namespace InputProcessor::Event {
+namespace CoreEngine::Event {
 	template<typename T> using EventCallback = std::function<bool(const T&)>;
 
 	class IEventAction {

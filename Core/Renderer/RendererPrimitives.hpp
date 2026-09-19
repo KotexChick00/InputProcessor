@@ -1,6 +1,6 @@
 #pragma once
 
-namespace InputProcessor::Renderer {
+namespace CoreEngine::Renderer {
 #pragma region Buffers
 	enum class ClearBufferMasks {
 		Color = 1,

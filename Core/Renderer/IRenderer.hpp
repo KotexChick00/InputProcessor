@@ -4,8 +4,8 @@
 #include <Renderer/Resource/IResouceManager.hpp>
 #include <Renderer/Resource/IFrameBufferManager.hpp>
 
-namespace InputProcessor::Renderer {
-	using namespace InputProcessor::Renderer::Resource;
+namespace CoreEngine::Renderer {
+	using namespace CoreEngine::Renderer::Resource;
 
 	class IRenderer {
 	public:

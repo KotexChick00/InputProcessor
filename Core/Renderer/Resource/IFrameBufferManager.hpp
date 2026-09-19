@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Renderer/Resource/IFrameBuffer.hpp>
 
-namespace InputProcessor::Renderer::Resource {
+namespace CoreEngine::Renderer {
 	class IFrameBufferManager {
 	public:
 		virtual ~IFrameBufferManager() = default;

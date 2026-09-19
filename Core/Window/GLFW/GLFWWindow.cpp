@@ -3,8 +3,8 @@
 #include <Window/GLFW/GLFWWindow.hpp>
 #include <Logger/Logger.hpp>
 
-namespace InputProcessor::Window::GLFW {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Window::GLFW {
+	using namespace CoreEngine::Logger;
 
 	void GLFWWindow::Init(const WindowConfiguration& config) {
 		if (!glfwInit()) {

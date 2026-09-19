@@ -1,6 +1,6 @@
 #include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
 
-namespace InputProcessor::Logger::SpdLog {
+namespace CoreEngine::Logger::SpdLog {
     SpdLogLoggerAdapter::SpdLogLoggerAdapter(const std::string& loggerName) {
         if (!mLogger) {
             auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();

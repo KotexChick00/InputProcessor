@@ -5,8 +5,8 @@
 #endif
 #include <GLFW/glfw3.h>
 
-namespace InputProcessor::Window::GLFW {
-	class GLFWWindow : public InputProcessor::Window::IWindow {
+namespace CoreEngine::Window::GLFW {
+	class GLFWWindow : public CoreEngine::Window::IWindow {
 	public:
 		void Init(const WindowConfiguration& config) override;
 		void PollEvents() override;

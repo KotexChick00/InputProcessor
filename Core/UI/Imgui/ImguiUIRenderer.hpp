@@ -2,10 +2,10 @@
 #include <UI/IUIRenderer.hpp>
 #include <UI/Imgui/ImguiUIWindowVisitor.hpp>
 
-namespace InputProcessor::UI::Imgui {
+namespace CoreEngine::UI::Imgui {
 	class ImguiUIRenderer : public IUIRenderer {
 	public:
-		ImguiUIRenderer(InputProcessor::Window::IWindow* window);
+		ImguiUIRenderer(CoreEngine::Window::IWindow* window);
 
 		void Init() override;
 		void Render() override;
@@ -18,6 +18,6 @@ namespace InputProcessor::UI::Imgui {
 		ImguiWindowRenderVisitor* mRenderVisitor = nullptr;
 		ImguiWindowShutdownVisitor* mShutdownVisitor = nullptr;
 
-		InputProcessor::Window::IWindow* mWindow = nullptr;
+		CoreEngine::Window::IWindow* mWindow = nullptr;
 	};
 }

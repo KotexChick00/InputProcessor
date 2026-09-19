@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Renderer/Resource/IVertexBuffer.hpp>
 
-namespace InputProcessor::Renderer::Resource {
+namespace CoreEngine::Renderer {
 	enum class IndexBufferRenderMode {
 		Static = 0,
 		Stream = 1,

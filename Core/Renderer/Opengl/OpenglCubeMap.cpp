@@ -7,8 +7,8 @@
 
 #include <stb_image.h>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	// --- Constructor / Destructor ---
 	OpenglCubeMap::OpenglCubeMap(GLuint cubemap)

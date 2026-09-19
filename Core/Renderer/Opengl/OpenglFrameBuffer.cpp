@@ -3,8 +3,8 @@
 #include <Logger/Logger.hpp>
 #include <glad/glad.h>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	// --- OpenglFrameTextureAttachment ---
 	OpenglFrameTextureAttachment::OpenglFrameTextureAttachment(GLuint texId, GLenum target)

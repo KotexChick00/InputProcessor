@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-namespace InputProcessor::Input {
+namespace CoreEngine::Input {
 	enum class KeyState {
 		None,
 		Pressed,

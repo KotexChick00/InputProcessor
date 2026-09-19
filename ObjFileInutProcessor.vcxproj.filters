@@ -19,7 +19,6 @@
     <ClCompile Include="src\FormatChecker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp" />
-    <ClCompile Include="Domain\RenderModel.cpp" />
     <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />

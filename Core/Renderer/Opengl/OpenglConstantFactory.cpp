@@ -2,8 +2,8 @@
 #include <Logger/Logger.hpp>
 #include <Renderer/Resource/ICubeMap.hpp>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	GLenum OpenglConstantFactory::ToGLRenderMode(VertexBufferRenderMode mode) {
 		switch (mode) {

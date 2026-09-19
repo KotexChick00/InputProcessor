@@ -3,8 +3,8 @@
 #include <string>
 #include <fstream>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	OpenglResourceManager::~OpenglResourceManager() {
 		IP_ENGINE_TRACE("OpenglResourceManager destroy resources");

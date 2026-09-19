@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Renderer/Resource/IShader.hpp>
 
-namespace InputProcessor::Renderer::Resource {
+namespace CoreEngine::Renderer {
 	class IFrameTextureAttachment {
 	public:
 		virtual ~IFrameTextureAttachment() = default;

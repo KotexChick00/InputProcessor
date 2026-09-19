@@ -1,7 +1,7 @@
 #pragma once
 #include <Window/IWindow.hpp>
 
-namespace InputProcessor::UI {
+namespace CoreEngine::UI {
 	class IUIRenderer {
 	public:
 		virtual void Init() = 0;

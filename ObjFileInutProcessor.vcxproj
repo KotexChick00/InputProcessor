@@ -185,7 +185,6 @@
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
-    <ClCompile Include="Domain\RenderModel.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />

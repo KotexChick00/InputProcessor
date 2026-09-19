@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 
-namespace InputProcessor::Renderer::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	class OpenglRendererCommand : public IRendererCommand {
 	public:
 		static OpenglRendererCommand* GetInstance();

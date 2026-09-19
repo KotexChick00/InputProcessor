@@ -9,8 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	class OpenglResourceManager : public InputProcessor::Renderer::Resource::IResourceManager {
+namespace CoreEngine::Renderer::Opengl {
+	class OpenglResourceManager : public IResourceManager {
 
 	protected:
 		OpenglResourceManager() = default;

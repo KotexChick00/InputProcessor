@@ -2,7 +2,7 @@
 #include <Window/IWindow.hpp>
 #include <Window/GLFW/GLFWWindow.hpp>
 
-namespace InputProcessor::Window {
+namespace CoreEngine::Window {
 
 	class IWindowVisitor {
 	public:

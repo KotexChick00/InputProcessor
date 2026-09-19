@@ -2,7 +2,7 @@
 #include <Input/IMouseInput.hpp>
 #include <GLFW/glfw3.h>
 
-namespace InputProcessor::Input::GLFW {
+namespace CoreEngine::Input::GLFW {
 	class GLFWMouseInput : public IMouseInput {
 	public:
 		GLFWMouseInput(GLFWwindow* window);

@@ -3,7 +3,7 @@
 #include <Event/EventAction.hpp>
 #include <unordered_map>
 
-namespace InputProcessor::Event {
+namespace CoreEngine::Event {
 	class EventDispatcher {
 	public:
 		EventDispatcher() = default;

@@ -1,6 +1,6 @@
 #include <Input/GLFW/GLFWMouseInput.hpp>
 
-namespace InputProcessor::Input::GLFW {
+namespace CoreEngine::Input::GLFW {
 
 	GLFWMouseInput::GLFWMouseInput(GLFWwindow* window) : mWindow(window) { }
 

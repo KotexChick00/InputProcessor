@@ -1,7 +1,7 @@
 #pragma once
 #include <UI/Elements/IUIElement.hpp>
 
-namespace InputProcessor::UI {
+namespace CoreEngine::UI {
 	class IUIElementFactory {
 	public:
 		virtual IContainer* CreateContainer() = 0;

@@ -2,7 +2,7 @@
 #include <Input/IKeyboardInput.hpp>
 #include <GLFW/glfw3.h>
 
-namespace InputProcessor::Input::GLFW {
+namespace CoreEngine::Input::GLFW {
 	class GLFWKeyBoardInput : public IKeyboardInput {
 	public:
 		GLFWKeyBoardInput(GLFWwindow* window);

@@ -9,8 +9,8 @@
 #include <Renderer/Resource/IUniformBuffer.hpp>
 #include <Renderer/Resource/IFrameBuffer.hpp>
 
-namespace InputProcessor::Renderer::Resource {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer {
+	using namespace CoreEngine::Logger;
 
 	class IResourceManager {
 	public:

@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-namespace InputProcessor::Event {
+namespace CoreEngine::Event {
 	// Note: Marker interface
 	class EventContext {
 	public:
