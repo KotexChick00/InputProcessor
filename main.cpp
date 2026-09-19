@@ -2,7 +2,8 @@
 
 #include <memory>
 #include <glad/glad.h>
-#include <Window/GLFW/GLFWWindow.hpp>
+// #include <Window/GLFW/GLFWWindow.hpp>
+#include <Window/SDL3/SDL3Window.hpp>
 #include <Window/FrameLimiter.hpp>
 #include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
 #include <Renderer/Opengl/OpenglRenderer.hpp>
@@ -10,7 +11,8 @@
 #include <UI/Imgui/ImguiUIWindowVisitor.hpp>
 
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
+// #include <imgui_impl_glfw.h>
+#include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_internal.h>
 // do not include <imgui_impl_opengl3_loader.h> because glad is already included
@@ -18,7 +20,8 @@
 using namespace InputProcessor::Logger::SpdLog;
 
 using namespace InputProcessor::Window;
-using namespace InputProcessor::Window::GLFW;
+// using namespace InputProcessor::Window::GLFW;
+using namespace InputProcessor::Window::SDL3;
 using namespace InputProcessor::Renderer::Opengl;
 using namespace InputProcessor::Renderer::Resource::Opengl;
 using namespace InputProcessor::Renderer;
@@ -56,20 +59,10 @@ const char* fragmentShaderSource = "#version 330 core\n"
 const unsigned int WINDOW_WIDTH = 1000;
 const unsigned int WINDOW_HEIGHT = 1000;
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    // yoffset báo cáo hành động cuộn dọc
-    if (yoffset > 0) {
-        std::cout << "Cuon len: " << yoffset << std::endl;
-    }
-    else if (yoffset < 0) {
-        std::cout << "Cuon xuong: " << yoffset << std::endl;
-    }
-}
 
 int main() {
     Logger::SetEngineImplementation(std::make_shared<SpdLogLoggerAdapter>("IP_ENGINE"));
-    std::unique_ptr<GLFWWindow> window = std::make_unique<GLFWWindow>();
+    std::unique_ptr<SDL3Window> window = std::make_unique<SDL3Window>();
 
     WindowConfiguration config{ WINDOW_WIDTH, WINDOW_HEIGHT, "Hello Window" };
     window->Init(config);
@@ -85,8 +78,6 @@ int main() {
     rendererConfig.ViewPortOptions.Height = WINDOW_HEIGHT;
 
     renderer->Config(rendererConfig);
-
-	glfwSetScrollCallback(window->GetNativeWindow(), scroll_callback);
     
     IShader* shader = OpenglShader::FromSource(vertexShaderSource, fragmentShaderSource);
     IVertexBuffer* vertexBuffer = OpenglVertexBuffer::Create();
@@ -114,7 +105,7 @@ int main() {
         uiRenderer->Render();
 
         window->SwapBuffers();
-        window->PollEvents();
+        // window->PollEvents();
         frameLimiter.EndFrame();
     }
 
