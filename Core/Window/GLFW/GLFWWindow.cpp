@@ -314,4 +314,16 @@ namespace CoreEngine::Window::GLFW {
 			handler->KeyboardButtonCallback(key, scancode, action, mods);
 		}
 	}
+
+
+
+    /// Unsupport function
+
+    void GLFWWindow::OnMouseScrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)>) {
+        CORE_ASSERT(false && "GLFW backend does not support scroll events");
+    }
+
+    void GLFWWindow::OnMouseMoveDeltaEventCallback(std::function<void(const WindowMouseMoveDeltaEventContext&)>) {
+        CORE_ASSERT(false && "GLFW backend does not support mouse move delta events");
+    }
 }

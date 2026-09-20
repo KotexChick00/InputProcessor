@@ -1,6 +1,6 @@
 #include <Input/SDL3/SDL3KeyBoardInput.h>
 
-namespace InputProcessor::Input::SDL3 {
+namespace CoreEngine::Input::SDL3 {
 	namespace {
 		inline bool Valid(SDL_Scancode scancode) {
 			return scancode >= SDL_SCANCODE_UNKNOWN && scancode < SDL_SCANCODE_COUNT;
@@ -32,7 +32,14 @@ namespace InputProcessor::Input::SDL3 {
 	bool SDL3KeyBoardInput::CheckIsHeld(KeyboardKey key) {
 		SDL_Scancode scancode = ToSDL3Scancode(key);
 		if (!Valid(scancode)) return false;
-		return mCurr[scancode] && mPrev[scancode];
+		return mCurr[scancode];
+	}
+
+	KeyState SDL3KeyBoardInput::GetKeyState(KeyboardKey key) {
+		if (CheckIsPressed(key)) return KeyState::Pressed;
+		if (CheckIsReleased(key)) return KeyState::Released;
+		if (CheckIsHeld(key)) return KeyState::Held;
+		return KeyState::None;
 	}
 
 	SDL_Scancode SDL3KeyBoardInput::ToSDL3Scancode(KeyboardKey key) {

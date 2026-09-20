@@ -5,8 +5,8 @@ namespace CoreEngine::Input {
 	enum class CORE_API KeyState {
 		None,
 		Pressed,
-		Held,
-		Released
+		Released,
+        Held
 	};
 
 	enum class CORE_API KeyboardKey {
@@ -153,14 +153,8 @@ namespace CoreEngine::Input {
 
         virtual bool CheckIsPressed(KeyboardKey key) = 0;
         virtual bool CheckIsReleased(KeyboardKey key) = 0;
+        virtual bool CheckIsHeld(KeyboardKey key) = 0;
 
         virtual KeyState GetKeyState(KeyboardKey key) = 0;
-    };
-
-    class IKeyboardInputCheckIsHeldable {
-    public:
-		virtual ~IKeyboardInputCheckIsHeldable() = default;
-        virtual bool CheckIsHeld(KeyboardKey key) = 0;
-        // tại sao phải tách riêng vậy?
     };
 }
