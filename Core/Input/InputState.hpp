@@ -3,7 +3,7 @@
 #include <Input/IMouseInput.hpp>
 
 namespace CoreEngine::Input {
-	struct InputState {
+	struct CORE_API InputState {
 		IKeyboardInput* KeyboardInput;
 		IMouseInput* MouseInput;
 	};

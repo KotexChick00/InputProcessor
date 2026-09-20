@@ -6,7 +6,6 @@ namespace CoreEngine::Window {
 		unsigned int Width;
 		unsigned int Height;
 		std::string Title;
-		WindowConfiguration(int width, int height, std::string title) : Width(width), Height(height), Title(title) {}
 	};
 
 	struct WindowMouseMoveEventContext {
@@ -174,7 +173,19 @@ namespace CoreEngine::Window {
         Menu
 	};
 
-	class IWindowVisitor;
+    enum class WindowKeyboardKeyState {
+        None,
+        Pressed,
+        Held,
+        Released
+    };
+
+    struct WindowKeyboardKeyEventContext {
+        WindowKeyboardKey Key;
+        WindowKeyboardKeyState State;
+    };
+
+	class CORE_API IWindowVisitor;
 
 	class CORE_API IWindow {
 	public:
@@ -184,9 +195,9 @@ namespace CoreEngine::Window {
 		virtual bool CheckShouldClose() = 0;
 		virtual void Close() = 0;
 
-		virtual void RegisterMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) = 0;
-		virtual void RegisterMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) = 0;
-		virtual void RegisterKeyboardEventCallback() = 0;
+		virtual void OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) = 0;
+		virtual void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) = 0;
+		virtual void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) = 0;
 
 		virtual void Accept(IWindowVisitor* visitor) = 0;
 	};

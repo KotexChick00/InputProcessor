@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <pch.h>
 
 namespace CoreEngine::Renderer {
 	typedef unsigned int ShaderID;
@@ -7,7 +7,7 @@ namespace CoreEngine::Renderer {
 	// Forward declare ITexture to avoid circular include
 	class ITexture;
 
-	class IShader {
+	class CORE_API IShader {
 	public:
 		virtual ~IShader() = default;
 		virtual void SetUniformMatrix4fv(const std::string& name, const float* value) = 0;

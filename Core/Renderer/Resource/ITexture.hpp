@@ -1,16 +1,16 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Renderer/Resource/IShader.hpp>
 
 namespace CoreEngine::Renderer {
-	enum class WrapMethod {
+	enum class CORE_API WrapMethod {
 		Repeat = 0,
 		MirroedRepeat = 1,
 		ClampToEdge = 2,
 		ClampToBorder = 3
 	};
 
-	enum class MinFilterMethod {
+	enum class CORE_API MinFilterMethod {
 		BiLinear,
 		Nearest,
 		BiLinearMimapBiLinear,
@@ -19,12 +19,12 @@ namespace CoreEngine::Renderer {
 		NearestMimapNearest
 	};
 
-	enum class MagFilterMethod {
+	enum class CORE_API MagFilterMethod {
 		BiLinear,
 		Nearest
 	};
 
-	struct TextureConfiguration {
+	struct CORE_API TextureConfiguration {
 		WrapMethod WrapSMethod;
 		WrapMethod WrapTMethod;
 		MinFilterMethod MinFilter;
@@ -46,7 +46,7 @@ namespace CoreEngine::Renderer {
 
 	typedef unsigned int TextureID;
 
-	class ITexture {
+	class CORE_API ITexture {
 	public:
 		virtual ~ITexture() = default;
 

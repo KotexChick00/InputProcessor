@@ -1,8 +1,8 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 
 namespace CoreEngine::Input {
-	enum class MouseButton {
+	enum class CORE_API MouseButton {
 		Button1, // Left
 		Button2, // Right
 		Button3, // Middle
@@ -17,14 +17,14 @@ namespace CoreEngine::Input {
 		ButtonMiddle = Button3
 	};
 
-	enum class MouseButtonState {
+	enum class CORE_API MouseButtonState {
 		None,
 		Pressed,
 		Held,
 		Released
 	};
 
-	class IMouseInput {
+	class CORE_API IMouseInput {
 	public:
 		virtual ~IMouseInput() = default;
 

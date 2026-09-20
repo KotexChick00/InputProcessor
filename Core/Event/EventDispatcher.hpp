@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 namespace CoreEngine::Event {
-	class EventDispatcher {
+	class CORE_API EventDispatcher {
 	public:
 		EventDispatcher() = default;
 
@@ -27,7 +27,7 @@ namespace CoreEngine::Event {
 			if (mEventActionMappers.contains(eventName)) {
 				std::vector<IEventAction*> eventActions = mEventActionMappers.at(eventName);
 				for (IEventAction* eventAction : eventActions) 
-					eventAction->Handle(eventContext);
+					if (eventAction->Handle(eventContext)) break;
 			}
 		}
 

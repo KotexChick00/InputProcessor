@@ -1,14 +1,15 @@
 #pragma once
 #include <iostream>
+#include <pch.h>
 
 namespace CoreEngine::Renderer {
-	enum class VertexBufferRenderMode {
+	enum class CORE_API VertexBufferRenderMode {
 		Static = 0,
 		Stream = 1,
 		Dynamic = 2
 	};
 
-	enum class VertexBufferDataType {
+	enum class CORE_API VertexBufferDataType {
 		Float = 0,
 		Int = 1,
 		UnsignedInt = 2,
@@ -17,7 +18,7 @@ namespace CoreEngine::Renderer {
 	
 	typedef unsigned int VertexBufferID;
 
-	class IVertexBuffer {
+	class CORE_API IVertexBuffer {
 	public:
 		virtual ~IVertexBuffer() = default;
 

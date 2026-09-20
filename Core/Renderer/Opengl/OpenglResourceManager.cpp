@@ -55,6 +55,49 @@ namespace CoreEngine::Renderer::Opengl {
 		return nullptr;
 	}
 
+	IVertexBuffer* OpenglResourceManager::CreateVertexBuffer()
+	{
+		return OpenglVertexBuffer::Create();
+	}
+
+	IIndexBuffer* OpenglResourceManager::CreateIndexBuffer()
+	{
+		return OpenglIndexBuffer::Create();
+	}
+
+	IShader* OpenglResourceManager::CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource)
+	{
+		return OpenglShader::FromSource(vertexSource, fragmentSource);
+	}
+
+	IShader* OpenglResourceManager::CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile)
+	{
+		return OpenglShader::FromFiles(vertexFile, fragmentFile);
+	}
+
+	ITexture* OpenglResourceManager::CreateTexture(const std::string& file)
+	{
+		return OpenglTexture::FromFile(file);
+	}
+
+	ICubeMap* OpenglResourceManager::CreateCubeMap(const CubemapTextureFiles& textureFiles)
+	{
+		Opengl::CubeMapFiles cubemapFiles;
+		cubemapFiles.Front = textureFiles.Front;
+		cubemapFiles.Back = textureFiles.Back;
+		cubemapFiles.Bottom = textureFiles.Bot;
+		cubemapFiles.Top = textureFiles.Top;
+		cubemapFiles.Left = textureFiles.Left;
+		cubemapFiles.Right = textureFiles.Right;
+
+		return OpenglCubeMap::FromFiles(cubemapFiles);
+	}
+
+	IUniformBuffer* OpenglResourceManager::CreateUniformBuffer()
+	{
+		return OpenglUniformBuffer::Create();
+	}
+
 	IIndexBuffer* OpenglResourceManager::GetIndexBuffer(IndexBufferID indexBufferId) {
 		if (mIndexBuffers.contains(indexBufferId)) {
 			IP_ENGINE_TRACE("OpenglResourceManager get vertex buffer with id: {}", indexBufferId);

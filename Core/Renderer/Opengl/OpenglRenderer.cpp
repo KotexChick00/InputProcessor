@@ -11,11 +11,15 @@ namespace CoreEngine::Renderer::Opengl {
 		return sInstance;
 	}
 
-	void OpenglRenderer::Free() {
+	void OpenglRenderer::SFree() {
 		if (sInstance != nullptr) {
 			delete sInstance;
 			sInstance = nullptr;
 		}
+	}
+
+	void OpenglRenderer::Free() {
+		OpenglRenderer::SFree();
 	}
 
 	OpenglRenderer::OpenglRenderer() { }

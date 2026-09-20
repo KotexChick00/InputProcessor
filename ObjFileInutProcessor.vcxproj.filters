@@ -31,6 +31,11 @@
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
+    <ClCompile Include="Core\Application\Application.cpp" />
+    <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
+    <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
+    <ClCompile Include="Core\Time\Time.cpp" />
+    <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -96,5 +101,10 @@
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
     <ClInclude Include="Core\Input\InputState.hpp" />
     <ClInclude Include="Core\pch.h" />
+    <ClInclude Include="Core\Application\Application.hpp" />
+    <ClInclude Include="Core\Window\WindowPlatformFactory.hpp" />
+    <ClInclude Include="Core\Logger\LoggerFactory.hpp" />
+    <ClInclude Include="Core\Time\Time.hpp" />
+    <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
   </ItemGroup>
 </Project>

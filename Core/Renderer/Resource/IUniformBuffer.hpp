@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
 #include <Renderer/Resource/IShader.hpp>
+#include <pch.h>
 
 namespace CoreEngine::Renderer {
-	enum class UniformBufferRenderMode {
+	enum class CORE_API UniformBufferRenderMode {
 		Static = 0,
 		Stream = 1,
 		Dynamic = 2,
@@ -11,7 +11,7 @@ namespace CoreEngine::Renderer {
 
 	typedef unsigned int UniformBufferID;
 	
-	class IUniformBuffer {
+	class CORE_API IUniformBuffer {
 	public:
 		virtual ~IUniformBuffer() = default;
 

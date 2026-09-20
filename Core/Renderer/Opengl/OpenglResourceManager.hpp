@@ -36,6 +36,14 @@ namespace CoreEngine::Renderer::Opengl {
 		// Uniform buffer API
 		IUniformBuffer* GetUniformBuffer(UniformBufferID uniformBufferId) override;
 
+		IVertexBuffer* CreateVertexBuffer() override;
+		IIndexBuffer* CreateIndexBuffer() override;
+		IShader* CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource) override;
+		IShader* CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile) override;
+		ITexture* CreateTexture(const std::string& file) override;
+		ICubeMap* CreateCubeMap(const CubemapTextureFiles& textureFiles) override;
+		IUniformBuffer* CreateUniformBuffer() override;
+
 		void InsertVertexBuffer(OpenglVertexBuffer* vertexBuffer);
 		void InsertIndexBuffer(OpenglIndexBuffer* openglIndexBuffer);
 		void InsertShader(OpenglShader* shader);

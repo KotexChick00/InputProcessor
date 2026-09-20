@@ -1,14 +1,14 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Renderer/Resource/IShader.hpp>
 
 namespace CoreEngine::Renderer {
-	enum class CubeMapMagFilterMethod {
+	enum class CORE_API CubeMapMagFilterMethod {
 		BiLinear,
 		Nearest
 	};
 
-	enum class CubeMapMinFilterMethod {
+	enum class CORE_API CubeMapMinFilterMethod {
 		BiLinear,
 		Nearest,
 		BiLinearMimapBiLinear,
@@ -18,14 +18,14 @@ namespace CoreEngine::Renderer {
 	};
 
 	// Most of time use ClampToBorder because of hardware limitation
-	enum class CubeMapWrapMethod {
+	enum class CORE_API CubeMapWrapMethod {
 		Repeat = 0,
 		MirroedRepeat = 1,
 		ClampToEdge = 2,
 		ClampToBorder = 3
 	};
 
-	struct CubeMapConfiguration {
+	struct CORE_API CubeMapConfiguration {
 		CubeMapMinFilterMethod MinFilterMethod = CubeMapMinFilterMethod::BiLinear;
 		CubeMapMagFilterMethod MagFilterMethod = CubeMapMagFilterMethod::BiLinear;
 		
@@ -36,7 +36,7 @@ namespace CoreEngine::Renderer {
 
 	typedef unsigned int CubeMapID;
 
-	class ICubeMap {
+	class CORE_API ICubeMap {
 	public:
 		virtual ~ICubeMap() = default;
 
