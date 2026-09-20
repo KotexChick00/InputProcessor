@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Logger/Logger.hpp>
 
 #include <spdlog/spdlog.h>
@@ -7,7 +7,7 @@
 
 #define SPDLOG_COMPILED_LIB
 namespace CoreEngine::Logger::SpdLog {
-	class SpdLogLoggerAdapter : public CoreEngine::Logger::ILoggerImplentation {
+	class SpdLogLoggerAdapter : public ILoggerImplentation {
 	public:
 		SpdLogLoggerAdapter(const std::string& loggerName);
 
@@ -17,6 +17,6 @@ namespace CoreEngine::Logger::SpdLog {
 			const std::source_location& location
 		);
 	private:
-		inline static std::shared_ptr<spdlog::logger> mLogger = nullptr;
+		Unique<spdlog::logger> mLogger = nullptr;
 	};
 }

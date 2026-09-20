@@ -1,6 +1,7 @@
 #pragma once
 #include <Window/IWindow.hpp>
 #include <Renderer/IRenderer.hpp>
+#include <Input/InputState.hpp>
 #include <Time/Time.hpp>
 #include <pch.h>
 
@@ -46,6 +47,7 @@ namespace CoreEngine {
 		// Client API
 		CORE_FORCE_INLINE Renderer::IRenderer* GetRenderer() const { return mRenderer.get(); }
 		CORE_FORCE_INLINE Time::Time* GetTime() const { return Time::Time::GetInstance(); }
+		CORE_FORCE_INLINE Input::InputState GetInput() const { return { mKeyboardInput.get(), mMouseInput.get() }; }
 
 	protected:
 		Application(ApplicationConfiguration& configuration);
@@ -58,11 +60,14 @@ namespace CoreEngine {
 
 		void SetupLogger();
 		void SetupWindow();
+		void SetupInput();
 		void SetupRenderer();	
 
 	private:
 		ApplicationConfiguration mConfig;
 		Unique<Window::IWindow> mWindow = nullptr;
 		Unique<Renderer::IRenderer> mRenderer = nullptr;
+		Unique<Input::IKeyboardInput> mKeyboardInput = nullptr;
+		Unique<Input::IMouseInput> mMouseInput = nullptr;
 	};
 }

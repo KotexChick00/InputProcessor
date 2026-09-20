@@ -1,7 +1,10 @@
 #include <Window/WindowPlatformFactory.hpp>
+#include <Window/GLFW/GLFWWindow.hpp>
 #include <Logger/LoggerFactory.hpp>
 #include <Renderer/RendererFactory.hpp>
 #include <Application/Application.hpp>
+#include <Input/GLFW/GLFWKeyBoardInput.hpp>
+#include <Input/GLFW/GLFWMouseInput.hpp>
 
 namespace CoreEngine {
 	Application::Application(ApplicationConfiguration& configuration) : mConfig(configuration) { }
@@ -9,6 +12,7 @@ namespace CoreEngine {
 	bool Application::Init() {
 		SetupLogger();
 		SetupWindow();
+		SetupInput();
 		SetupRenderer();
 		return mWindow != nullptr;
 	}
@@ -76,8 +80,8 @@ namespace CoreEngine {
 	}
 
 	void Application::SetupLogger() {
-		Logger::Logger::SetClientImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CORE_ENGINE"));
-		Logger::Logger::SetEngineImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CLIENT"));
+		Logger::Logger::SetClientImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CLIENT"));
+		Logger::Logger::SetEngineImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CORE_ENGINE"));
 	}
 
 	void Application::SetupRenderer() {
@@ -102,6 +106,18 @@ namespace CoreEngine {
 			}
 
 			mRenderer.reset(Renderer::RendererFactory::Create(spec));
+		}
+	}
+
+	void Application::SetupInput() {
+		if (mConfig.WindowPlatformSpec == WindowPlatformSpec::GLFW) {
+			Window::GLFW::GLFWWindow* window = dynamic_cast<Window::GLFW::GLFWWindow*>(mWindow.get());
+			CORE_ASSERT(window != nullptr && "Window is not glfw");
+			mKeyboardInput.reset(new Input::GLFW::GLFWKeyBoardInput(window->GetNativeWindow()));
+			mMouseInput.reset(new Input::GLFW::GLFWMouseInput(window->GetNativeWindow()));
+		}
+		else {
+			CORE_ASSERT("Currently window platform is not supported");
 		}
 	}
 }

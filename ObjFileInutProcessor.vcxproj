@@ -214,6 +214,7 @@
     <ClInclude Include="Core\Logger\Logger.hpp" />
     <ClInclude Include="Core\Logger\LoggerFactory.hpp" />
     <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
+    <ClInclude Include="Core\Memory\IMemoryAllocator.hpp" />
     <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />
     <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
