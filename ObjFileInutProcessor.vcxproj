@@ -174,6 +174,8 @@
   <ItemGroup>
     <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
+    <ClCompile Include="Core\Input\SDL3\SDL3KeyBoardInput.cpp" />
+    <ClCompile Include="Core\Input\SDL3\SDL3MouseInput.cpp" />
     <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
@@ -223,6 +225,9 @@
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
     <ClInclude Include="Core\Input\IKeyboardInput.hpp" />
     <ClInclude Include="Core\Input\IMouseInput.hpp" />
+    <ClInclude Include="Core\Input\InputState.hpp" />
+    <ClInclude Include="Core\Input\SDL3\SDL3KeyBoardInput.h" />
+    <ClInclude Include="Core\Input\SDL3\SDL3MouseInput.h" />
     <ClInclude Include="Core\Logger\Logger.hpp" />
     <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />

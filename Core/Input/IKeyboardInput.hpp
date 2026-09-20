@@ -29,7 +29,7 @@ namespace InputProcessor::Input {
 		// Both World1 and World2 keys are bounded to OEM-102 key, 
         // which is located between the left Shift and Z keys on a standard US keyboard layout. 
         // Theirs equivalent key in SDL3 is named SDL_SCANCODE_NONUSBACKSLASH.
-		//NonUS_Backslash, // The Non-US Backslash key is located between the left Shift and Z keys on a standard US keyboard layout.
+		NonUS_Backslash, // The Non-US Backslash key is located between the left Shift and Z keys on a standard US keyboard layout.
 
 
         // Numbers in the upper character parts
@@ -159,6 +159,8 @@ namespace InputProcessor::Input {
 
     class IKeyboardInputCheckIsHeldable {
     public:
+		virtual ~IKeyboardInputCheckIsHeldable() = default;
         virtual bool CheckIsHeld(KeyboardKey key) = 0;
+        // tại sao phải tách riêng vậy?
     };
 }
