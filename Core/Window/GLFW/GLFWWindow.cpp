@@ -15,7 +15,6 @@ namespace CoreEngine::Window::GLFW {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 #ifdef __APPLE__
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -89,6 +88,22 @@ namespace CoreEngine::Window::GLFW {
 		glfwSetKeyCallback(mWindow, _KeyCallback);
 	}
 
+    void GLFWWindow::OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) {
+        mMouseScrollCallback = callback;
+        glfwSetScrollCallback(mWindow, _MouseScrollCallback);
+    }
+
+    void GLFWWindow::OnWindowReiszeEventCallback(std::function<void(const WindowResizeEventContext&)> callback) {
+        mWindowResizeEventContext = callback;
+        glfwSetFramebufferSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
+            GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+
+            if (handler) {
+                handler->WindowReiszeCallback(width, height);
+            }
+            });
+    }
+
     float GLFWWindow::GetCurrentSeconds()
     {
         return glfwGetTime();
@@ -118,6 +133,21 @@ namespace CoreEngine::Window::GLFW {
             mWindowKeyboardKeyCallback(eventContext);
         }
 	}
+
+    void GLFWWindow::MouseScrollCallback(double xOffset, double yOffset) {
+        WindowMouseScrollEventContext eventContext = { xOffset, yOffset };
+
+        if (mMouseScrollCallback) {
+            mMouseScrollCallback(eventContext);
+        }
+    }
+
+    void GLFWWindow::WindowReiszeCallback(int width, int height) {
+        WindowResizeEventContext eventContext = { width, height };
+        if (mWindowResizeEventContext) {
+            mWindowResizeEventContext(eventContext);
+        }
+    }
 
 	void GLFWWindow::_SetCursorPosCallback(GLFWwindow* window, double xPos, double yPos) {
 		GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
@@ -314,4 +344,12 @@ namespace CoreEngine::Window::GLFW {
 			handler->KeyboardButtonCallback(key, scancode, action, mods);
 		}
 	}
+
+    void GLFWWindow::_MouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
+        GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+
+        if (handler) {
+            handler->MouseScrollCallback(xOffset, yOffset);
+        }
+    }
 }

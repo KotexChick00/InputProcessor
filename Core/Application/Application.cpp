@@ -13,6 +13,7 @@ namespace CoreEngine {
 		SetupLogger();
 		SetupWindow();
 		SetupInput();
+		SetupEvents();
 		SetupRenderer();
 		return mWindow != nullptr;
 	}
@@ -119,5 +120,12 @@ namespace CoreEngine {
 		else {
 			CORE_ASSERT("Currently window platform is not supported");
 		}
+	}
+
+	void Application::SetupEvents() {
+		mWindow->OnWindowReiszeEventCallback([this](CoreEngine::Window::WindowResizeEventContext ec) {
+			WindowResizeEventContext evc(ec.Width, ec.Height);
+			this->mEventDispatcher.Notify(evc);
+			});
 	}
 }

@@ -11,6 +11,12 @@ protected:
         CoreEngine::Renderer::RendererConfiguration config = renderer->GetConfig();
         config.ClearBufferColor.Red = 1.0f;
         renderer->Config(config);
+
+        CoreEngine::Event::EventDispatcher* eventDispatcher = GetEventDispatcher();
+        eventDispatcher->AddEventListener<CoreEngine::WindowResizeEventContext>([](const CoreEngine::WindowResizeEventContext& eventContext) -> bool {
+            IP_CLIENT_TRACE("({}, {})", eventContext.GetWidth(), eventContext.GetHeight());
+            return true;
+            });
     }
 
     void OnLoopClient() override {

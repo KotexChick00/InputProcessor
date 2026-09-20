@@ -2,45 +2,45 @@
 #include <pch.h>
 
 namespace CoreEngine::Window {
-	struct WindowConfiguration {
-		unsigned int Width;
-		unsigned int Height;
-		std::string Title;
-	};
+    struct WindowConfiguration {
+        unsigned int Width;
+        unsigned int Height;
+        std::string Title;
+    };
 
-	struct WindowMouseMoveEventContext {
-		double XPos;
-		double YPos;
-	};
+    struct WindowMouseMoveEventContext {
+        double XPos;
+        double YPos;
+    };
 
-	enum class WindowMouseButton {
-		Button1, // Left
-		Button2, // Right
-		Button3, // Middle
-		Button4, // Thumb back or Thumb button 1
-		Button5, // Thumb forward or Thumb button 2
-		Button6,
-		Button7,
-		Button8,
-		ButtonLast = Button8,
-		ButtonLeft = Button1,
-		ButtonRight = Button2,
-		ButtonMiddle = Button3
-	};
+    enum class WindowMouseButton {
+        Button1, // Left
+        Button2, // Right
+        Button3, // Middle
+        Button4, // Thumb back or Thumb button 1
+        Button5, // Thumb forward or Thumb button 2
+        Button6,
+        Button7,
+        Button8,
+        ButtonLast = Button8,
+        ButtonLeft = Button1,
+        ButtonRight = Button2,
+        ButtonMiddle = Button3
+    };
 
-	enum class WindowMouseButtonState {
-		None,
-		Pressed,
-		Held,
-		Released
-	};
+    enum class WindowMouseButtonState {
+        None,
+        Pressed,
+        Held,
+        Released
+    };
 
-	struct WindowMouseButtonEventContext {
-		WindowMouseButton Button;
-		WindowMouseButtonState State;
-	};
+    struct WindowMouseButtonEventContext {
+        WindowMouseButton Button;
+        WindowMouseButtonState State;
+    };
 
-	enum class WindowKeyboardKey {
+    enum class WindowKeyboardKey {
         // Special Keys and notations
         Unknow,
         Space,
@@ -171,7 +171,7 @@ namespace CoreEngine::Window {
         RightAlt,
         RightSuper, // Window right key
         Menu
-	};
+    };
 
     enum class WindowKeyboardKeyState {
         None,
@@ -183,6 +183,17 @@ namespace CoreEngine::Window {
     struct WindowKeyboardKeyEventContext {
         WindowKeyboardKey Key;
         WindowKeyboardKeyState State;
+    };
+
+    struct WindowMouseScrollEventContext {
+        // If touchpads, Trackball...
+        double OffsetX;
+        double OffsetY;
+    };
+
+    struct WindowResizeEventContext {
+        unsigned int Width;
+        unsigned int Height;
     };
 
 	class CORE_API IWindowVisitor;
@@ -198,6 +209,8 @@ namespace CoreEngine::Window {
 		virtual void OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) = 0;
 		virtual void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) = 0;
 		virtual void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) = 0;
+        virtual void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) = 0;
+        virtual void OnWindowReiszeEventCallback(std::function<void(const WindowResizeEventContext&)> callback) = 0;
 
         virtual float GetCurrentSeconds() = 0;
 		virtual void Accept(IWindowVisitor* visitor) = 0;

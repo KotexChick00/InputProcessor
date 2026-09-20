@@ -1,7 +1,6 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Event/EventAction.hpp>
-#include <unordered_map>
 
 namespace CoreEngine::Event {
 	class CORE_API EventDispatcher {
@@ -10,7 +9,7 @@ namespace CoreEngine::Event {
 
 		~EventDispatcher() {
 			for (auto pair : mEventActionMappers) {
-				for (IEventAction* eventAction : pair.second) delete eventAction;
+				for (IEventAction* eventAction : pair.second) CORE_FREE(eventAction);
 			}
 		}
 

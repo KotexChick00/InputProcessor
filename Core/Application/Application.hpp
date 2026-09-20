@@ -3,6 +3,7 @@
 #include <Renderer/IRenderer.hpp>
 #include <Input/InputState.hpp>
 #include <Time/Time.hpp>
+#include <Event/EventDispatcher.hpp>
 #include <pch.h>
 
 namespace CoreEngine {
@@ -33,6 +34,16 @@ namespace CoreEngine {
 		Renderer::IRenderer* InjectedRenderer = nullptr; // If RenderAPI is Injection
 	};
 
+	class CORE_API WindowResizeEventContext : public Event::EventContext {
+	public:
+		WindowResizeEventContext(unsigned int width, unsigned int height) : mWidth(width), mHeight(height) { }
+		CORE_FORCE_INLINE unsigned int GetWidth() const { return mWidth; }
+		CORE_FORCE_INLINE unsigned int GetHeight() const { return mHeight; }
+
+	private:
+		unsigned int mWidth, mHeight;
+	};
+
 	class CORE_API Application {
 	public:
 		virtual ~Application() = default;
@@ -48,6 +59,7 @@ namespace CoreEngine {
 		CORE_FORCE_INLINE Renderer::IRenderer* GetRenderer() const { return mRenderer.get(); }
 		CORE_FORCE_INLINE Time::Time* GetTime() const { return Time::Time::GetInstance(); }
 		CORE_FORCE_INLINE Input::InputState GetInput() const { return { mKeyboardInput.get(), mMouseInput.get() }; }
+		CORE_FORCE_INLINE Event::EventDispatcher* GetEventDispatcher() const { return (Event::EventDispatcher*)&mEventDispatcher; }
 
 	protected:
 		Application(ApplicationConfiguration& configuration);
@@ -61,12 +73,17 @@ namespace CoreEngine {
 		void SetupLogger();
 		void SetupWindow();
 		void SetupInput();
+		void SetupEvents();
 		void SetupRenderer();	
 
 	private:
 		ApplicationConfiguration mConfig;
 		Unique<Window::IWindow> mWindow = nullptr;
 		Unique<Renderer::IRenderer> mRenderer = nullptr;
+
+		Event::EventDispatcher mEventDispatcher;
+
+		// Input
 		Unique<Input::IKeyboardInput> mKeyboardInput = nullptr;
 		Unique<Input::IMouseInput> mMouseInput = nullptr;
 	};

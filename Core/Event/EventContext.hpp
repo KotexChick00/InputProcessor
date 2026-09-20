@@ -5,6 +5,7 @@ namespace CoreEngine::Event {
 	// Note: Marker interface
 	class CORE_API EventContext {
 	public:
-		virtual ~EventContext() = 0;
+		EventContext() = default;
+		virtual ~EventContext() = default;
 	};
 };

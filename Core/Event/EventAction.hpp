@@ -1,6 +1,5 @@
 #pragma once
-#include <iostream>
-#include <functional>
+#include <pch.h>
 #include <Event/EventContext.hpp>
 
 namespace CoreEngine::Event {
@@ -9,7 +8,7 @@ namespace CoreEngine::Event {
 	class IEventAction {
 	public:
 		virtual ~IEventAction() = default;
-		virtual bool Handle(EventContext* eventContext) = 0;
+		virtual bool Handle(const EventContext& eventContext) = 0;
 	};
 
 	template<typename T>
@@ -17,7 +16,7 @@ namespace CoreEngine::Event {
 	public:
 		EventAction(const EventCallback<T>& callback) : mCallback(callback) { }
 
-		bool Handle(EventContext* eventContext) override {
+		bool Handle(const EventContext& eventContext) override {
 			return mCallback(*(T*)&eventContext);
 		}
 
