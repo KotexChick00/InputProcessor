@@ -199,6 +199,7 @@ namespace CoreEngine::Window {
 		virtual void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) = 0;
 		virtual void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) = 0;
 
+        virtual float GetCurrentSeconds() = 0;
 		virtual void Accept(IWindowVisitor* visitor) = 0;
 	};
 }

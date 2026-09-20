@@ -184,7 +184,6 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
     <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
-    <ClCompile Include="Core\Time\Time.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />

@@ -34,7 +34,6 @@
     <ClCompile Include="Core\Application\Application.cpp" />
     <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
     <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
-    <ClCompile Include="Core\Time\Time.cpp" />
     <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -28,7 +28,15 @@ namespace CoreEngine {
 	}
 
 	void Application::BeginLoop() {
-		GetTime()->Update();
+		Time::Time* time = GetTime();
+		float minDeltaTime = 1.f / mConfig.MaxFPS;
+		float prevFrameTime = time->GetTimeNow();
+
+		while (mWindow->GetCurrentSeconds() - prevFrameTime < minDeltaTime);
+		float currentTime = mWindow->GetCurrentSeconds();
+		time->SetDeltaTime(currentTime - prevFrameTime);
+		time->SetTimeNow(currentTime);
+
 		mWindow->PollEvents();
 	}
 

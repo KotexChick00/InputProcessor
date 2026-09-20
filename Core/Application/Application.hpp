@@ -23,6 +23,8 @@ namespace CoreEngine {
 		unsigned int Height;
 		const char* Title;
 
+		unsigned int MaxFPS = 60;
+
 		WindowPlatformSpec WindowPlatformSpec = WindowPlatformSpec::GLFW;
 		Window::IWindow* InjectedWindow = nullptr; // If WindowPlatformSpec is Injection
 

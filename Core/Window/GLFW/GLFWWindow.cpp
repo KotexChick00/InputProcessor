@@ -89,6 +89,11 @@ namespace CoreEngine::Window::GLFW {
 		glfwSetKeyCallback(mWindow, _KeyCallback);
 	}
 
+    float GLFWWindow::GetCurrentSeconds()
+    {
+        return glfwGetTime();
+    }
+
 	void GLFWWindow::Accept(IWindowVisitor* visitor) {
 		visitor->VisitGlfwWindow(this);
 	}

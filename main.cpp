@@ -15,6 +15,7 @@ protected:
 
     void OnLoopClient() override {
         GetRenderer()->GetRendererCommand()->ClearBuffers(CoreEngine::Renderer::ClearBufferMasks::Color);
+        IP_CLIENT_TRACE("Delta Time: {}", GetTime()->GetDeltaTime());
     }
 
     void OnShutdownClient() override {

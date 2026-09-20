@@ -18,6 +18,8 @@ namespace CoreEngine::Window::GLFW {
 		void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) override;
 		void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) override;
 
+		float GetCurrentSeconds() override;
+
 		void Accept(IWindowVisitor* visitor) override;
 
 		GLFWwindow* GetNativeWindow();
