@@ -43,6 +43,7 @@ namespace CoreEngine {
 
 		// Client API
 		CORE_FORCE_INLINE Renderer::IRenderer* GetRenderer() const { return mRenderer.get(); }
+		CORE_FORCE_INLINE Time::Time* GetTime() const { return Time::Time::GetInstance(); }
 
 	protected:
 		Application(ApplicationConfiguration& configuration);

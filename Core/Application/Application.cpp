@@ -28,7 +28,7 @@ namespace CoreEngine {
 	}
 
 	void Application::BeginLoop() {
-		Time::Time::Update();
+		GetTime()->Update();
 		mWindow->PollEvents();
 	}
 

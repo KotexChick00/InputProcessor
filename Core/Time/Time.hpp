@@ -4,17 +4,22 @@
 namespace CoreEngine::Time {
 	class CORE_API Time {
 	public:
-		CORE_FORCE_INLINE static float GetDeltaTime() { return sDeltaTime; }
-		CORE_FORCE_INLINE static float GetTimeScale() { return sTimeScale; }
-		CORE_FORCE_INLINE static float GetCurrentTime() { return sCurrentSecond; }
+		CORE_FORCE_INLINE float GetDeltaTime() const { return mDeltaTime; }
+		CORE_FORCE_INLINE float GetTimeScale() const { return mTimeScale; }
+		CORE_FORCE_INLINE float GetCurrentTime() const { return mCurrentSecond; }
 
-		CORE_FORCE_INLINE static void SetTimeScale(float timeScale) { sTimeScale = timeScale; }
+		CORE_FORCE_INLINE void SetTimeScale(float timeScale) { mTimeScale = timeScale; }
 
 		// Update time scale of the time system in the loop
-		static void Update();
+		void Update();
+
+		static Time* GetInstance() {
+			static Time time;
+			return &time;
+		}
 
 	private:
-		static float sDeltaTime, sTimeScale, sCurrentSecond;
+		float mDeltaTime, mTimeScale, mCurrentSecond;
 
 		Time() = default;
 		~Time() = default;
