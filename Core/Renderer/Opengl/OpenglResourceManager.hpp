@@ -9,8 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	class OpenglResourceManager : public InputProcessor::Renderer::Resource::IResourceManager {
+namespace CoreEngine::Renderer::Opengl {
+	class OpenglResourceManager : public IResourceManager {
 
 	protected:
 		OpenglResourceManager() = default;
@@ -35,6 +35,14 @@ namespace InputProcessor::Renderer::Resource::Opengl {
 		ICubeMap* GetCubeMap(CubeMapID cubeMapId) override;
 		// Uniform buffer API
 		IUniformBuffer* GetUniformBuffer(UniformBufferID uniformBufferId) override;
+
+		IVertexBuffer* CreateVertexBuffer() override;
+		IIndexBuffer* CreateIndexBuffer() override;
+		IShader* CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource) override;
+		IShader* CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile) override;
+		ITexture* CreateTexture(const std::string& file) override;
+		ICubeMap* CreateCubeMap(const CubemapTextureFiles& textureFiles) override;
+		IUniformBuffer* CreateUniformBuffer() override;
 
 		void InsertVertexBuffer(OpenglVertexBuffer* vertexBuffer);
 		void InsertIndexBuffer(OpenglIndexBuffer* openglIndexBuffer);

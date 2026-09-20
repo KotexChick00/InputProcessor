@@ -3,13 +3,13 @@
 #include <functional>
 #include <Event/EventContext.hpp>
 
-namespace InputProcessor::Event {
+namespace CoreEngine::Event {
 	template<typename T> using EventCallback = std::function<bool(const T&)>;
 
 	class IEventAction {
 	public:
 		virtual ~IEventAction() = default;
-		virtual void Handle(EventContext* eventContext) = 0;
+		virtual bool Handle(EventContext* eventContext) = 0;
 	};
 
 	template<typename T>
@@ -17,8 +17,8 @@ namespace InputProcessor::Event {
 	public:
 		EventAction(const EventCallback<T>& callback) : mCallback(callback) { }
 
-		void Handle(EventContext* eventContext) override {
-			mCallback(*(T*)&eventContext);
+		bool Handle(EventContext* eventContext) override {
+			return mCallback(*(T*)&eventContext);
 		}
 
 	private:

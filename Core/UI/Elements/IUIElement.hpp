@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 
-namespace InputProcessor::UI {
+namespace CoreEngine::UI {
 	enum class SizeMode {
 		Absolute,
 		ParentRelative

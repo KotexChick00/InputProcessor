@@ -1,15 +1,15 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 
-namespace InputProcessor::Input {
-	enum class KeyState {
+namespace CoreEngine::Input {
+	enum class CORE_API KeyState {
 		None,
 		Pressed,
 		Held,
 		Released
 	};
 
-	enum class KeyboardKey {
+	enum class CORE_API KeyboardKey {
         // Special Keys and notations
 		Unknow,
         Space,
@@ -147,7 +147,7 @@ namespace InputProcessor::Input {
         Menu
 	};
 
-    class IKeyboardInput {
+    class CORE_API IKeyboardInput {
     public:
         virtual ~IKeyboardInput() = default;
 

@@ -2,7 +2,7 @@
 #include <Renderer/Resource/ITexture.hpp>
 #include <glad/glad.h>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	class OpenglTexture : public ITexture {
 	public:
 		OpenglTexture(GLuint textId);

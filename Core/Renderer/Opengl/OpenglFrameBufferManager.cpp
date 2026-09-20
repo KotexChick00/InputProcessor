@@ -2,8 +2,8 @@
 #include <Renderer/Opengl/OpenglFrameBuffer.hpp>
 #include <Logger/Logger.hpp>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	IFrameBuffer* OpenglFrameBufferManager::GetFrameBuffer(FrameBufferID id) {
 		auto it = mBuffers.find(id);

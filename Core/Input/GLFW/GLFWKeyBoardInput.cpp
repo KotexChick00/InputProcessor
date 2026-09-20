@@ -1,6 +1,6 @@
 #include <Input/GLFW/GLFWKeyBoardInput.hpp>
 
-namespace InputProcessor::Input::GLFW {
+namespace CoreEngine::Input::GLFW {
 	GLFWKeyBoardInput::GLFWKeyBoardInput(GLFWwindow* window) : mWindow(window) { }
 
 	bool GLFWKeyBoardInput::CheckIsPressed(KeyboardKey key) {

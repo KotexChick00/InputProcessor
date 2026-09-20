@@ -1,7 +1,7 @@
 #include <UI/Imgui/ImguiUIRenderer.hpp>
 
-namespace InputProcessor::UI::Imgui {
-	ImguiUIRenderer::ImguiUIRenderer(InputProcessor::Window::IWindow* window) : mWindow(window) { }
+namespace CoreEngine::UI::Imgui {
+	ImguiUIRenderer::ImguiUIRenderer(CoreEngine::Window::IWindow* window) : mWindow(window) { }
 
 	void ImguiUIRenderer::Init() {
 		mContextVisitor = new ImguiWindowContextInitVisitor();

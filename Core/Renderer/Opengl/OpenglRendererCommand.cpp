@@ -1,8 +1,8 @@
 #include <Renderer/Opengl/OpenglRendererCommand.hpp>
 #include <Logger/Logger.hpp>
 
-namespace InputProcessor::Renderer::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	OpenglRendererCommand* OpenglRendererCommand::GetInstance() {
 		if (sInstance == nullptr) sInstance = new OpenglRendererCommand();

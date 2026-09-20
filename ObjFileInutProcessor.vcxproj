@@ -172,10 +172,10 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Application\Application.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
-    <ClCompile Include="Core\Input\SDL3\SDL3KeyBoardInput.cpp" />
-    <ClCompile Include="Core\Input\SDL3\SDL3MouseInput.cpp" />
+    <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
     <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
@@ -189,23 +189,13 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglTexture.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
+    <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\FrameLimiter.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
-    <ClCompile Include="Core\Window\SDL3\SDL3Window.cpp" />
+    <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
     <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
-    <ClCompile Include="Domain\RenderModel.cpp" />
-    <ClCompile Include="Import\AsciiReader.cpp" />
-    <ClCompile Include="Import\FormatChecker.cpp" />
-    <ClCompile Include="Import\OBJ\ObjFace.cpp" />
-    <ClCompile Include="Import\OBJ\ObjLogger.cpp" />
-    <ClCompile Include="Import\OBJ\ObjMeshConverter.cpp" />
-    <ClCompile Include="Import\OBJ\ObjParser.cpp" />
-    <ClCompile Include="Import\OBJ\ObjVertex.cpp" />
-    <ClCompile Include="Import\PrimitiveType\Vector2.cpp" />
-    <ClCompile Include="Import\PrimitiveType\Vector3.cpp" />
-    <ClCompile Include="Import\PrimitiveType\Vector4.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />
@@ -218,6 +208,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Application\Application.hpp" />
     <ClInclude Include="Core\Event\EventAction.hpp" />
     <ClInclude Include="Core\Event\EventContext.hpp" />
     <ClInclude Include="Core\Event\EventDispatcher.hpp" />
@@ -226,10 +217,11 @@
     <ClInclude Include="Core\Input\IKeyboardInput.hpp" />
     <ClInclude Include="Core\Input\IMouseInput.hpp" />
     <ClInclude Include="Core\Input\InputState.hpp" />
-    <ClInclude Include="Core\Input\SDL3\SDL3KeyBoardInput.h" />
-    <ClInclude Include="Core\Input\SDL3\SDL3MouseInput.h" />
     <ClInclude Include="Core\Logger\Logger.hpp" />
+    <ClInclude Include="Core\Logger\LoggerFactory.hpp" />
     <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
+    <ClInclude Include="Core\Memory\IMemoryAllocator.hpp" />
+    <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />
     <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglConstantFactory.hpp" />
@@ -244,6 +236,7 @@
     <ClInclude Include="Core\Renderer\Opengl\OpenglTexture.hpp" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglVertexBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
     <ClInclude Include="Core\Renderer\RendererPrimitives.hpp" />
     <ClInclude Include="Core\Renderer\Resource\ICubeMap.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IFrameBuffer.hpp" />
@@ -254,6 +247,7 @@
     <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
+    <ClInclude Include="Core\Time\Time.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElement.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
@@ -261,7 +255,7 @@
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
-    <ClInclude Include="Core\Window\SDL3\SDL3Window.hpp" />
+    <ClInclude Include="Core\Window\WindowPlatformFactory.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporterAdapter.hpp" />
     <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />

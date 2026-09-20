@@ -6,11 +6,10 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_opengl3.h>
 
-using namespace InputProcessor::UI;
-using namespace InputProcessor::Window;
-using namespace InputProcessor::Window::GLFW;
-using namespace InputProcessor::Window::SDL3;
-using namespace InputProcessor::UI::Imgui;
+using namespace CoreEngine::UI;
+using namespace CoreEngine::Window;
+using namespace CoreEngine::Window::GLFW;
+using namespace CoreEngine::UI::Imgui;
 
 namespace {
 	void CreateImguiContext() {

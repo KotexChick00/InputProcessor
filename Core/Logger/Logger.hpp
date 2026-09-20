@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <source_location>
 #include <format>
 
-namespace InputProcessor::Logger {
+namespace CoreEngine::Logger {
 	enum class LogLevel {
 		Trace,
 		Debug,
@@ -25,8 +25,8 @@ namespace InputProcessor::Logger {
 	// Format for log messages: [LEVEL] [HH:MM:SS] [Thread] Message
 	class Logger {
 	public:
-		static void SetEngineImplementation(std::shared_ptr<ILoggerImplentation> engineImplementation) { s_EngineImplementation = engineImplementation; }
-		static void SetClientImplementation(std::shared_ptr<ILoggerImplentation> clientImplementation) { s_ClientImplementation = clientImplementation; }
+		static void SetEngineImplementation(ILoggerImplentation* engineImplementation) { s_EngineImplementation.reset(engineImplementation); }
+		static void SetClientImplementation(ILoggerImplentation* clientImplementation) { s_ClientImplementation.reset(clientImplementation); }
 
 		template <typename... Args>
 		static void ClientLog(
@@ -55,8 +55,8 @@ namespace InputProcessor::Logger {
 		}
 
 	private:
-		inline static std::shared_ptr<ILoggerImplentation> s_EngineImplementation = nullptr;
-		inline static std::shared_ptr<ILoggerImplentation> s_ClientImplementation = nullptr;
+		inline static Unique<ILoggerImplentation> s_EngineImplementation = nullptr;
+		inline static Unique<ILoggerImplentation> s_ClientImplementation = nullptr;
 
 	private:
 		Logger() = default;
@@ -65,18 +65,18 @@ namespace InputProcessor::Logger {
 #if defined(_DEBUG) || !defined(NDEBUG)
 
 	// --- Engine Log Macros ---
-#define IP_ENGINE_TRACE(fmt, ...)    ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Trace,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_ENGINE_DEBUG(fmt, ...)    ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Debug,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_ENGINE_WARN(fmt, ...)     ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_ENGINE_ERROR(fmt, ...)    ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_ENGINE_CRITICAL(fmt, ...) ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_TRACE(fmt, ...)    ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Trace,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_DEBUG(fmt, ...)    ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Debug,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_WARN(fmt, ...)     ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_ERROR(fmt, ...)    ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_CRITICAL(fmt, ...) ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
 
 // --- Client Log Macros ---
-#define IP_CLIENT_TRACE(fmt, ...)    ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Trace,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_CLIENT_DEBUG(fmt, ...)    ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Debug,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_CLIENT_WARN(fmt, ...)     ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_CLIENT_ERROR(fmt, ...)    ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_CLIENT_CRITICAL(fmt, ...) ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_TRACE(fmt, ...)    ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Trace,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_DEBUG(fmt, ...)    ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Debug,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_WARN(fmt, ...)     ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_ERROR(fmt, ...)    ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_CRITICAL(fmt, ...) ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
 
 #else
 #define IP_ENGINE_TRACE(fmt, ...)    do {} while(0)
@@ -84,13 +84,13 @@ namespace InputProcessor::Logger {
 #define IP_CLIENT_TRACE(fmt, ...)    do {} while(0)
 #define IP_CLIENT_DEBUG(fmt, ...)    do {} while(0)
 
-#define IP_ENGINE_WARN(fmt, ...)     ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_ENGINE_ERROR(fmt, ...)    ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_ENGINE_CRITICAL(fmt, ...) ::InputProcessor::Logger::Logger::EngineLog(::InputProcessor::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_WARN(fmt, ...)     ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_ERROR(fmt, ...)    ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_ENGINE_CRITICAL(fmt, ...) ::CoreEngine::Logger::Logger::EngineLog(::CoreEngine::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
 
-#define IP_CLIENT_WARN(fmt, ...)     ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_CLIENT_ERROR(fmt, ...)    ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
-#define IP_CLIENT_CRITICAL(fmt, ...) ::InputProcessor::Logger::Logger::ClientLog(::InputProcessor::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_WARN(fmt, ...)     ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Warning,  std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_ERROR(fmt, ...)    ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Error,    std::source_location::current(), fmt, ##__VA_ARGS__)
+#define IP_CLIENT_CRITICAL(fmt, ...) ::CoreEngine::Logger::Logger::ClientLog(::CoreEngine::Logger::LogLevel::Critical, std::source_location::current(), fmt, ##__VA_ARGS__)
 
 #endif
 }

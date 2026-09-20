@@ -2,7 +2,7 @@
 #include <Input/IMouseInput.hpp>
 #include <GLFW/glfw3.h>
 
-namespace InputProcessor::Input::GLFW {
+namespace CoreEngine::Input::GLFW {
 	class GLFWMouseInput : public IMouseInput {
 	public:
 		GLFWMouseInput(GLFWwindow* window);
@@ -10,7 +10,6 @@ namespace InputProcessor::Input::GLFW {
 
 		bool CheckIsPressed(MouseButton mouseButton) override;
 		bool CheckIsReleased(MouseButton mouseButton) override;
-		bool CheckIsScrolled(MouseScroll mouseScroll) override;
 
 	private:
 		static int ToGLFWMouseButton(MouseButton mouseButton);

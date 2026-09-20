@@ -1,118 +1,36 @@
-// Use project IWindow and GLFWWindow to create a black 800x600 window titled "Hello Window"
+#include <iostream>
+#include <Application/Application.hpp>
 
-#include <memory>
-#include <glad/glad.h>
-// #include <Window/GLFW/GLFWWindow.hpp>
-#include <Window/SDL3/SDL3Window.hpp>
-#include <Window/FrameLimiter.hpp>
-#include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
-#include <Renderer/Opengl/OpenglRenderer.hpp>
-#include <UI/Imgui/ImguiUIRenderer.hpp>
-#include <UI/Imgui/ImguiUIWindowVisitor.hpp>
+class DemoApp : public CoreEngine::Application {
+public:
+    DemoApp(CoreEngine::ApplicationConfiguration& config) : Application(config) { }
 
-#include <imgui.h>
-// #include <imgui_impl_glfw.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_internal.h>
-// do not include <imgui_impl_opengl3_loader.h> because glad is already included
-
-using namespace InputProcessor::Logger::SpdLog;
-
-using namespace InputProcessor::Window;
-// using namespace InputProcessor::Window::GLFW;
-using namespace InputProcessor::Window::SDL3;
-using namespace InputProcessor::Renderer::Opengl;
-using namespace InputProcessor::Renderer::Resource::Opengl;
-using namespace InputProcessor::Renderer;
-using namespace InputProcessor::Renderer::Resource;
-using namespace InputProcessor::UI::Imgui;
-using namespace InputProcessor::UI;
-
-float vertices[] = {
-     0.5f,  0.5f, 0.0f,  // top right
-     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left 
-};
-
-unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-};
-
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\0";
-
-const unsigned int WINDOW_WIDTH = 1000;
-const unsigned int WINDOW_HEIGHT = 1000;
-
-
-int main() {
-    Logger::SetEngineImplementation(std::make_shared<SpdLogLoggerAdapter>("IP_ENGINE"));
-    std::unique_ptr<SDL3Window> window = std::make_unique<SDL3Window>();
-
-    WindowConfiguration config{ WINDOW_WIDTH, WINDOW_HEIGHT, "Hello Window" };
-    window->Init(config);
-    FrameLimiter frameLimiter(config.TargetFPS);
-
-    IRenderer* renderer = OpenglRenderer::GetInstance();
-    RendererConfiguration rendererConfig = renderer->GetConfig();
-    rendererConfig.ClearBufferColor.Red = 0.2f;
-    rendererConfig.ClearBufferColor.Green = 0.3f;
-    rendererConfig.ClearBufferColor.Blue = 0.3f;
-    rendererConfig.ClearBufferColor.Alpha = 1.0f;
-    rendererConfig.ViewPortOptions.Width = WINDOW_WIDTH;
-    rendererConfig.ViewPortOptions.Height = WINDOW_HEIGHT;
-
-    renderer->Config(rendererConfig);
-    
-    IShader* shader = OpenglShader::FromSource(vertexShaderSource, fragmentShaderSource);
-    IVertexBuffer* vertexBuffer = OpenglVertexBuffer::Create();
-    vertexBuffer->SetData(0, vertices, sizeof(vertices), 3, 3 * sizeof(float));
-
-    IIndexBuffer* indexBuffer = OpenglIndexBuffer::Create();
-    indexBuffer->SetData(indices, sizeof(indices));
-
-
-	// Init ImGui
-    IUIRenderer* uiRenderer = new ImguiUIRenderer(window.get());
-    uiRenderer->Init();
-
-    while (!window->CheckShouldClose()) {
-        // Poll events first
-        window->PollEvents();
-
-        // Render scene (triangle)
-        renderer->GetRendererCommand()->ClearBuffers(ClearBufferMasks::Color);
-        shader->Use();
-        vertexBuffer->Bind();
-        indexBuffer->Bind();
-        renderer->GetRendererCommand()->DrawIndex(RenderMode::Triangles, 6);
-
-        uiRenderer->Render();
-
-        window->SwapBuffers();
-        // window->PollEvents();
-        frameLimiter.EndFrame();
+protected:
+    void OnInitClient() override {
+        CoreEngine::Renderer::IRenderer* renderer = GetRenderer();
+        CoreEngine::Renderer::RendererConfiguration config = renderer->GetConfig();
+        config.ClearBufferColor.Red = 1.0f;
+        renderer->Config(config);
     }
 
-    uiRenderer->Free();
-    delete uiRenderer;
+    void OnLoopClient() override {
+        GetRenderer()->GetRendererCommand()->ClearBuffers(CoreEngine::Renderer::ClearBufferMasks::Color);
+    }
 
-    window->Close();
-    OpenglRenderer::Free();
-    return 0;
+    void OnShutdownClient() override {
+        std::cout << "CLIENT SHUTDOWN" << std::endl;
+    }
+};
+
+int main() {
+    CoreEngine::ApplicationConfiguration config;
+    config.Width = 1000;
+    config.Height = 1000;
+    config.Title = "Hello World!";
+    config.WindowPlatformSpec = CoreEngine::WindowPlatformSpec::GLFW;
+    config.RenderAPI = CoreEngine::RenderAPI::Opengl;
+
+    CoreEngine::Application* application = new DemoApp(config);
+    application->Run();
+    delete application;
 }

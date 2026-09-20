@@ -17,7 +17,6 @@
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp" />
-    <ClCompile Include="Domain\RenderModel.cpp" />
     <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />
@@ -30,18 +29,10 @@
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
-    <ClCompile Include="Core\Window\FrameLimiter.cpp" />
-    <ClCompile Include="Import\AsciiReader.cpp" />
-    <ClCompile Include="Import\FormatChecker.cpp" />
-    <ClCompile Include="Import\OBJ\ObjFace.cpp" />
-    <ClCompile Include="Import\OBJ\ObjLogger.cpp" />
-    <ClCompile Include="Import\OBJ\ObjMeshConverter.cpp" />
-    <ClCompile Include="Import\OBJ\ObjParser.cpp" />
-    <ClCompile Include="Import\OBJ\ObjVertex.cpp" />
-    <ClCompile Include="Import\PrimitiveType\Vector2.cpp" />
-    <ClCompile Include="Import\PrimitiveType\Vector3.cpp" />
-    <ClCompile Include="Import\PrimitiveType\Vector4.cpp" />
-    <ClCompile Include="Library\ImGui\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="Core\Application\Application.cpp" />
+    <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
+    <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
+    <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -103,20 +94,13 @@
     <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
     <ClInclude Include="Core\Input\IMouseInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
-    <ClInclude Include="Core\Window\FrameLimiter.hpp" />
-    <ClInclude Include="Import\AsciiReader.h" />
-    <ClInclude Include="Import\DataTypes.h" />
-    <ClInclude Include="Import\FormatChecker.h" />
-    <ClInclude Include="Import\OBJ\ObjFace.h" />
-    <ClInclude Include="Import\OBJ\ObjLogger.h" />
-    <ClInclude Include="Import\OBJ\ObjMeshConverter.h" />
-    <ClInclude Include="Import\OBJ\ObjParser.h" />
-    <ClInclude Include="Import\OBJ\ObjTools.h" />
-    <ClInclude Include="Import\OBJ\ObjVertex.h" />
-    <ClInclude Include="Import\PrimitiveType\Vector2.h" />
-    <ClInclude Include="Import\PrimitiveType\Vector3.h" />
-    <ClInclude Include="Import\PrimitiveType\Vector4.h" />
-    <ClInclude Include="Import\StringUtils.h" />
-    <ClInclude Include="Library\ImGui\imgui_impl_sdl3.h" />
+    <ClInclude Include="Core\Input\InputState.hpp" />
+    <ClInclude Include="Core\pch.h" />
+    <ClInclude Include="Core\Application\Application.hpp" />
+    <ClInclude Include="Core\Window\WindowPlatformFactory.hpp" />
+    <ClInclude Include="Core\Logger\LoggerFactory.hpp" />
+    <ClInclude Include="Core\Time\Time.hpp" />
+    <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
+    <ClInclude Include="Core\Memory\IMemoryAllocator.hpp" />
   </ItemGroup>
 </Project>

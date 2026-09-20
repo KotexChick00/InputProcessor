@@ -2,25 +2,22 @@
 #include <iostream>
 #include <Window/IWindowVisitor.hpp>
 
-namespace InputProcessor::UI::Imgui {
-	class ImguiWindowContextInitVisitor : public InputProcessor::Window::IWindowVisitor {
+namespace CoreEngine::UI::Imgui {
+	class ImguiWindowContextInitVisitor : public CoreEngine::Window::IWindowVisitor {
 	public:
-		void Visit(InputProcessor::Window::IWindow* window) override;
-		void VisitGlfwWindow(InputProcessor::Window::GLFW::GLFWWindow* window) override;
-		void VisitSdl3Window(InputProcessor::Window::SDL3::SDL3Window* window) override;
+		void Visit(CoreEngine::Window::IWindow* window) override;
+		void VisitGlfwWindow(CoreEngine::Window::GLFW::GLFWWindow* window) override;
 	};
 
-	class ImguiWindowRenderVisitor : public InputProcessor::Window::IWindowVisitor {
+	class ImguiWindowRenderVisitor : public CoreEngine::Window::IWindowVisitor {
 	public:
-		void Visit(InputProcessor::Window::IWindow* window) override;
-		void VisitGlfwWindow(InputProcessor::Window::GLFW::GLFWWindow* window) override;
-		void VisitSdl3Window(InputProcessor::Window::SDL3::SDL3Window* window) override;
+		void Visit(CoreEngine::Window::IWindow* window) override;
+		void VisitGlfwWindow(CoreEngine::Window::GLFW::GLFWWindow* window) override;
 	};
 
-	class ImguiWindowShutdownVisitor : public InputProcessor::Window::IWindowVisitor {
+	class ImguiWindowShutdownVisitor : public CoreEngine::Window::IWindowVisitor {
 	public:
-		void Visit(InputProcessor::Window::IWindow* window) override;
-		void VisitGlfwWindow(InputProcessor::Window::GLFW::GLFWWindow* window) override;
-		void VisitSdl3Window(InputProcessor::Window::SDL3::SDL3Window* window) override;
+		void Visit(CoreEngine::Window::IWindow* window) override;
+		void VisitGlfwWindow(CoreEngine::Window::GLFW::GLFWWindow* window) override;
 	};
 }

@@ -3,8 +3,8 @@
 #include <Event/EventAction.hpp>
 #include <unordered_map>
 
-namespace InputProcessor::Event {
-	class EventDispatcher {
+namespace CoreEngine::Event {
+	class CORE_API EventDispatcher {
 	public:
 		EventDispatcher() = default;
 
@@ -27,7 +27,7 @@ namespace InputProcessor::Event {
 			if (mEventActionMappers.contains(eventName)) {
 				std::vector<IEventAction*> eventActions = mEventActionMappers.at(eventName);
 				for (IEventAction* eventAction : eventActions) 
-					eventAction->Handle(eventContext);
+					if (eventAction->Handle(eventContext)) break;
 			}
 		}
 

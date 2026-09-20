@@ -6,7 +6,7 @@
 #include <Renderer/Resource/ITexture.hpp>
 #include <Renderer/Resource/ICubeMap.hpp>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
+namespace CoreEngine::Renderer::Opengl {
 	class OpenglConstantFactory {
 	public:
 		static GLenum ToGLRenderMode(VertexBufferRenderMode mode);

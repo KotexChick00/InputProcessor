@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Renderer/Resource/IVertexBuffer.hpp>
 
-namespace InputProcessor::Renderer::Resource {
-	enum class IndexBufferRenderMode {
+namespace CoreEngine::Renderer {
+	enum class CORE_API IndexBufferRenderMode {
 		Static = 0,
 		Stream = 1,
 		Dynamic = 2
@@ -11,7 +11,7 @@ namespace InputProcessor::Renderer::Resource {
 
 	typedef unsigned int IndexBufferID;
 
-	class IIndexBuffer {
+	class CORE_API IIndexBuffer {
 	public:
 		virtual ~IIndexBuffer() = default;
 

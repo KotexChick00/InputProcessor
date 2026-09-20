@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 #include <Renderer/Resource/IIndexBuffer.hpp>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-class OpenglIndexBuffer : public InputProcessor::Renderer::Resource::IIndexBuffer {
+namespace CoreEngine::Renderer::Opengl {
+class OpenglIndexBuffer : public IIndexBuffer {
 	public:
 		~OpenglIndexBuffer();
 

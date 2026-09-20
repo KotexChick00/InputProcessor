@@ -3,9 +3,8 @@
 #include <Window/GLFW/GLFWWindow.hpp>
 #include <Window/SDL3/SDL3Window.hpp	>
 
-namespace InputProcessor::Window {
-
-	class IWindowVisitor {
+namespace CoreEngine::Window {
+	class CORE_API IWindowVisitor {
 	public:
 		virtual void Visit(IWindow* window) = 0;
 		virtual void VisitGlfwWindow(GLFW::GLFWWindow* window) = 0;

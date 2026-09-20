@@ -2,8 +2,8 @@
 #include <Renderer/Opengl/OpenglResourceManager.hpp>
 #include <Logger/Logger.hpp>
 
-namespace InputProcessor::Renderer::Resource::Opengl {
-	using namespace InputProcessor::Logger;
+namespace CoreEngine::Renderer::Opengl {
+	using namespace CoreEngine::Logger;
 
 	OpenglUniformBuffer* OpenglUniformBuffer::Create() {
 		GLuint uboId;

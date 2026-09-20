@@ -1,12 +1,13 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Logger/Logger.hpp>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-namespace InputProcessor::Logger::SpdLog {
-	class SpdLogLoggerAdapter : public InputProcessor::Logger::ILoggerImplentation {
+#define SPDLOG_COMPILED_LIB
+namespace CoreEngine::Logger::SpdLog {
+	class SpdLogLoggerAdapter : public ILoggerImplentation {
 	public:
 		SpdLogLoggerAdapter(const std::string& loggerName);
 
@@ -16,6 +17,6 @@ namespace InputProcessor::Logger::SpdLog {
 			const std::source_location& location
 		);
 	private:
-		inline static std::shared_ptr<spdlog::logger> mLogger = nullptr;
+		Unique<spdlog::logger> mLogger = nullptr;
 	};
 }
