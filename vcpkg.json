@@ -1,8 +1,8 @@
 {
   "dependencies": [
     "glad",
-    "glfw3",
     "glm",
+    "glfw3",
     {
       "name": "imgui",
       "features": [

@@ -17,7 +17,7 @@ namespace CoreEngine::Window::SDL3 {
 		bool CheckShouldClose() override;
 		void Close() override;
 
-		void  OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) override;
+		void OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) override;
 		void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) override;
 		void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) override;
 		void OnMouseScrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override;
