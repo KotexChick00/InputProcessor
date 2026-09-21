@@ -1,4 +1,5 @@
 #pragma once
+#include <Application/ApplicationEventContext.hpp>
 #include <Window/IWindow.hpp>
 #include <Renderer/IRenderer.hpp>
 #include <Input/InputState.hpp>
@@ -28,20 +29,10 @@ namespace CoreEngine {
 		unsigned int MaxFPS = 60;
 
 		WindowPlatformSpec WindowPlatformSpec = WindowPlatformSpec::GLFW;
-		Window::IWindow* InjectedWindow = nullptr; // If WindowPlatformSpec is Injection
+		Window::IWindow* InjectedWindow = nullptr;			// If WindowPlatformSpec is Injection
 
 		RenderAPI RenderAPI = RenderAPI::Opengl;
-		Renderer::IRenderer* InjectedRenderer = nullptr; // If RenderAPI is Injection
-	};
-
-	class CORE_API WindowResizeEventContext : public Event::EventContext {
-	public:
-		WindowResizeEventContext(unsigned int width, unsigned int height) : mWidth(width), mHeight(height) { }
-		CORE_FORCE_INLINE unsigned int GetWidth() const { return mWidth; }
-		CORE_FORCE_INLINE unsigned int GetHeight() const { return mHeight; }
-
-	private:
-		unsigned int mWidth, mHeight;
+		Renderer::IRenderer* InjectedRenderer = nullptr;	// If RenderAPI is Injection
 	};
 
 	class CORE_API Application {
@@ -74,7 +65,7 @@ namespace CoreEngine {
 		void SetupWindow();
 		void SetupInput();
 		void SetupEvents();
-		void SetupRenderer();	
+		void SetupRenderer();
 
 	private:
 		ApplicationConfiguration mConfig;
@@ -86,5 +77,11 @@ namespace CoreEngine {
 		// Input
 		Unique<Input::IKeyboardInput> mKeyboardInput = nullptr;
 		Unique<Input::IMouseInput> mMouseInput = nullptr;
+
+	private:
+		static KeyboardKey ToApplicationKeyboardKey(Window::WindowKeyboardKey key);
+		static KeyboardKeyState ToApplicationKeyboardKeyState(Window::WindowKeyboardKeyState keyState);
+		static MouseButton ToApplicationMouseButton(Window::WindowMouseButton mouseButton);
+		static MouseButtonState ToApplicationMouseButtonState(Window::WindowMouseButtonState mouseButtonState);
 	};
 }

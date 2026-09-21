@@ -106,5 +106,6 @@
     <ClInclude Include="Core\Time\Time.hpp" />
     <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
     <ClInclude Include="Core\Memory\IMemoryAllocator.hpp" />
+    <ClInclude Include="Core\Application\ApplicationEventContext.hpp" />
   </ItemGroup>
 </Project>

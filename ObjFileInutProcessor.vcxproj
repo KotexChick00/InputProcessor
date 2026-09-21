@@ -203,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application\Application.hpp" />
+    <ClInclude Include="Core\Application\ApplicationEventContext.hpp" />
     <ClInclude Include="Core\Event\EventAction.hpp" />
     <ClInclude Include="Core\Event\EventContext.hpp" />
     <ClInclude Include="Core\Event\EventDispatcher.hpp" />
