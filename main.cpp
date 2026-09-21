@@ -22,7 +22,7 @@ protected:
     void OnLoopClient() override {
         GetRenderer()->GetRendererCommand()->ClearBuffers(CoreEngine::Renderer::ClearBufferMasks::Color);
         auto input = GetInput();
-        IP_CLIENT_TRACE("({}, {})", input.MouseInput->GetDeltaX(), input.MouseInput->GetDeltaY());
+        IP_CLIENT_TRACE("({}, {})", input.MouseInput->GetScrollX(), input.MouseInput->GetScrollY());
     }
 
     void OnShutdownClient() override {

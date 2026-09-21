@@ -36,6 +36,8 @@ namespace CoreEngine::Input::GLFW {
 		for (auto button : MouseInput::sMouseButtons) {
 			sMouseButtons[button] = CheckIsPressed(button);
 		}
+		SetScroll(0, 0);
+		SetDelta(0, 0);
 	}
 
 	int GLFWMouseInput::ToGLFWMouseButton(MouseButton mouseButton) {
