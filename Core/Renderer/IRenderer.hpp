@@ -1,9 +1,9 @@
 #pragma once
+#include <pch.h>
 #include <Renderer/RendererPrimitives.hpp>
 #include <Renderer/IRendererCommand.hpp>
 #include <Renderer/Resource/IResouceManager.hpp>
 #include <Renderer/Resource/IFrameBufferManager.hpp>
-#include <pch.h>
 
 namespace CoreEngine::Renderer {
 	class CORE_API IRenderer {

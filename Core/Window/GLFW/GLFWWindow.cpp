@@ -6,46 +6,83 @@
 namespace CoreEngine::Window::GLFW {
 	using namespace CoreEngine::Logger;
 
-	void GLFWWindow::Init(const WindowConfiguration& config) {
-		if (!glfwInit()) {
-			IP_ENGINE_CRITICAL("Failed to initialize GLFW.");
-			return;
-		}
+//	void GLFWWindow::Init(const WindowConfiguration& config) {
+//		if (!glfwInit()) {
+//			IP_ENGINE_CRITICAL("Failed to initialize GLFW.");
+//			return;
+//		}
+//
+//		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+//		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+//		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+//#ifdef __APPLE__
+//		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+//#endif
+//
+//		mWindow = glfwCreateWindow(
+//			config.Width,
+//			config.Height,
+//			config.Title.c_str(),
+//			nullptr,
+//			nullptr
+//		);
+//
+//		if (!mWindow) {
+//			IP_ENGINE_CRITICAL("Failed to create GLFW window: '{}' ({}x{})", config.Title, config.Width, config.Height);
+//			glfwTerminate();
+//			return;
+//		}
+//
+//		glfwMakeContextCurrent(mWindow);
+//
+//		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+//			IP_ENGINE_CRITICAL("Failed to initialize OpenGL loader (GLAD).");
+//			Close();
+//			return;
+//		}
+//
+//		glfwSetWindowUserPointer(mWindow, this);
+//
+//		IP_ENGINE_TRACE("Window initialized successfully: '{}' ({}x{})", config.Title, config.Width, config.Height);
+//	}
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    bool GLFWWindow::TryInit(const WindowConfiguration& config) {
+        if (mWindow) return true;   // tránh khởi tạo hai lần
+
+        if (!glfwInit()) {
+            IP_ENGINE_CRITICAL("Failed to initialize GLFW.");
+            return false;
+        }
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 #ifdef __APPLE__
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-		mWindow = glfwCreateWindow(
-			config.Width,
-			config.Height,
-			config.Title.c_str(),
-			nullptr,
-			nullptr
-		);
+        mWindow = glfwCreateWindow(config.Width, config.Height, config.Title.c_str(), nullptr, nullptr);
+        if (!mWindow) {
+            IP_ENGINE_CRITICAL("Failed to create GLFW window: '{}' ({}x{})", config.Title, config.Width, config.Height);
+            glfwTerminate();
+            return false;
+        }
 
-		if (!mWindow) {
-			IP_ENGINE_CRITICAL("Failed to create GLFW window: '{}' ({}x{})", config.Title, config.Width, config.Height);
-			glfwTerminate();
-			return;
-		}
+        glfwMakeContextCurrent(mWindow);
 
-		glfwMakeContextCurrent(mWindow);
+        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+            IP_ENGINE_CRITICAL("Failed to initialize OpenGL loader (GLAD).");
+            Close();   // destroy window + terminate + mWindow = nullptr
+            return false;
+        }
 
-		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-			IP_ENGINE_CRITICAL("Failed to initialize OpenGL loader (GLAD).");
-			Close();
-			return;
-		}
+        glfwSetWindowUserPointer(mWindow, this);
 
-		glfwSetWindowUserPointer(mWindow, this);
-
-		IP_ENGINE_TRACE("Window initialized successfully: '{}' ({}x{})", config.Title, config.Width, config.Height);
-	}
+        IP_ENGINE_TRACE("Window initialized successfully: '{}' ({}x{})", config.Title, config.Width, config.Height);
+        return true;
+    }
 
 	void GLFWWindow::PollEvents() {
 		glfwPollEvents();
@@ -89,7 +126,7 @@ namespace CoreEngine::Window::GLFW {
 		glfwSetKeyCallback(mWindow, _KeyCallback);
 	}
 
-    float GLFWWindow::GetCurrentSeconds()
+    double GLFWWindow::GetCurrentSeconds()
     {
         return glfwGetTime();
     }
@@ -314,16 +351,4 @@ namespace CoreEngine::Window::GLFW {
 			handler->KeyboardButtonCallback(key, scancode, action, mods);
 		}
 	}
-
-
-
-    /// Unsupport function
-
-    void GLFWWindow::OnMouseScrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)>) {
-        CORE_ASSERT(false && "GLFW backend does not support scroll events");
-    }
-
-    void GLFWWindow::OnMouseMoveDeltaEventCallback(std::function<void(const WindowMouseMoveDeltaEventContext&)>) {
-        CORE_ASSERT(false && "GLFW backend does not support mouse move delta events");
-    }
 }

@@ -13,11 +13,6 @@ namespace CoreEngine::Window {
 		double YPos;
 	};
 
-	struct WindowMouseMoveDeltaEventContext {
-		double DeltaX;
-		double DeltaY;
-	};
-
 	enum class WindowMouseButton {
 		Button1, // Left
 		Button2, // Right
@@ -62,7 +57,8 @@ namespace CoreEngine::Window {
         GraveAccent,
         World1,
         World2,
-		NonUS_Backslash, /* Non-US # and ~ */
+		NonUS_Backslash, /* Non-US \ */
+		NonUS_Hash, /* Non-US # */
 
         // Numbers in the upper character parts
         Zero,
@@ -191,37 +187,27 @@ namespace CoreEngine::Window {
         WindowKeyboardKeyState State;
     };
 
-    enum class WindowMouseScrollDirection {
-        None,
-        YPositive, // Scroll up
-        YNegative, // Scroll down
-        XPositive, // Scroll right
-        XNegative  // Scroll left
-    };
-
-	struct WindowMouseScrollEventContext {
-		WindowMouseScrollDirection Direction;
-		float xOffset;
-		float yOffset;
-	};
-
 	class CORE_API IWindowVisitor;
 
 	class CORE_API IWindow {
 	public:
+		virtual ~IWindow() = default;
+
 		virtual void Init(const WindowConfiguration& config) = 0;
+        virtual bool TryInit(const WindowConfiguration& config) {
+			Init(config);
+            return true;
+        };
 		virtual void PollEvents() = 0;
 		virtual void SwapBuffers() = 0;
 		virtual bool CheckShouldClose() = 0;
 		virtual void Close() = 0;
 
 		virtual void OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) = 0;
-		virtual void OnMouseMoveDeltaEventCallback(std::function<void(const WindowMouseMoveDeltaEventContext&)> callback) = 0;
 		virtual void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) = 0;
 		virtual void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) = 0;
-		virtual void OnMouseScrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) = 0;
 
-        virtual float GetCurrentSeconds() = 0;
+        virtual double GetCurrentSeconds() = 0;
 		virtual void Accept(IWindowVisitor* visitor) = 0;
 	};
 }

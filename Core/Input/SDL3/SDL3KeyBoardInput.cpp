@@ -60,6 +60,7 @@ namespace CoreEngine::Input::SDL3 {
 		//case KeyboardKey::World1: return SDL_SCANCODE_UNKNOWN;
 		//case KeyboardKey::World2: return SDL_SCANCODE_UNKNOWN;
 		case KeyboardKey::NonUS_Backslash: return SDL_SCANCODE_NONUSBACKSLASH;
+		case KeyboardKey::NonUS_Hash: return SDL_SCANCODE_NONUSHASH;
 
 		case KeyboardKey::Zero: return SDL_SCANCODE_0;
 		case KeyboardKey::One: return SDL_SCANCODE_1;

@@ -37,7 +37,7 @@ namespace CoreEngine {
 		float prevFrameTime = time->GetTimeNow();
 
 		while (mWindow->GetCurrentSeconds() - prevFrameTime < minDeltaTime);
-		float currentTime = mWindow->GetCurrentSeconds();
+		double currentTime = mWindow->GetCurrentSeconds();
 		time->SetDeltaTime(currentTime - prevFrameTime);
 		time->SetTimeNow(currentTime);
 

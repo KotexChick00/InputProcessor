@@ -1,9 +1,9 @@
 #pragma once
+#include <pch.h>
 #include <Window/IWindow.hpp>
 #include <Renderer/IRenderer.hpp>
 #include <Input/InputState.hpp>
 #include <Time/Time.hpp>
-#include <pch.h>
 
 namespace CoreEngine {
 	enum class CORE_API WindowPlatformSpec {

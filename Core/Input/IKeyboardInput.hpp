@@ -29,7 +29,8 @@ namespace CoreEngine::Input {
 		// Both World1 and World2 keys are bounded to OEM-102 key, 
         // which is located between the left Shift and Z keys on a standard US keyboard layout. 
         // Theirs equivalent key in SDL3 is named SDL_SCANCODE_NONUSBACKSLASH.
-		NonUS_Backslash, // The Non-US Backslash key is located between the left Shift and Z keys on a standard US keyboard layout.
+		NonUS_Backslash, // The Non-US Backslash key is located between the left Shift and Z keys on a standard UK keyboard layout.
+		NonUS_Hash, // The Non-US Hash key is located in the left side of the Enter (Return) key on a standard UK keyboard layout.
 
 
         // Numbers in the upper character parts
@@ -153,7 +154,6 @@ namespace CoreEngine::Input {
 
         virtual bool CheckIsPressed(KeyboardKey key) = 0;
         virtual bool CheckIsReleased(KeyboardKey key) = 0;
-        virtual bool CheckIsHeld(KeyboardKey key) = 0;
 
         virtual KeyState GetKeyState(KeyboardKey key) = 0;
     };

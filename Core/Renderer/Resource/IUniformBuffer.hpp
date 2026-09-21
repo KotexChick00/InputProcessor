@@ -1,6 +1,6 @@
 #pragma once
-#include <Renderer/Resource/IShader.hpp>
 #include <pch.h>
+#include <Renderer/Resource/IShader.hpp>
 
 namespace CoreEngine::Renderer {
 	enum class CORE_API UniformBufferRenderMode {

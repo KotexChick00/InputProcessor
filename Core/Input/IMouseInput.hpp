@@ -30,14 +30,5 @@ namespace CoreEngine::Input {
 
 		virtual bool CheckIsPressed(MouseButton mouseButton) = 0;
 		virtual bool CheckIsReleased(MouseButton mouseButton) = 0;
-		virtual bool CheckIsHeld(MouseButton mouseButton) = 0;
-
-		virtual MouseButtonState GetMouseButtonState(MouseButton mouseButton) = 0;
-
-		virtual float GetScrollDeltaX() const = 0;
-		virtual float GetScrollDeltaY() const = 0;
-
-		virtual void GetPositionCoordinates(float& x, float& y) const = 0;
-		virtual void GetPositionDelta(float& deltaX, float& deltaY) const = 0;
 	};
 }

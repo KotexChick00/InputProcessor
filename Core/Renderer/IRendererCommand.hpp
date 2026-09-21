@@ -1,6 +1,6 @@
 #pragma once
-#include <Renderer/RendererPrimitives.hpp>
 #include <pch.h>
+#include <Renderer/RendererPrimitives.hpp>
 
 namespace CoreEngine::Renderer {
 

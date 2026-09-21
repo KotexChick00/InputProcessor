@@ -9,6 +9,7 @@
 using namespace CoreEngine::UI;
 using namespace CoreEngine::Window;
 using namespace CoreEngine::Window::GLFW;
+using namespace CoreEngine::Window::SDL3;
 using namespace CoreEngine::UI::Imgui;
 
 namespace {

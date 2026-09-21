@@ -14,16 +14,16 @@ namespace CoreEngine::Input::SDL3 {
         // Buttons
         bool CheckIsPressed(MouseButton mouseButton) override;
         bool CheckIsReleased(MouseButton mouseButton) override;
-        bool CheckIsHeld(MouseButton mouseButton) override;
-        MouseButtonState GetMouseButtonState(MouseButton mouseButton) override;
+        bool CheckIsHeld(MouseButton mouseButton);
+        MouseButtonState GetMouseButtonState(MouseButton mouseButton);
 
         // Scroll
-        float GetScrollDeltaX() const override;
-        float GetScrollDeltaY() const override;
+        float GetScrollDeltaX() const;
+        float GetScrollDeltaY() const;
 
         // Position
-        void GetPositionCoordinates(float& x, float& y) const override;
-        void GetPositionDelta(float& deltaX, float& deltaY) const override;
+        void GetPositionCoordinates(float& x, float& y) const;
+        void GetPositionDelta(float& deltaX, float& deltaY) const;
 
         // Gọi từ event loop khi nhận SDL_EVENT_MOUSE_WHEEL
         void AddScrollDelta(float x, float y);

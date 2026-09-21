@@ -9,9 +9,30 @@
 
 
 namespace CoreEngine::Window::SDL3 {
+
+	enum class WindowMouseScrollDirection {
+		None,
+		YPositive, // Scroll up
+		YNegative, // Scroll down
+		XPositive, // Scroll right
+		XNegative  // Scroll left
+	};
+
+	struct WindowMouseScrollEventContext {
+		WindowMouseScrollDirection Direction;
+		float xOffset;
+		float yOffset;
+	};
+
+
+
 	class SDL3Window : public CoreEngine::Window::IWindow {
 	public:
-		void Init(const WindowConfiguration& config) override;
+		~SDL3Window() override {
+			SDL_Quit();
+		}
+		void Init(const WindowConfiguration& config) override {TryInit(config);};
+		bool TryInit(const WindowConfiguration& config) override;
 		void PollEvents() override;
 		void SwapBuffers() override;
 		bool CheckShouldClose() override;
@@ -20,9 +41,9 @@ namespace CoreEngine::Window::SDL3 {
 		void OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) override;
 		void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) override;
 		void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) override;
-		void OnMouseScrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override;
+		void OnMouseScrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback);
 
-		float GetCurrentSeconds() override;
+		double GetCurrentSeconds() override;
 
 		void Accept(IWindowVisitor* visitor) override;
 

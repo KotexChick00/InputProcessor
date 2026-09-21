@@ -1,7 +1,7 @@
 #pragma once
+#include <pch.h>
 #include <Logger/Logger.hpp>
 #include <Logger/SpdLog/SpdLogLoggerAdapter.hpp>
-#include <pch.h>
 
 namespace CoreEngine::Logger {
 	enum class LoggerSpec {
