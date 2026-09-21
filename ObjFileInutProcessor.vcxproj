@@ -209,8 +209,8 @@
     <ClInclude Include="Core\Event\EventDispatcher.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWKeyBoardInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
-    <ClInclude Include="Core\Input\IKeyboardInput.hpp" />
-    <ClInclude Include="Core\Input\IMouseInput.hpp" />
+    <ClInclude Include="Core\Input\KeyboardInput.hpp" />
+    <ClInclude Include="Core\Input\MouseInput.hpp" />
     <ClInclude Include="Core\Input\InputState.hpp" />
     <ClInclude Include="Core\Logger\Logger.hpp" />
     <ClInclude Include="Core\Logger\LoggerFactory.hpp" />

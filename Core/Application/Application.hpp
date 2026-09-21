@@ -49,7 +49,7 @@ namespace CoreEngine {
 		// Client API
 		CORE_FORCE_INLINE Renderer::IRenderer* GetRenderer() const { return mRenderer.get(); }
 		CORE_FORCE_INLINE Time::Time* GetTime() const { return Time::Time::GetInstance(); }
-		CORE_FORCE_INLINE Input::InputState GetInput() const { return { mKeyboardInput.get(), mMouseInput.get() }; }
+		CORE_FORCE_INLINE Input::InputState GetInput() const { return mWindow->GetInput(); }
 		CORE_FORCE_INLINE Event::EventDispatcher* GetEventDispatcher() const { return (Event::EventDispatcher*)&mEventDispatcher; }
 
 	protected:
@@ -63,7 +63,6 @@ namespace CoreEngine {
 
 		void SetupLogger();
 		void SetupWindow();
-		void SetupInput();
 		void SetupEvents();
 		void SetupRenderer();
 
@@ -73,10 +72,6 @@ namespace CoreEngine {
 		Unique<Renderer::IRenderer> mRenderer = nullptr;
 
 		Event::EventDispatcher mEventDispatcher;
-
-		// Input
-		Unique<Input::IKeyboardInput> mKeyboardInput = nullptr;
-		Unique<Input::IMouseInput> mMouseInput = nullptr;
 
 	private:
 		static KeyboardKey ToApplicationKeyboardKey(Window::WindowKeyboardKey key);

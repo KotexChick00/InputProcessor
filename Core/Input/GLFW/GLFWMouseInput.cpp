@@ -2,7 +2,11 @@
 
 namespace CoreEngine::Input::GLFW {
 
-	GLFWMouseInput::GLFWMouseInput(GLFWwindow* window) : mWindow(window) { }
+	GLFWMouseInput::GLFWMouseInput(GLFWwindow* window) : mWindow(window) {
+		for (auto button : MouseInput::sMouseButtons) {
+			sMouseButtons[button] = false;
+		}
+	}
 
 	bool GLFWMouseInput::CheckIsPressed(MouseButton mouseButton) {
 		if (mWindow == nullptr) return false;
@@ -16,6 +20,22 @@ namespace CoreEngine::Input::GLFW {
 		int glfwBtn = ToGLFWMouseButton(mouseButton);
 		int state = glfwGetMouseButton(mWindow, glfwBtn);
 		return state == GLFW_RELEASE;
+	}
+
+	bool GLFWMouseInput::CheckIsJustPressed(MouseButton mouseButton) {
+		return false;
+	}
+
+	MouseButtonState GLFWMouseInput::GetMouseButtonState(MouseButton mouseButton) {
+		if (CheckIsPressed(mouseButton)) return MouseButtonState::Pressed;
+		if (CheckIsReleased(mouseButton)) return MouseButtonState::Released;
+		return MouseButtonState::None;
+	}
+
+	void GLFWMouseInput::Update() {
+		for (auto button : MouseInput::sMouseButtons) {
+			sMouseButtons[button] = CheckIsPressed(button);
+		}
 	}
 
 	int GLFWMouseInput::ToGLFWMouseButton(MouseButton mouseButton) {
@@ -35,15 +55,4 @@ namespace CoreEngine::Input::GLFW {
 		default: return GLFW_MOUSE_BUTTON_LAST;
 		}
 	}
-
-	/*
-	* Y tuong o day la dung delta cua scroll callback de nhan biet loai chuot va huong cuon.
-	* Vi trong GLFW, khong co cach de lay thong tin ve loai chuot (mouse device type) truc tiep,
-	* nen cach nay chi mang tinh phong doan va co the co sai sot.
-	* Doi voi con lan, gia tri delta thuong la so nguyen, neu cuon len thi delta > 0, cuon xuong thi delta < 0.
-	* Doi voi ban di chuot, gia tri delta neu dung thao tac cuon thuong la so thuc, co gia tri tuyet doi < 1,
-	* neu cuon len thi delta > 0, cuon xuong thi delta < 0.
-	* Tuy nhien, neu dung thao tac phong to thu nho tren touchpad, delta luon la 1 neu phong to
-	* va -1 neu thu nho, nen khong the phan biet duoc loai chuot.
-	*/
 }

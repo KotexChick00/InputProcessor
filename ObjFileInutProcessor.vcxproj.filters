@@ -89,14 +89,14 @@
     <ClInclude Include="Core\UI\IUIRenderer.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIRenderer.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
-    <ClInclude Include="Core\Input\IKeyboardInput.hpp" />
+    <ClInclude Include="Core\Input\KeyboardInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWKeyBoardInput.hpp" />
     <ClInclude Include="Core\Event\EventContext.hpp" />
     <ClInclude Include="Core\Event\EventAction.hpp" />
     <ClInclude Include="Core\Event\EventDispatcher.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElement.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
-    <ClInclude Include="Core\Input\IMouseInput.hpp" />
+    <ClInclude Include="Core\Input\MouseInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
     <ClInclude Include="Core\Input\InputState.hpp" />
     <ClInclude Include="Core\pch.h" />

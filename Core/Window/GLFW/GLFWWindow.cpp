@@ -44,9 +44,93 @@ namespace CoreEngine::Window::GLFW {
 		glfwSetWindowUserPointer(mWindow, this);
 
 		IP_ENGINE_TRACE("Window initialized successfully: '{}' ({}x{})", config.Title, config.Width, config.Height);
-	}
+    
+        mKeyboardInput.reset(new Input::GLFW::GLFWKeyBoardInput(mWindow));
+        mMouseInput.reset(new Input::GLFW::GLFWMouseInput(mWindow));
+
+        glfwSetCursorPosCallback(mWindow, [](GLFWwindow* window, double xPos, double yPos) {
+            GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+            
+            if (handler) {
+                static double lastFrameX = xPos;
+                static double lastFrameY = yPos;
+
+                double dx = xPos - lastFrameX;
+                double dy = yPos - lastFrameY;
+
+                auto mouseInput = handler->GetInput().MouseInput;
+                mouseInput->SetDelta(dx, dy);
+                mouseInput->SetPosition(xPos, yPos);
+                
+                lastFrameX = xPos;
+                lastFrameY = yPos;
+
+                auto callback = handler->GetMouseMoveEventCallback();
+                if (callback) {
+                    WindowMouseMoveEventContext evc = { xPos, yPos };
+                    callback(evc);
+                }
+            }
+        });
+
+        glfwSetWindowSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
+            GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+
+            if (handler) {
+                auto callback = handler->GetWindowResizeEventCallback();
+                if (callback) {
+                    WindowResizeEventContext evc = { width, height };
+                    callback(evc);
+                }
+            }
+        });
+
+        glfwSetMouseButtonCallback(mWindow, [](GLFWwindow* window, int button, int action, int mods) {
+            GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+
+            if (handler) {
+                auto callback = handler->GetMouseButtonEventCallback();
+                if (callback) {
+                    WindowMouseButton windowMouseButton = GLFWWindow::_ToWindowMouseButton(button);
+                    WindowMouseButtonState windowMouseButtonState = GLFWWindow::_ToWindowMouseButtonState(action);
+                    WindowMouseButtonEventContext evc = { windowMouseButton, windowMouseButtonState };
+                    callback(evc);
+                }
+            }
+        });
+
+        glfwSetKeyCallback(mWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+            GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+
+            if (handler) {
+                auto callback = handler->GetKeyboardKeyEventCallback();
+                if (callback) {
+                    WindowKeyboardKey windowKeyboardKey = GLFWWindow::_ToWindowKeyboardKey(key);
+                    WindowKeyboardKeyState windowKeyboardKeyState = GLFWWindow::_ToWindowKeyboardState(action);
+                    WindowKeyboardKeyEventContext evc = { windowKeyboardKey, windowKeyboardKeyState };
+                    callback(evc);
+                }
+            }
+        });
+
+        glfwSetScrollCallback(mWindow, [](GLFWwindow* window, double dx, double dy) {
+            GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+            
+            if (handler) {
+                auto mouseInput = handler->GetInput().MouseInput;
+                mouseInput->SetScroll(dx, dy);
+
+                auto callback = handler->GetMouseScrollEventCallback();
+                if (callback) {
+                    callback({ dx,dy });
+                }
+            }
+        });
+    }
 
 	void GLFWWindow::PollEvents() {
+        mKeyboardInput->Update();
+        mMouseInput->Update();
 		glfwPollEvents();
 	}
 
@@ -75,94 +159,34 @@ namespace CoreEngine::Window::GLFW {
 
 	void GLFWWindow::OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) {
 		mMouseMoveEventCallback = callback;
-		glfwSetCursorPosCallback(mWindow, _SetCursorPosCallback);
 	}
 
 	void GLFWWindow::OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) {
 		mMouseButtonCallback = callback;
-		glfwSetMouseButtonCallback(mWindow, _MouseButtonCallback);
 	}
 
 	void GLFWWindow::OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) {
 		mWindowKeyboardKeyCallback = callback;
-		glfwSetKeyCallback(mWindow, _KeyCallback);
 	}
 
     void GLFWWindow::OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) {
         mMouseScrollCallback = callback;
-        glfwSetScrollCallback(mWindow, _MouseScrollCallback);
     }
 
     void GLFWWindow::OnWindowReiszeEventCallback(std::function<void(const WindowResizeEventContext&)> callback) {
         mWindowResizeEventContext = callback;
-        glfwSetFramebufferSizeCallback(mWindow, [](GLFWwindow* window, int width, int height) {
-            GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
-
-            if (handler) {
-                handler->WindowReiszeCallback(width, height);
-            }
-            });
     }
 
-    float GLFWWindow::GetCurrentSeconds()
-    {
+    Input::InputState GLFWWindow::GetInput() const {
+        return { mKeyboardInput.get(), mMouseInput.get() };
+    }
+
+    float GLFWWindow::GetCurrentSeconds() {
         return glfwGetTime();
     }
 
 	void GLFWWindow::Accept(IWindowVisitor* visitor) {
 		visitor->VisitGlfwWindow(this);
-	}
-
-	void GLFWWindow::CursorPosCallback(double xPos, double yPos) {
-		WindowMouseMoveEventContext eventContext = { xPos, yPos };
-		if (mMouseMoveEventCallback) {
-			mMouseMoveEventCallback(eventContext);
-		}
-	}
-
-	void GLFWWindow::MouseButtonCallback(int button, int action, int mods) {
-		WindowMouseButtonEventContext eventContext = { _ToWindowMouseButton(button), _ToWindowMouseButtonState(action) };
-		if (mMouseButtonCallback) {
-			mMouseButtonCallback(eventContext);
-		}
-	}
-
-	void GLFWWindow::KeyboardButtonCallback(int key, int scancode, int action, int mods) {
-        WindowKeyboardKeyEventContext eventContext = { _ToWindowKeyboardKey(key), _ToWindowKeyboardState(action) };
-        if (mWindowKeyboardKeyCallback) {
-            mWindowKeyboardKeyCallback(eventContext);
-        }
-	}
-
-    void GLFWWindow::MouseScrollCallback(double xOffset, double yOffset) {
-        WindowMouseScrollEventContext eventContext = { xOffset, yOffset };
-
-        if (mMouseScrollCallback) {
-            mMouseScrollCallback(eventContext);
-        }
-    }
-
-    void GLFWWindow::WindowReiszeCallback(int width, int height) {
-        WindowResizeEventContext eventContext = { width, height };
-        if (mWindowResizeEventContext) {
-            mWindowResizeEventContext(eventContext);
-        }
-    }
-
-	void GLFWWindow::_SetCursorPosCallback(GLFWwindow* window, double xPos, double yPos) {
-		GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
-
-		if (handler) {
-			handler->CursorPosCallback(xPos, yPos);
-		}
-	}
-
-	void GLFWWindow::_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-		GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
-
-		if (handler) {
-			handler->MouseButtonCallback(button, action, mods);
-		}
 	}
 
 	WindowMouseButton GLFWWindow::_ToWindowMouseButton(int button) {
@@ -336,20 +360,4 @@ namespace CoreEngine::Window::GLFW {
         default: return WindowKeyboardKeyState::None;
         }
 	}
-
-	void GLFWWindow::_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-		GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
-
-		if (handler) {
-			handler->KeyboardButtonCallback(key, scancode, action, mods);
-		}
-	}
-
-    void GLFWWindow::_MouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset) {
-        GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
-
-        if (handler) {
-            handler->MouseScrollCallback(xOffset, yOffset);
-        }
-    }
 }

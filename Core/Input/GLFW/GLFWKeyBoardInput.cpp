@@ -1,7 +1,11 @@
 #include <Input/GLFW/GLFWKeyBoardInput.hpp>
 
 namespace CoreEngine::Input::GLFW {
-	GLFWKeyBoardInput::GLFWKeyBoardInput(GLFWwindow* window) : mWindow(window) { }
+	GLFWKeyBoardInput::GLFWKeyBoardInput(GLFWwindow* window) : mWindow(window) {
+		for (KeyboardKey key : KeyboardInput::sKeyboardKeys) {
+			mWasPressed[key] = false;
+		}
+	}
 
 	bool GLFWKeyBoardInput::CheckIsPressed(KeyboardKey key) {
 		int glfwKey = ToGLFWKey(key);
@@ -17,10 +21,20 @@ namespace CoreEngine::Input::GLFW {
 		return state == GLFW_RELEASE;
 	}
 
+	bool GLFWKeyBoardInput::CheckIsJustPressed(KeyboardKey key) {
+		return CheckIsPressed(key) && !mWasPressed[key];
+	}
+
 	KeyState GLFWKeyBoardInput::GetKeyState(KeyboardKey key) {
 		if (CheckIsPressed(key)) return KeyState::Pressed;
 		if (CheckIsReleased(key)) return KeyState::Released;
 		return KeyState::None;
+	}
+
+	void GLFWKeyBoardInput::Update() {
+		for (KeyboardKey key : KeyboardInput::sKeyboardKeys) {
+			mWasPressed[key] = CheckIsPressed(key);
+		}
 	}
 
 	int GLFWKeyBoardInput::ToGLFWKey(KeyboardKey key) {

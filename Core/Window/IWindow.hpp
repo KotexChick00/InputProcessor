@@ -1,4 +1,5 @@
 #pragma once
+#include <Input/InputState.hpp>
 #include <pch.h>
 
 namespace CoreEngine::Window {
@@ -211,6 +212,8 @@ namespace CoreEngine::Window {
 		virtual void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) = 0;
         virtual void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) = 0;
         virtual void OnWindowReiszeEventCallback(std::function<void(const WindowResizeEventContext&)> callback) = 0;
+
+        virtual Input::InputState GetInput() const = 0;
 
         virtual float GetCurrentSeconds() = 0;
 		virtual void Accept(IWindowVisitor* visitor) = 0;

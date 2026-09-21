@@ -1,5 +1,8 @@
 #pragma once
+#include <pch.h>
 #include <Window/IWindow.hpp>
+#include <Input/GLFW/GLFWKeyBoardInput.hpp>
+#include <Input/GLFW/GLFWMouseInput.hpp>
 #ifdef _USE_GLAD_OPENGL
 #include <glad/glad.h>
 #endif
@@ -20,17 +23,18 @@ namespace CoreEngine::Window::GLFW {
 		void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override;
 		void OnWindowReiszeEventCallback(std::function<void(const WindowResizeEventContext&)> callback) override;
 
+		CORE_FORCE_INLINE std::function<void(const WindowMouseMoveEventContext&)> GetMouseMoveEventCallback() const { return mMouseMoveEventCallback; }
+		CORE_FORCE_INLINE std::function<void(const WindowMouseButtonEventContext&)> GetMouseButtonEventCallback() const { return mMouseButtonCallback; }
+		CORE_FORCE_INLINE std::function<void(const WindowKeyboardKeyEventContext&)> GetKeyboardKeyEventCallback() const { return mWindowKeyboardKeyCallback; }
+		CORE_FORCE_INLINE std::function<void(const WindowMouseScrollEventContext&)> GetMouseScrollEventCallback() const { return mMouseScrollCallback; }
+		CORE_FORCE_INLINE std::function<void(const WindowResizeEventContext&)> GetWindowResizeEventCallback() const { return mWindowResizeEventContext; }
+
+		Input::InputState GetInput() const override;
 		float GetCurrentSeconds() override;
 
 		void Accept(IWindowVisitor* visitor) override;
 
 		GLFWwindow* GetNativeWindow();
-
-		void CursorPosCallback(double xPos, double yPos);
-		void MouseButtonCallback(int button, int action, int mods);
-		void KeyboardButtonCallback(int key, int scancode, int action, int mods);
-		void MouseScrollCallback(double xOffset, double yOffset);
-		void WindowReiszeCallback(int width, int height);
 
 	private:
 		GLFWwindow* mWindow{ nullptr };
@@ -40,15 +44,13 @@ namespace CoreEngine::Window::GLFW {
 		std::function<void(const WindowMouseScrollEventContext&)> mMouseScrollCallback = nullptr;
 		std::function<void(const WindowResizeEventContext&)> mWindowResizeEventContext = nullptr;
 
+		Unique<Input::GLFW::GLFWKeyBoardInput> mKeyboardInput = nullptr;
+		Unique<Input::GLFW::GLFWMouseInput> mMouseInput = nullptr;
+
 	private:
 		static WindowMouseButton _ToWindowMouseButton(int button);
 		static WindowMouseButtonState _ToWindowMouseButtonState(int action);
 		static WindowKeyboardKey _ToWindowKeyboardKey(int key);
 		static WindowKeyboardKeyState _ToWindowKeyboardState(int action);
-
-		static void _SetCursorPosCallback(GLFWwindow* window, double xPos, double yPos);
-		static void _MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-		static void _KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-		static void _MouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 	};
 }

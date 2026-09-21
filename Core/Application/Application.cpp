@@ -12,7 +12,6 @@ namespace CoreEngine {
 	bool Application::Init() {
 		SetupLogger();
 		SetupWindow();
-		SetupInput();
 		SetupEvents();
 		SetupRenderer();
 		return mWindow != nullptr;
@@ -90,7 +89,7 @@ namespace CoreEngine {
 			mRenderer.reset(mConfig.InjectedRenderer);
 		}
 		else {
-			Renderer::RendererSpec spec;
+			Renderer::RendererSpec spec = Renderer::RendererSpec::Opengl;;
 			switch (mConfig.RenderAPI) {
 			case RenderAPI::Opengl: 
 				spec = Renderer::RendererSpec::Opengl;
@@ -108,18 +107,13 @@ namespace CoreEngine {
 
 			mRenderer.reset(Renderer::RendererFactory::Create(spec));
 		}
-	}
-
-	void Application::SetupInput() {
-		if (mConfig.WindowPlatformSpec == WindowPlatformSpec::GLFW) {
-			Window::GLFW::GLFWWindow* window = dynamic_cast<Window::GLFW::GLFWWindow*>(mWindow.get());
-			CORE_ASSERT(window != nullptr && "Window is not glfw");
-			mKeyboardInput.reset(new Input::GLFW::GLFWKeyBoardInput(window->GetNativeWindow()));
-			mMouseInput.reset(new Input::GLFW::GLFWMouseInput(window->GetNativeWindow()));
-		}
-		else {
-			CORE_ASSERT("Currently window platform is not supported");
-		}
+        
+        auto config = mRenderer->GetConfig();
+        config.ViewPortOptions.X = 0;
+        config.ViewPortOptions.Y = 0;
+        config.ViewPortOptions.Width = mConfig.Width;
+        config.ViewPortOptions.Height = mConfig.Height;
+        mRenderer->Config(config);
 	}
 
 	void Application::SetupEvents() {
