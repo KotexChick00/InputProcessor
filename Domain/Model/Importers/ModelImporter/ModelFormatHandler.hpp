@@ -1,13 +1,13 @@
 #pragma once
 #include <vector>
-#include <Model/Mesh.hpp>
+#include <Model/RenderModel.hpp>
 
 namespace Model {
 	class ModelFormatHandler {
 	public:
-		virtual std::vector<Mesh> Handle(const char* file) = 0;
+		virtual RenderModel* Handle(const char* file) = 0;
 		void SetNext(ModelFormatHandler* next) { mNext = next; }
-		std::vector<Mesh> Next(const char* file) { mNext->Handle(file); }
+		RenderModel* Next(const char* file) { return mNext->Handle(file); }
 	private:
 		ModelFormatHandler* mNext = nullptr;
 	};

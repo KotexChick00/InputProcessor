@@ -38,6 +38,7 @@
     <ClCompile Include="Core\Memory\LinearMemoryAllocator.cpp" />
     <ClCompile Include="Core\Memory\StackMemoryAllocator.cpp" />
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
+    <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -114,5 +115,6 @@
     <ClInclude Include="Domain\Model\Importers\ModelImporter\ModelImporter.hpp" />
     <ClInclude Include="Domain\Model\Importers\ModelImporter\ModelFormatHandler.hpp" />
     <ClInclude Include="Domain\Model\Importers\ModelImporter\ObjModelFormatHandler.hpp" />
+    <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.hpp" />
   </ItemGroup>
 </Project>

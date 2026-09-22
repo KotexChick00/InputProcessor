@@ -8,7 +8,7 @@ namespace Model {
 		ModelImporter(ModelFormatHandler* handler);
 		~ModelImporter() = default;
 
-		std::vector<Mesh> Import(const char* file) override;
+		RenderModel* Import(const char* file) override;
 
 	private:
 		ModelFormatHandler* handler;
