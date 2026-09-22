@@ -35,6 +35,9 @@
     <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
     <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
     <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
+    <ClCompile Include="Core\Memory\MemoryAllocator.cpp" />
+    <ClCompile Include="Core\Memory\LinearMemoryAllocator.cpp" />
+    <ClCompile Include="Core\Memory\StackMemoryAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -105,7 +108,9 @@
     <ClInclude Include="Core\Logger\LoggerFactory.hpp" />
     <ClInclude Include="Core\Time\Time.hpp" />
     <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
-    <ClInclude Include="Core\Memory\IMemoryAllocator.hpp" />
+    <ClInclude Include="Core\Memory\MemoryAllocator.hpp" />
     <ClInclude Include="Core\Application\ApplicationEventContext.hpp" />
+    <ClInclude Include="Core\Memory\LinearMemoryAllocator.hpp" />
+    <ClInclude Include="Core\Memory\StackMemoryAllocator.hpp" />
   </ItemGroup>
 </Project>
