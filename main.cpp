@@ -1,6 +1,24 @@
 #include <iostream>
 #include <Application/Application.hpp>
 
+float vertices[] = {
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+};
+
+const char* vertexSrc = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"void main() {\n"
+"   gl_Position = vec4(aPos, 1.0f);\n"
+"}\n";
+
+const char* fragmentSource = "#version 330 core\n"
+"out vec4 color;\n"
+"void main() {\n"
+"   color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"}\n";
+
 class DemoApp : public CoreEngine::Application {
 public:
     DemoApp(CoreEngine::ApplicationConfiguration& config) : Application(config) { }
@@ -12,22 +30,26 @@ protected:
         config.ClearBufferColor.Red = 1.0f;
         renderer->Config(config);
 
-        CoreEngine::Event::EventDispatcher* eventDispatcher = GetEventDispatcher();
-        eventDispatcher->AddEventListener<CoreEngine::WindowResizeEventContext>([](const CoreEngine::WindowResizeEventContext& eventContext) -> bool {
-            IP_CLIENT_TRACE("({}, {})", eventContext.GetWidth(), eventContext.GetHeight());
-            return true;
-            });
+        shader = renderer->GetResourceManager()->CreateShaderFromSources(vertexSrc, fragmentSource);
+        vertexBuffer = renderer->GetResourceManager()->CreateVertexBuffer();
+        vertexBuffer->SetData(0, vertices, sizeof(vertices), 3, 3 * sizeof(float));
     }
 
     void OnLoopClient() override {
         GetRenderer()->GetRendererCommand()->ClearBuffers(CoreEngine::Renderer::ClearBufferMasks::Color);
         auto input = GetInput();
-        IP_CLIENT_TRACE("({}, {})", input.MouseInput->GetScrollX(), input.MouseInput->GetScrollY());
+        shader->Use();
+        vertexBuffer->Bind();
+        GetRenderer()->GetRendererCommand()->Draw(CoreEngine::Renderer::RenderMode::Triangles, 3);
     }
 
     void OnShutdownClient() override {
         std::cout << "CLIENT SHUTDOWN" << std::endl;
     }
+
+private:
+    CoreEngine::Renderer::IShader* shader = nullptr;
+    CoreEngine::Renderer::IVertexBuffer* vertexBuffer = nullptr;
 };
 
 int main() {

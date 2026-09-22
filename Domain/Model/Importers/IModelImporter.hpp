@@ -1,11 +1,11 @@
 #pragma once
 #include <vector>
-#include <Model/Mesh.hpp>
+#include <Model/RenderModel.hpp>
 
 namespace Model {
 	class IModelImporter {
 	public:
 		virtual ~IModelImporter() = default;
-		virtual std::vector<Mesh> Import(const char* file) = 0;
+		virtual RenderModel* Import(const char* file) = 0;
 	};
 }
