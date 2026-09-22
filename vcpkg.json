@@ -3,8 +3,9 @@
     "glad",
     "glfw3",
     "glm",
+    "imgui",
     "spdlog",
     "stb",
-    "imgui"
+    "assimp"
   ]
 }

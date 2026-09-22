@@ -5,6 +5,6 @@
 namespace Model {
 	class IMaterial {
 	public:
-		virtual void Apply(CoreEngine::Renderer::IShader* shader);
+		virtual void Apply(CoreEngine::Renderer::IShader* shader) = 0;
 	};
 }
