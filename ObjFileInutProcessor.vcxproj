@@ -191,7 +191,7 @@
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
-    <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
+    <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />
@@ -255,12 +255,14 @@
     <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
     <ClInclude Include="Core\Window\WindowPlatformFactory.hpp" />
+    <ClInclude Include="Domain\Model\AdsMaterial.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />
-    <ClInclude Include="Domain\Model\Importers\AssimpModelImporterAdapter.hpp" />
     <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />
+    <ClInclude Include="Domain\Model\Importers\ModelImporter\ModelFormatHandler.hpp" />
+    <ClInclude Include="Domain\Model\Importers\ModelImporter\ModelImporter.hpp" />
+    <ClInclude Include="Domain\Model\Importers\ModelImporter\ObjModelFormatHandler.hpp" />
     <ClInclude Include="Domain\Model\IRenderResourceFactory.hpp" />
     <ClInclude Include="Domain\Model\Mesh.hpp" />
-    <ClInclude Include="Domain\Model\OpenglRenderResourceFactory.hpp" />
     <ClInclude Include="Domain\Model\RenderModel.hpp" />
     <ClInclude Include="Library\ImGui\imconfig.h" />
     <ClInclude Include="Library\ImGui\imgui.h" />
