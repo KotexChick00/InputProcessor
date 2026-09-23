@@ -15,5 +15,6 @@ namespace CoreEngine::Renderer {
 			CORE_ASSERT(false && "Can't find any spec match");
 			break;
 		}
+		return nullptr;
 	}
 }

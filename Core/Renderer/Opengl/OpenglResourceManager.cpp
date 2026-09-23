@@ -77,7 +77,22 @@ namespace CoreEngine::Renderer::Opengl {
 
 	ITexture* OpenglResourceManager::CreateTexture(const std::string& file)
 	{
-		return OpenglTexture::FromFile(file);
+		auto it = mTexturePathCache.find(file);
+		if (it != mTexturePathCache.end()) {
+			TextureID textureId = it->second;
+			IP_ENGINE_TRACE("OpenglResourceManager get cached texture with id: {} for file: {}", textureId, file);
+			return GetTexture(textureId);
+		}
+
+		OpenglTexture* texture = OpenglTexture::FromFile(file);
+
+		if (texture != nullptr) {
+			TextureID textureId = texture->GetTextureId();
+			mTexturePathCache[file] = textureId;
+			IP_ENGINE_TRACE("OpenglResourceManager create new texture with id: {} for file: {}", textureId, file);
+		}
+
+		return texture; // ham nay da bi sua
 	}
 
 	ICubeMap* OpenglResourceManager::CreateCubeMap(const CubemapTextureFiles& textureFiles)
@@ -255,6 +270,13 @@ namespace CoreEngine::Renderer::Opengl {
 		if (isOnFree) return;
 		if (mTextures.contains(textureId)) {
 			mTextures.erase(textureId);
+			for (auto it = mTexturePathCache.begin(); it != mTexturePathCache.end(); ) {
+				if (it->second == textureId) {
+					it = mTexturePathCache.erase(it);
+				} else {
+					++it;
+				}
+			}
 			IP_ENGINE_TRACE("OpenglResourceManager removed texture with id: {}", textureId);
 			return;
 		}

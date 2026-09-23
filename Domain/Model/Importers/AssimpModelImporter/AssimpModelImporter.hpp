@@ -1,11 +1,9 @@
 #pragma once
-#include <unordered_map>
-#include <mutex>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <Model/Importers/IModelImporter.hpp>
-#include <Model/IRenderResourceFactory.hpp>
+#include <Renderer/Resource/IResouceManager.hpp>
 
 namespace Model {
 
@@ -13,9 +11,9 @@ namespace Model {
 
 	class AssimpModelImporter : public IModelImporter {
 	public:
-		explicit AssimpModelImporter(Renderer::IRenderResourceFactory* materialResourceFactory);
+		explicit AssimpModelImporter(Renderer::IResourceManager* resourceManager);
 		std::unique_ptr<RenderModel> Import(const char* file) override;
-		~AssimpModelImporter() override;
+		~AssimpModelImporter() override = default;
 
 	private:
 		void ProcessNode(aiNode* node, const aiScene* scene, std::vector<Mesh>& outMeshes, const aiMatrix4x4& parentTransform, const std::string& directory);
@@ -24,8 +22,6 @@ namespace Model {
 		std::vector<Renderer::ITexture*> LoadMaterialTextures(aiMaterial* material, aiTextureType type, const std::string& directory);
 
 	private:
-		Renderer::IRenderResourceFactory* materialResourceFactory;
-		std::unordered_map<std::string, Renderer::ITexture*> materialTextureCache;
-		std::mutex materialTextureCacheMutex; // bảo vệ cache khi nhiều thread cùng Import()
+		Renderer::IResourceManager* mResourceManager;
 	};
 }

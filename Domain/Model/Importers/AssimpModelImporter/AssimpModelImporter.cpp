@@ -4,18 +4,11 @@
 #include <filesystem>
 
 namespace Model {
-	AssimpModelImporter::AssimpModelImporter(Renderer::IRenderResourceFactory* materialResourceFactory)
-		: materialResourceFactory(materialResourceFactory) {}
-
-	AssimpModelImporter::~AssimpModelImporter() {
-		for (auto& [path, texture] : materialTextureCache) {
-			delete texture;
-		}
-		materialTextureCache.clear();
-	}
+	AssimpModelImporter::AssimpModelImporter(Renderer::IResourceManager* resourceManager)
+		: mResourceManager(resourceManager) {}
 
 	std::unique_ptr<RenderModel> AssimpModelImporter::Import(const char* file) {
-		Assimp::Importer importer; // local biến, mỗi thread gọi Import() có importer riêng — vốn đã an toàn
+		Assimp::Importer importer;
 
 		const aiScene* scene = importer.ReadFile(
 			file,
@@ -38,7 +31,6 @@ namespace Model {
 
 		IP_ENGINE_TRACE("AssimpModelImporter::Import: Successfully loaded model '{}'", file);
 
-		// local biến thay vì member — mỗi lời gọi Import() có bản riêng, không đụng nhau giữa các thread
 		std::string directory = std::filesystem::path(file).parent_path().string();
 
 		std::vector<Mesh> meshes;
@@ -46,7 +38,7 @@ namespace Model {
 
 		IP_ENGINE_DEBUG("AssimpModelImporter::Import: Processed {} meshes from model '{}'", meshes.size(), file);
 
-		return std::unique_ptr<RenderModel>(std::make_unique<RenderModel>(meshes));
+		return std::make_unique<RenderModel>(std::move(meshes));
 	}
 
 	void AssimpModelImporter::ProcessNode(aiNode* node, const aiScene* scene, std::vector<Mesh>& meshes, const aiMatrix4x4& parentTransform, const std::string& directory) {
@@ -72,25 +64,31 @@ namespace Model {
 			aiVector3D transformedPosition = transform * mesh->mVertices[i];
 			vertex.Position = glm::vec3(
 				transformedPosition.x,
-				transformedPosition.y, 
-				transformedPosition.z);
+				transformedPosition.y,
+				transformedPosition.z
+			);
 
 			aiVector3D transformedNormal = normalMatrix * mesh->mNormals[i];
 			transformedNormal.Normalize();
-			vertex.Normal = glm::vec3(	
+			vertex.Normal = glm::vec3(
 				transformedNormal.x, 
 				transformedNormal.y, 
-				transformedNormal.z);
+				transformedNormal.z
+			);
 
 			if (mesh->mTextureCoords[0]) {
-				vertex.TextureCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+				vertex.TextureCoords = glm::vec2(
+					mesh->mTextureCoords[0][i].x, 
+					mesh->mTextureCoords[0][i].y
+				);
 			}
 
 			if (mesh->HasVertexColors(0)) {
 				vertex.Color = glm::vec3(
-					mesh->mColors[0][i].r,
-					mesh->mColors[0][i].g,
-					mesh->mColors[0][i].b);
+					mesh->mColors[0][i].r, 
+					mesh->mColors[0][i].g, 
+					mesh->mColors[0][i].b
+				);
 			}
 
 			resultMesh.Vertices.push_back(vertex);
@@ -122,20 +120,12 @@ namespace Model {
 		for (unsigned int i = 0; i < material->GetTextureCount(type); i++) {
 			aiString str;
 			material->GetTexture(type, i, &str);
-			std::string texturePath = directory + "/" + str.C_Str();
 
-			// khóa cache lại vì nhiều thread có thể đọc/ghi materialTextureCache cùng lúc
-			std::lock_guard<std::mutex> lock(materialTextureCacheMutex);
+			std::string texturePath = (std::filesystem::path(directory) / str.C_Str()).string();
 
-			auto it = materialTextureCache.find(texturePath);
-			if (it != materialTextureCache.end()) {
-				textures.push_back(it->second);
-				continue;
-			}
-
-			Renderer::ITexture* texture = materialResourceFactory->CreateTexture(texturePath);
+			// OpenglResourceManager tự cache theo path — không cần cache lại ở đây
+			Renderer::ITexture* texture = mResourceManager->CreateTexture(texturePath);
 			if (texture) {
-				materialTextureCache[texturePath] = texture;
 				textures.push_back(texture);
 			}
 			else {

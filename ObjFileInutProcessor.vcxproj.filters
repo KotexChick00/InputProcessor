@@ -39,6 +39,7 @@
     <ClCompile Include="Core\Memory\StackMemoryAllocator.cpp" />
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
+    <ClCompile Include="Domain\Model\RenderModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />

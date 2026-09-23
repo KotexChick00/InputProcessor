@@ -14,5 +14,6 @@ namespace CoreEngine::Window {
 			CORE_ASSERT(false && "Didn't found the platform");
 			break;
 		}
+		return nullptr;
 	}
 }

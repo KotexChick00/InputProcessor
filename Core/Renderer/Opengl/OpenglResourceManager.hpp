@@ -66,6 +66,10 @@ namespace CoreEngine::Renderer::Opengl {
 		std::unordered_map<CubeMapID, OpenglCubeMap*> mCubeMaps;
 		std::unordered_map<UniformBufferID, OpenglUniformBuffer*> mUniformBuffers;
 
+		///
+		std::unordered_map<std::string, TextureID> mTexturePathCache;
+		///
+
 		bool isOnFree = false;
 
 	private:

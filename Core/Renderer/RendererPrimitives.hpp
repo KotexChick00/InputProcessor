@@ -8,8 +8,12 @@ namespace CoreEngine::Renderer {
 		Depth = 1 << 1
 	};
 
+	inline ClearBufferMasks operator|(ClearBufferMasks a, ClearBufferMasks b) {
+		return static_cast<ClearBufferMasks>(static_cast<int>(a) | static_cast<int>(b));
+	}
+
 	inline bool HasFlag(ClearBufferMasks a, ClearBufferMasks b) {
-		return static_cast<bool>(static_cast<int>(a) | static_cast<int>(b));
+		return static_cast<bool>(static_cast<int>(a) & static_cast<int>(b)) != 0;
 	}
 
 	enum class CORE_API RenderMode {

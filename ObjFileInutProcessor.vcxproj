@@ -193,6 +193,7 @@
     <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
+    <ClCompile Include="Domain\Model\RenderModel.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />
