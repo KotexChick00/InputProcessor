@@ -1,6 +1,8 @@
 #include <iostream>
+#include <cmath>
 #include <Application/Application.hpp>
 #include <Model/Importers/AssimpModelImporter/AssimpModelImporter.hpp>
+#include <Model/Importers/AssimpModelImporter/AssimpBoundingBox.h>
 #include <Model/RenderModel.hpp>
 
 
@@ -52,9 +54,18 @@ protected:
             return;
         }
 
+		const std::string modelPath = "./assets/models/Ak_47/Ak-47.obj";
+
+		ModelUtils::BoundingBox box = ModelUtils::ComputeBoundingBox(modelPath);
+
+		if (box.Valid) {
+			cameraSetup = ModelUtils::FitCameraToBox(box, 45.0f, 1000.0f / 1000.0f, 30.0f, 20.0f, 1.1f);
+		}
+
+
         // wiring: AssimpModelImporter cần IResourceManager, lấy qua renderer đã có sẵn
         Model::AssimpModelImporter importer(renderer->GetResourceManager());
-        model = importer.Import("./assets/models/cube-tex.obj"); // đường dẫn model test đơn giản trước
+        model = importer.Import(modelPath.c_str()); // đường dẫn model test đơn giản trước
 
         if (!model) {
             IP_ENGINE_ERROR("DemoApp::OnInitClient: Failed to import model");
@@ -68,25 +79,10 @@ protected:
 
         if (model && shader) {
             shader->Use();
+            
+			glm::mat4 modelMatrix = glm::mat4(1.0f); // model matrix identity
 
-            // Đưa cube về giữa
-            glm::mat4 modelMatrix = glm::mat4(1.0f);
-            modelMatrix = glm::translate(modelMatrix, glm::vec3(-0.5f, -0.5f, -0.5f));
-
-            glm::mat4 view = glm::lookAt(
-                glm::vec3(3.0f, 3.0f, 3.0f),  // Đặt camera lệch đều cả 3 trục (X, Y, Z > 0)
-                glm::vec3(0.0f, 0.0f, 0.0f),  // Nhìn vào tâm xúc xắc
-                glm::vec3(0.0f, 1.0f, 0.0f)   // Trục Y hướng lên trên
-            );
-
-            glm::mat4 projection = glm::perspective(
-                glm::radians(45.0f),
-                1000.0f / 1000.0f,
-                0.1f,
-                100.0f
-            );
-
-            glm::mat4 viewProjection = projection * view;
+			glm::mat4 viewProjection = cameraSetup.ViewProjection();
 
             shader->SetUniformMatrix4fv("uModel", glm::value_ptr(modelMatrix));
             shader->SetUniformMatrix4fv("uViewProjection", glm::value_ptr(viewProjection));
@@ -102,6 +98,7 @@ protected:
 private:
     CoreEngine::Renderer::IShader* shader = nullptr;
     std::unique_ptr<Model::RenderModel> model = nullptr;
+	ModelUtils::CameraSetup cameraSetup;
 };
 
 int main() {

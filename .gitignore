@@ -365,21 +365,4 @@ FodyWeavers.xsd
 /Dragon_Baked_Actions_fbx_6.1_ASCII.fbx
 /vcpkg_installed
 example.txt
-/assets/models/Ak_47/Ak-47-FinalRender.jpg
-/assets/models/Ak_47/ak-47-round.jpg
-/assets/models/Ak_47/ak-47.jpg
-/assets/models/Ak_47/Ak-47.obj
-/assets/models/Ak_47/Ambiont Occlusion.jpg
-/assets/models/backpack/ao.jpg
-/assets/models/backpack/backpack.mtl
-/assets/models/backpack/backpack.obj
-/assets/models/backpack/diffuse.jpg
-/assets/models/backpack/normal.png
-/assets/models/backpack/roughness.jpg
-/assets/models/backpack/source_attribution.txt
-/assets/models/backpack/specular.jpg
-/assets/models/Cube/cube-tex.obj
-/assets/models/Cube/Cube.fbx
-/assets/models/Cube/cube.mtl
-/assets/models/Cube/cube.obj
-/assets/models/Cube/texture.png
+assets/
