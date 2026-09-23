@@ -6,8 +6,8 @@ namespace Model {
 	public:
 		AdsMaterial(
 			std::vector<CoreEngine::Renderer::ITexture*> ambientTextures,
-			std::vector<CoreEngine::Renderer::ITexture*> mDiffuseTextures,
-			std::vector<CoreEngine::Renderer::ITexture*> mSpecularTextures
+			std::vector<CoreEngine::Renderer::ITexture*> diffuseTextures,
+			std::vector<CoreEngine::Renderer::ITexture*> specularTextures
 		);
 
 		void Apply(CoreEngine::Renderer::IShader* shader) override;

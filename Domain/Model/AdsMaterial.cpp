@@ -1,4 +1,5 @@
 #include <Model/AdsMaterial.hpp>
+#include <memory>
 
 namespace Model {
 	AdsMaterial::AdsMaterial(

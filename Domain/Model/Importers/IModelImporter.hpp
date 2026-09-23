@@ -1,11 +1,12 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <Model/RenderModel.hpp>
 
 namespace Model {
 	class IModelImporter {
 	public:
 		virtual ~IModelImporter() = default;
-		virtual RenderModel* Import(const char* file) = 0;
+		virtual std::unique_ptr<RenderModel> Import(const char* file) = 0;
 	};
 }
