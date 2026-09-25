@@ -17,7 +17,7 @@
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp.bak" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglShader.cpp" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />
@@ -40,6 +40,8 @@
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
     <ClCompile Include="Domain\Model\RenderModel.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -119,5 +121,8 @@
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpBoundingBox.h" />
     <ClInclude Include="Domain\Model\IBoundingBox.hpp" />
+    <ClInclude Include="Domain\Camera\ICamera.hpp" />
+    <ClInclude Include="Domain\Camera\ICameraController.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera.hpp" />
   </ItemGroup>
 </Project>

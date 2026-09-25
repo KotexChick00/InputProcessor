@@ -191,6 +191,7 @@
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera.cpp" />
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
     <ClCompile Include="Domain\Model\RenderModel.cpp" />
@@ -202,9 +203,10 @@
     <ClCompile Include="Library\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Library\ImGui\imgui_tables.cpp" />
     <ClCompile Include="Library\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp.bak" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application\Application.hpp" />
@@ -257,6 +259,9 @@
     <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
     <ClInclude Include="Core\Window\WindowPlatformFactory.hpp" />
+    <ClInclude Include="Domain\Camera\ICamera.hpp" />
+    <ClInclude Include="Domain\Camera\ICameraController.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera.hpp" />
     <ClInclude Include="Domain\Model\AdsMaterial.hpp" />
     <ClInclude Include="Domain\Model\IBoundingBox.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />

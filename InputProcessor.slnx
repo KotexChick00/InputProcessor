@@ -3,5 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="../../repo/InputProcessorTest/InputProcessorTest.vcxproj" />
   <Project Path="ObjFileInutProcessor.vcxproj" Id="bed805ab-1c8c-4d81-bc4e-628ea4e01d60" />
 </Solution>
