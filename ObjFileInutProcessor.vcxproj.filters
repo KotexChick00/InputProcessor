@@ -118,5 +118,6 @@
     <ClInclude Include="Domain\Model\Importers\ModelImporter\ObjModelFormatHandler.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpBoundingBox.h" />
+    <ClInclude Include="Domain\Model\IBoundingBox.hpp" />
   </ItemGroup>
 </Project>

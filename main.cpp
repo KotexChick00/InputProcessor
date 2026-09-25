@@ -56,10 +56,10 @@ protected:
 
 		const std::string modelPath = "./assets/models/Ak_47/Ak-47.obj";
 
-		ModelUtils::BoundingBox box = ModelUtils::ComputeBoundingBox(modelPath);
+		Model::AssimpBoundingBox box = Model::AssimpBoundingBox::FromFile(modelPath);
 
-		if (box.Valid) {
-			cameraSetup = ModelUtils::FitCameraToBox(box, 45.0f, 1000.0f / 1000.0f, 30.0f, 20.0f, 1.1f);
+		if (box.isValid()) {
+			cameraSetup = Model::FitCameraToBox(box, 45.0f, 1000.0f / 1000.0f, 30.0f, 20.0f, 1.1f);
 		}
 
 
@@ -98,7 +98,7 @@ protected:
 private:
     CoreEngine::Renderer::IShader* shader = nullptr;
     std::unique_ptr<Model::RenderModel> model = nullptr;
-	ModelUtils::CameraSetup cameraSetup;
+	Model::CameraSetup cameraSetup;
 };
 
 int main() {

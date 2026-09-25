@@ -258,6 +258,7 @@
     <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
     <ClInclude Include="Core\Window\WindowPlatformFactory.hpp" />
     <ClInclude Include="Domain\Model\AdsMaterial.hpp" />
+    <ClInclude Include="Domain\Model\IBoundingBox.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpBoundingBox.h" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.hpp" />

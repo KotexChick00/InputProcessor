@@ -1,8 +1,9 @@
 #pragma once
 
-// Header-only helper: đọc file model bằng Assimp -> tính bounding box (AABB)
-// -> tự tính camera (view/projection/near/far) để thấy trọn model.
-// Không phụ thuộc vào Model::RenderModel hay engine, chỉ cần Assimp + GLM.
+// Cài đặt IBoundingBox3D<float> bằng dữ liệu đọc từ file model qua Assimp.
+// Chỉ phụ thuộc Assimp + GLM + IBoundingBox.hpp, không phụ thuộc engine.
+
+#include <Model/IBoundingBox.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -17,31 +18,91 @@
 #include <limits>
 #include <string>
 
-namespace ModelUtils {
+using BoundingBox3D = Model::IBoundingBox3D<float>;
 
-    // ---------------------------------------------------------------------------
-    // Bounding box
-    // ---------------------------------------------------------------------------
-    struct BoundingBox {
-        glm::vec3 Min{ std::numeric_limits<float>::max() };
-        glm::vec3 Max{ std::numeric_limits<float>::lowest() };
-        bool Valid = false;
+namespace Model {
+    // Bounding box (AABB) cài đặt từ IBoundingBox3D<float>, dữ liệu lấy từ Assimp.
+    class AssimpBoundingBox final : public BoundingBox3D {
+    public:
+        AssimpBoundingBox() { reset(); }
 
-        void Expand(const glm::vec3& p) {
-            Min = glm::min(Min, p);
-            Max = glm::max(Max, p);
-            Valid = true;
+        // Đọc file bằng Assimp và tính AABB bao toàn bộ model.
+        // applyNodeTransforms = true : áp dụng transform của node hierarchy (đúng với
+        //                              hầu hết importer). Đặt false nếu importer của
+        //                              engine bỏ qua node transform.
+        // Trả về box với isValid() == false nếu đọc file lỗi hoặc không có vertex.
+        static AssimpBoundingBox FromFile(const std::string& path,
+            bool applyNodeTransforms = true) {
+            AssimpBoundingBox box;
+
+            Assimp::Importer importer;
+            // flags = 0: chỉ cần đọc vị trí vertex, không cần triangulate/join... nên nhanh
+            const aiScene* scene = importer.ReadFile(path, 0);
+            if (!scene || !scene->mRootNode) {
+                return box;
+            }
+
+            accumulate(scene, scene->mRootNode, glm::mat4(1.0f), applyNodeTransforms, box);
+            return box;
         }
 
-        glm::vec3 Center() const { return (Min + Max) * 0.5f; }
-        glm::vec3 Size() const { return Max - Min; }
-        // Bán kính của hình cầu bao quanh AABB
-        float Radius() const { return glm::length(Size()) * 0.5f; }
-    };
+        // --- IBoundingBox3D<float> ---
+        Point getMin() const override { return m_min; }
+        Point getMax() const override { return m_max; }
+        Point getCenter() const override { return (m_min + m_max) * 0.5f; }
+        Point getSize() const override { return m_max - m_min; }
 
-    namespace Detail {
+        bool contains(const Point& point) const override {
+            return m_valid &&
+                point.x >= m_min.x && point.x <= m_max.x &&
+                point.y >= m_min.y && point.y <= m_max.y &&
+                point.z >= m_min.z && point.z <= m_max.z;
+        }
 
-        inline glm::mat4 ToGlm(const aiMatrix4x4& m) {
+        bool intersects(const BoundingBox3D& other) const override {
+            if (!m_valid || !other.isValid()) return false;
+            const Point oMin = other.getMin();
+            const Point oMax = other.getMax();
+            return  m_min.x <= oMax.x && m_max.x >= oMin.x &&
+                    m_min.y <= oMax.y && m_max.y >= oMin.y &&
+                    m_min.z <= oMax.z && m_max.z >= oMin.z;
+        }
+
+        void expand(const Point& point) override {
+            m_min = glm::min(m_min, point);
+            m_max = glm::max(m_max, point);
+            m_valid = true;
+        }
+
+        void expand(const Model::IBoundingBox<float, 3>& other) override {
+            if (!other.isValid()) return;
+            expand(other.getMin());
+            expand(other.getMax());
+        }
+
+        void reset() override {
+            m_min = Point(std::numeric_limits<float>::max());
+            m_max = Point(std::numeric_limits<float>::lowest());
+            m_valid = false;
+        }
+
+        float volume() const override {
+            if (!m_valid) return 0.0f;
+            const Point s = getSize();
+            return s.x * s.y * s.z;
+        }
+
+        bool isValid() const override { return m_valid; }
+
+        // Bán kính hình cầu bao quanh AABB (tiện cho việc fit camera)
+        float radius() const { return glm::length(getSize()) * 0.5f; }
+
+    private:
+        Point m_min{ 0.0f };
+        Point m_max{ 0.0f };
+        bool  m_valid = false;
+
+        static glm::mat4 toGlm(const aiMatrix4x4& m) {
             // Assimp là row-major, GLM là column-major -> transpose
             return glm::mat4(
                 m.a1, m.b1, m.c1, m.d1,
@@ -50,48 +111,27 @@ namespace ModelUtils {
                 m.a4, m.b4, m.c4, m.d4);
         }
 
-        inline void Accumulate(const aiScene* scene, const aiNode* node,
+        static void accumulate(const aiScene* scene, const aiNode* node,
             const glm::mat4& parent, bool applyNodeTransforms,
-            BoundingBox& box) {
+            AssimpBoundingBox& box) {
             const glm::mat4 world =
-                applyNodeTransforms ? parent * ToGlm(node->mTransformation) : glm::mat4(1.0f);
+                applyNodeTransforms ? parent * toGlm(node->mTransformation) : glm::mat4(1.0f);
 
             for (unsigned i = 0; i < node->mNumMeshes; ++i) {
                 const aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
                 for (unsigned v = 0; v < mesh->mNumVertices; ++v) {
                     const aiVector3D& p = mesh->mVertices[v];
-                    box.Expand(glm::vec3(world * glm::vec4(p.x, p.y, p.z, 1.0f)));
+                    box.expand(glm::vec3(world * glm::vec4(p.x, p.y, p.z, 1.0f)));
                 }
             }
             for (unsigned c = 0; c < node->mNumChildren; ++c) {
-                Accumulate(scene, node->mChildren[c], world, applyNodeTransforms, box);
+                accumulate(scene, node->mChildren[c], world, applyNodeTransforms, box);
             }
         }
-
-    } // namespace Detail
-
-    // Tính AABB của toàn bộ model trong file.
-    // applyNodeTransforms = true : áp dụng transform của node hierarchy (đúng với
-    //                              hầu hết importer). Đặt false nếu importer của
-    //                              engine bỏ qua node transform.
-    // Trả về box.Valid == false nếu đọc file lỗi hoặc không có vertex.
-    inline BoundingBox ComputeBoundingBox(const std::string& path,
-        bool applyNodeTransforms = true) {
-        BoundingBox box;
-
-        Assimp::Importer importer;
-        // flags = 0: chỉ cần đọc vị trí vertex, không cần triangulate/join... nên nhanh
-        const aiScene* scene = importer.ReadFile(path, 0);
-        if (!scene || !scene->mRootNode) {
-            return box;
-        }
-
-        Detail::Accumulate(scene, scene->mRootNode, glm::mat4(1.0f), applyNodeTransforms, box);
-        return box;
-    }
+    };
 
     // ---------------------------------------------------------------------------
-    // Camera fit
+    // Camera fit — nhận bất kỳ IBoundingBox3D<float> nào, không riêng AssimpBoundingBox
     // ---------------------------------------------------------------------------
     struct CameraSetup {
         glm::vec3 Position{ 0.0f };
@@ -108,20 +148,20 @@ namespace ModelUtils {
     //   yawDeg   : xoay quanh trục Y.  0 = nhìn từ phía +Z, 90 = từ phía +X
     //   pitchDeg : góc nâng.           0 = ngang, dương = nhìn từ trên xuống
     //   margin   : hệ số chừa lề (1.1 = 10%)
-    // Model matrix có thể để identity (không cần dời model về gốc).
-    inline CameraSetup FitCameraToBox(const BoundingBox& box,
+    inline CameraSetup FitCameraToBox(const BoundingBox3D& box,
         float fovYDeg = 45.0f,
         float aspect = 1.0f,
         float yawDeg = 0.0f,
         float pitchDeg = 0.0f,
         float margin = 1.1f) {
         CameraSetup cam;
-        if (!box.Valid) {
+        if (!box.isValid()) {
             return cam;
         }
 
-        const glm::vec3 center = box.Center();
-        const float radius = std::max(box.Radius(), 1e-6f);
+        const glm::vec3 center = box.getCenter();
+        const glm::vec3 size = box.getSize();
+        const float radius = std::max(glm::length(size) * 0.5f, 1e-6f);
 
         // Khung hình bị giới hạn bởi FOV nhỏ hơn giữa chiều dọc và chiều ngang
         const float fovY = glm::radians(fovYDeg);
@@ -147,5 +187,4 @@ namespace ModelUtils {
         cam.Projection = glm::perspective(fovY, aspect, cam.NearPlane, cam.FarPlane);
         return cam;
     }
-
-} // namespace ModelUtils
+};
