@@ -217,5 +217,7 @@ namespace CoreEngine::Window {
 
         virtual float GetCurrentSeconds() = 0;
 		virtual void Accept(IWindowVisitor* visitor) = 0;
+
+		virtual void EndFrame() = 0;
 	};
 }

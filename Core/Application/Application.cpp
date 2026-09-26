@@ -45,6 +45,9 @@ namespace CoreEngine {
 	}
 
 	void Application::EndLoop() {
+        if (auto* GLFWwindow = dynamic_cast<Window::GLFW::GLFWWindow*>(mWindow.get())) {
+            GLFWwindow->EndFrame();
+        }
 		mWindow->SwapBuffers();
 	}
 

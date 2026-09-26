@@ -23,7 +23,7 @@ namespace CoreEngine::Input::GLFW {
 	}
 
 	bool GLFWMouseInput::CheckIsJustPressed(MouseButton mouseButton) {
-		return false;
+		return CheckIsPressed(mouseButton) && !sMouseButtons[mouseButton];
 	}
 
 	MouseButtonState GLFWMouseInput::GetMouseButtonState(MouseButton mouseButton) {

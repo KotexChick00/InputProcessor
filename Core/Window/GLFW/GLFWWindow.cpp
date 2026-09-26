@@ -129,8 +129,6 @@ namespace CoreEngine::Window::GLFW {
     }
 
 	void GLFWWindow::PollEvents() {
-        mKeyboardInput->Update();
-        mMouseInput->Update();
 		glfwPollEvents();
 	}
 
@@ -187,6 +185,11 @@ namespace CoreEngine::Window::GLFW {
 
 	void GLFWWindow::Accept(IWindowVisitor* visitor) {
 		visitor->VisitGlfwWindow(this);
+	}
+
+	void GLFWWindow::EndFrame() {
+		mKeyboardInput->Update();
+		mMouseInput->Update();
 	}
 
 	WindowMouseButton GLFWWindow::_ToWindowMouseButton(int button) {

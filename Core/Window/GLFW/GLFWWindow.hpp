@@ -34,6 +34,8 @@ namespace CoreEngine::Window::GLFW {
 
 		void Accept(IWindowVisitor* visitor) override;
 
+		void EndFrame() override;
+
 		GLFWwindow* GetNativeWindow();
 
 	private:
