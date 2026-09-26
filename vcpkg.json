@@ -4,8 +4,19 @@
     "glad",
     "glfw3",
     "glm",
-    "imgui",
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental"
+      ]
+    },
     "spdlog",
-    "stb"
+    "stb",
+    {
+      "name": "qt",
+      "features": [
+        "default-features"
+      ]
+    }
   ]
 }

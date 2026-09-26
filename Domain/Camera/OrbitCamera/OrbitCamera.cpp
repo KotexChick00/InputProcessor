@@ -1,4 +1,5 @@
-#include <Camera/OrbitCamera.hpp>
+#include <pch.h>
+#include <Camera/OrbitCamera/OrbitCamera.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -118,4 +119,4 @@ namespace Domain::Camera
 		m_projectionMatrix = glm::perspective(m_fovY, m_aspect, m_near, m_far);
 		m_projectionDirty = false;
 	}
-}
+} // namespace Domain::Camera

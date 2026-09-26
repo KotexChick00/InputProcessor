@@ -4,6 +4,8 @@
 
 namespace Domain::Camera
 {
+	// Giao diện Camera (Interface)
+	// - Cung cấp các phương thức để truy xuất thông tin camera và thiết lập phép chiếu
 	class ICamera
 	{
 	public:
@@ -17,7 +19,7 @@ namespace Domain::Camera
 
 	public:
 		// C - Vị trí camera (World Space)
-		virtual const glm::vec3& GetPosition() const = 0; 
+		virtual const glm::vec3& GetPosition() const = 0;
 
 		// Hướng camera đang nhìn tới (look direction), world space, đã normalize
 		// Lưu ý: khác với quy ước "n" trong UVN model kinh điển (n = eye - target,
@@ -29,7 +31,7 @@ namespace Domain::Camera
 		virtual const glm::vec3& GetUp() const = 0;
 
 		// U - Vector hướng sang phải (Right Vector)
-		virtual const glm::vec3& GetRight() const = 0;   
+		virtual const glm::vec3& GetRight() const = 0;
 
 	public:
 		// Thiết lập phép chiếu phối cảnh (Perspective Projection)
@@ -41,4 +43,4 @@ namespace Domain::Camera
 		// Cập nhật kích thước khung hiển thị (Viewport Dimensions) để tính toán lại Aspect Ratio (width / height)
 		virtual void SetViewportSize(uint32_t width, uint32_t height) = 0;
 	};
-}
+} // namespace Domain::Camera
