@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Domain::Camera
+namespace Domain::Camera::OrbitCamera
 {
     // Camera dạng quỹ đạo (Orbit/Arcball Camera) - xoay quanh một điểm target cố định
     class OrbitCamera : public ICamera
@@ -27,6 +27,9 @@ namespace Domain::Camera
         // Thu phóng khoảng cách đến target (thay đổi m_distance)
         void Zoom(float delta);
 
+        // Đưa camera về đúng target/distance/azimuth/elevation lúc khởi tạo
+        void Reset();
+
         /*--- Override các phương thức từ ICamera ---*/
 
         // Lấy Ma trận Quan sát (View Matrix) - tự động tính lại nếu dữ liệu bị "dirty"
@@ -46,6 +49,10 @@ namespace Domain::Camera
 
         // Lấy Vector hướng sang phải (Right Vector / U)
         const glm::vec3& GetRight()     const override;
+
+		const glm::vec3& GetTarget() const { return m_target; }
+
+		float GetDistance() const { return m_distance; }
 
         // Thiết lập các thông số chiếu phối cảnh (FOV, Near plane, Far plane)
         void SetPerspective(float fovY, float nearClip, float farClip) override;
@@ -71,6 +78,12 @@ namespace Domain::Camera
         float m_distance{ 5.0f };       // Khoảng cách từ Camera đến Target
         float m_azimuth = 0.0f;   // Góc phương vị, góc xoay quanh trục Y (góc ngang / Yaw)
         float m_elevation = 0.0f;   // Góc nâng lên / xuống(Pitch), clamp trong(-90°, 90° ) để tránh N song song world-up (suy biến khi tính U = cross(N, worldUp))
+
+        // --- Giá trị khởi tạo, dùng cho Reset() ---
+        glm::vec3 m_initialTarget{ 0.0f, 0.0f, 0.0f };
+        float m_initialDistance{ 5.0f };
+        float m_initialAzimuth = 0.0f;
+        float m_initialElevation = 0.0f;
 
         /*--- Thuộc tính phép chiếu(Projection) -- -*/
 

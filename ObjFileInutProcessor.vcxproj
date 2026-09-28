@@ -192,6 +192,11 @@
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
     <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
     <ClCompile Include="Domain\Camera\OrbitCamera\OrbitCamera.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\OrbitCameraController.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\DollyingState.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\IdleState.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\OrbitingState.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\PanningState.cpp" />
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
     <ClCompile Include="Domain\Model\RenderModel.cpp" />
@@ -263,8 +268,14 @@
     <ClInclude Include="Domain\Camera\ICameraController.hpp" />
     <ClInclude Include="Domain\Camera\InputBinding.hpp" />
     <ClInclude Include="Domain\Camera\InputMap.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\IOrbitControllerState.hpp" />
     <ClInclude Include="Domain\Camera\OrbitCamera\OrbitCamera.hpp" />
     <ClInclude Include="Domain\Camera\OrbitCamera\OrbitCameraAction.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\OrbitCameraController.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\DollyingState.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\IdleState.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\OrbitingState.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\PanningState.hpp" />
     <ClInclude Include="Domain\Model\AdsMaterial.hpp" />
     <ClInclude Include="Domain\Model\IBoundingBox.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />

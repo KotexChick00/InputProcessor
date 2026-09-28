@@ -20,12 +20,16 @@ namespace
 	constexpr float kMaxZoomDistance = 1000.0f; // Khoảng cách tối đa từ camera đến target
 }
 
-namespace Domain::Camera
+namespace Domain::Camera::OrbitCamera
 {
 
 	OrbitCamera::OrbitCamera(const glm::vec3& target, float distance)
 		: m_target(target)
 		, m_distance(glm::clamp(distance, kMinZoomDistance, kMaxZoomDistance))
+		, m_initialTarget(target)
+		, m_initialDistance(glm::clamp(distance, kMinZoomDistance, kMaxZoomDistance))
+		, m_initialAzimuth(0.0f)
+		, m_initialElevation(0.0f)
 		, m_position(0.0f, 0.0f, 0.0f)
 		, m_forward(0.0f, 0.0f, -1.0f)
 		, m_up(0.0f, 1.0f, 0.0f)
@@ -53,6 +57,14 @@ namespace Domain::Camera
 	void OrbitCamera::Zoom(float delta)
 	{
 		m_distance = glm::clamp(m_distance - delta, kMinZoomDistance, kMaxZoomDistance);
+		m_viewDirty = true;
+	}
+	void OrbitCamera::Reset()
+	{
+		m_target = m_initialTarget;
+		m_distance = m_initialDistance;
+		m_azimuth = m_initialAzimuth;
+		m_elevation = m_initialElevation;
 		m_viewDirty = true;
 	}
 	const glm::mat4& OrbitCamera::GetViewMatrix() const
