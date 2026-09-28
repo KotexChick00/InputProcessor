@@ -2,8 +2,6 @@
 #include <Camera/OrbitCamera/States/OrbitingState.hpp>
 #include <Camera/OrbitCamera/States/PanningState.hpp>
 #include <Camera/OrbitCamera/States/DollyingState.hpp>
-#include <Camera/OrbitCamera/OrbitCameraController.hpp>
-
 #include <Camera/OrbitCamera/OrbitCameraAction.hpp>
 #include <Camera/OrbitCamera/OrbitCameraController.hpp>
 
@@ -36,6 +34,6 @@ namespace Domain::Camera::OrbitCamera::States
 			return;
 		}
 
-		// Zoom/Reset do not require a state change, they can be handled directly in IdleState
+		// Zoom/Reset being processed in OrbitCameraController::Update() directly, so no need to handle them here.
 	}
 } // namespace Domain::Camera::OrbitCamera::States

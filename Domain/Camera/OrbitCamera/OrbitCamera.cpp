@@ -131,4 +131,4 @@ namespace Domain::Camera::OrbitCamera
 		m_projectionMatrix = glm::perspective(m_fovY, m_aspect, m_near, m_far);
 		m_projectionDirty = false;
 	}
-} // namespace Domain::Camera
+} // namespace Domain::Camera::OrbitCamera

@@ -104,4 +104,4 @@ namespace Domain::Camera::OrbitCamera
         mutable glm::mat4 m_viewMatrix{ 1.0f }; // Ma trận Quan sát (View Matrix) chuyển từ World Space sang Camera/View Space
         mutable glm::mat4 m_projectionMatrix{ 1.0f }; // Ma trận Chiếu (Projection Matrix) chuyển từ View Space sang Clip Space
     };
-} // namespace Domain::Camera
+} // namespace Domain::Camera::OrbitCamera

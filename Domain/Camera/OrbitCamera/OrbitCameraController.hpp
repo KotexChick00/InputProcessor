@@ -45,4 +45,4 @@ namespace Domain::Camera::OrbitCamera
 		std::unique_ptr<IOrbitControllerState> m_state;
 		std::optional<OrbitCameraAction> m_activeAction; // action nào đang giữ quyền input, nếu có
 	};
-} // namespace Domain::Camera
+} // namespace Domain::Camera::OrbitCamera

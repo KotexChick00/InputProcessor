@@ -20,8 +20,11 @@ namespace Domain::Camera::OrbitCamera::States {
 	void DollyingState::Update(OrbitCameraController& controller, float deltaTime) {
 		const auto& inputState = controller.GetInputState();
 		float mouseDeltaY = inputState.MouseInput->GetDeltaY();
+
+		float zommScale = controller.GetOrbitCamera().GetDistance() * kDollySensitivity;
+
 		if (mouseDeltaY != 0.0f) {
-			controller.GetOrbitCamera().Zoom(mouseDeltaY * kDollySensitivity);
+			controller.GetOrbitCamera().Zoom(- mouseDeltaY * zommScale);
 		}
 
 		// TODO: hỗ trợ người dùng dolly bằng bàn phím
