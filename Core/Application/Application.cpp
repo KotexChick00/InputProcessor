@@ -12,6 +12,7 @@ namespace CoreEngine {
 	bool Application::Init() {
 		SetupLogger();
 		SetupWindow();
+		mInputState = mWindow->GetInput();
 		SetupEvents();
 		SetupRenderer();
 		return mWindow != nullptr;

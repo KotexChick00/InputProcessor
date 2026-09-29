@@ -4,7 +4,7 @@
 
 namespace CoreEngine::Input {
 	struct CORE_API InputState {
-		KeyboardInput* KeyboardInput;
-		MouseInput* MouseInput;
+		KeyboardInput* KeyboardInput = nullptr;
+		MouseInput* MouseInput = nullptr;
 	};
 }
