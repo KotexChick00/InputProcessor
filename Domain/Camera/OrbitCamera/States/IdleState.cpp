@@ -11,29 +11,27 @@ namespace Domain::Camera::OrbitCamera::States
 {
 	void IdleState::Update(OrbitCameraController& controller, float deltaTime)
 	{
-		// Nếu đang bị lock bởi 1 action khác, thì IdleState không làm gì cả.
-		if (controller.IsLocked())
-			return;
 		const auto& inputState = controller.GetInputState();
 		const auto& inputMap = controller.GetInputMap();
-		// Kiểm tra các action theo thứ tự ưu tiên: Orbit > Pan > Dolly
-		
-		if (inputMap.IsJustPressed(OrbitCameraAction::Orbit, inputState))
+
+		// Dùng IsContinuousPressed (không phải IsJustPressed) để không nuốt input:
+		// giữ Pan, nhấn Orbit (Orbit thắng), rồi thả Orbit thì Pan vẫn được kích hoạt
+		// ngay ở frame sau. Thứ tự ưu tiên này chỉ áp dụng khi nhiều nút cùng được giữ
+		// lúc rảnh; khi đang có gesture, gesture nhấn sau sẽ thắng (xem TryCreateOverridingState).
+		if (inputMap.IsContinuousPressed(OrbitCameraAction::Orbit, inputState))
 		{
 			controller.ChangeState(std::make_unique<OrbitingState>());
 			return;
 		}
-		else if (inputMap.IsJustPressed(OrbitCameraAction::Pan, inputState))
+		else if (inputMap.IsContinuousPressed(OrbitCameraAction::Pan, inputState))
 		{
 			controller.ChangeState(std::make_unique<PanningState>());
 			return;
 		}
-		else if (inputMap.IsJustPressed(OrbitCameraAction::Dolly, inputState))
+		else if (inputMap.IsContinuousPressed(OrbitCameraAction::Dolly, inputState))
 		{
 			controller.ChangeState(std::make_unique<DollyingState>());
 			return;
 		}
-
-		// Zoom/Reset being processed in OrbitCameraController::Update() directly, so no need to handle them here.
 	}
 } // namespace Domain::Camera::OrbitCamera::States

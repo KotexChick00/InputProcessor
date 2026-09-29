@@ -2,35 +2,39 @@
 #include <Camera/OrbitCamera/States/IdleState.hpp>
 #include <Camera/OrbitCamera/OrbitCameraAction.hpp>
 #include <Camera/OrbitCamera/OrbitCameraController.hpp>
+#include <cmath>
 #include <memory>
+#include <utility>
 #include <glm/glm.hpp>
 
 namespace
 {
-	constexpr float kPanSensitivity = 0.01f; // Độ nhạy pan camera (đơn vị world trên pixel)
+	constexpr float kPanSpeed = 1.0f; // Hệ số nhân trên pan 1:1 (1.0 = điểm dưới con trỏ đi đúng theo chuột)
 }
 
 namespace Domain::Camera::OrbitCamera::States
 {
-	void PanningState::OnEnter(OrbitCameraController& controller)
-	{
-		// Khi bắt đầu pan, lock action Pan để tránh tranh chấp với Orbit/Dolly
-		controller.LockAction(OrbitCameraAction::Pan);
-	}
-	void PanningState::OnExit(OrbitCameraController& controller)
-	{
-		controller.UnlockAction();
-	}
 	void PanningState::Update(OrbitCameraController& controller, float deltaTime)
 	{
+		// Có gesture khác vừa được nhấn đè lên -> nhường quyền cho nó, không áp delta frame này nữa.
+		if (auto next = controller.TryCreateOverridingState(OrbitCameraAction::Pan))
+		{
+			controller.ChangeState(std::move(next));
+			return;
+		}
+
 		const auto& inputState = controller.GetInputState();
 		float mouseDeltaX = inputState.MouseInput->GetDeltaX();
 		float mouseDeltaY = inputState.MouseInput->GetDeltaY();
 		if (mouseDeltaX != 0.0f || mouseDeltaY != 0.0f)
 		{
 			auto& camera = controller.GetOrbitCamera();
-			float distanceScale = camera.GetDistance() * kPanSensitivity;
-			glm::vec3 offset = (-mouseDeltaX * camera.GetRight() + mouseDeltaY * camera.GetUp()) * distanceScale;
+			// Chiều cao mặt phẳng nhìn thấy tại khoảng cách d là 2*d*tan(fov/2);
+			// chia cho số pixel chiều cao viewport -> đơn vị world trên mỗi pixel.
+			float worldPerPixel = 2.0f * camera.GetDistance() * std::tan(camera.GetFovY() * 0.5f)
+				/ camera.GetViewportHeight();
+			glm::vec3 offset = (-mouseDeltaX * camera.GetRight() + mouseDeltaY * camera.GetUp())
+				* (worldPerPixel * kPanSpeed);
 			camera.SetTarget(camera.GetTarget() + offset);
 		}
 

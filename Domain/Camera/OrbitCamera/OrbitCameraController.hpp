@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <optional>
 #include <Camera/ICameraController.hpp>
 #include <Camera/OrbitCamera/OrbitCamera.hpp>
 #include <Camera/OrbitCamera/OrbitCameraAction.hpp>
@@ -10,8 +9,9 @@
 
 namespace Domain::Camera::OrbitCamera
 {
-	// Controller điều khiển OrbitCamera bằng state machine (Idle/Orbiting/Panning)
+	// Controller điều khiển OrbitCamera bằng state machine (Idle/Orbiting/Panning/Dollying)
 	// và InputMap<OrbitCameraAction> để người dùng có thể rebind nút tùy ý.
+	// State machine đảm bảo mỗi lúc chỉ có 1 gesture dùng mouse-delta.
 	class OrbitCameraController : public ICameraController
 	{
 	public:
@@ -22,27 +22,24 @@ namespace Domain::Camera::OrbitCamera
 
 		// --- API dành cho các State gọi ngược lại ---
 
+		// Chỉ đăng ký yêu cầu chuyển state; việc chuyển thật sự diễn ra
+		// ở cuối Update() để state hiện tại không bị hủy khi đang chạy.
 		void ChangeState(std::unique_ptr<IOrbitControllerState> next);
+
+		// Nếu có gesture KHÁC `current` vừa được nhấn trong frame này thì trả về state tương ứng,
+		// ngược lại trả nullptr. Dùng để gesture nhấn sau giành quyền từ gesture đang chạy.
+		std::unique_ptr<IOrbitControllerState> TryCreateOverridingState(OrbitCameraAction current) const;
 
 		OrbitCamera& GetOrbitCamera() { return m_camera; }
 		const CoreEngine::Input::InputState& GetInputState() const { return m_inputState; }
 		InputMap<OrbitCameraAction>& GetInputMap() { return m_inputMap; }
-
-		// --- Action Lock: đảm bảo chỉ 1 action "sở hữu" gesture tại 1 thời điểm ---
-		// Gọi trong OnEnter() của state khi bắt đầu 1 gesture (vd OrbitingState -> LockAction(Orbit)).
-		// Trong khi bị khóa, mọi action khác (bất kể bind bằng mouse hay keyboard)
-		// đều bị IdleState phớt lờ hoàn toàn - vì chính lock này quyết định
-		// có được phép bắt đầu 1 gesture MỚI hay không, không phụ thuộc nguồn input.
-		void LockAction(OrbitCameraAction action) { m_activeAction = action; }
-		void UnlockAction() { m_activeAction.reset(); }
-		bool IsLocked() const { return m_activeAction.has_value(); }
-		bool IsLockedTo(OrbitCameraAction action) const { return m_activeAction == action; }
+		const InputMap<OrbitCameraAction>& GetInputMap() const { return m_inputMap; }
 
 	private:
 		OrbitCamera& m_camera;
 		const CoreEngine::Input::InputState& m_inputState;
 		InputMap<OrbitCameraAction> m_inputMap;
 		std::unique_ptr<IOrbitControllerState> m_state;
-		std::optional<OrbitCameraAction> m_activeAction; // action nào đang giữ quyền input, nếu có
+		std::unique_ptr<IOrbitControllerState> m_pendingState;
 	};
 } // namespace Domain::Camera::OrbitCamera

@@ -53,7 +53,7 @@ namespace CoreEngine::Input {
 		CORE_FORCE_INLINE void SetScrollY(float scrollY) { mScrollY = scrollY; }
 
 	private:
-		float mXPos, mYPos, mDeltaX, mDeltaY, mScrollX, mScrollY;
+		float mXPos{0.0f}, mYPos{0.0f}, mDeltaX{0.0f}, mDeltaY{0.0f}, mScrollX{0.0f}, mScrollY{0.0f};
 
 	protected:
 		// Helpers

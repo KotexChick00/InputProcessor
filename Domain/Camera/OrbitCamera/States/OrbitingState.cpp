@@ -3,26 +3,24 @@
 #include <Camera/OrbitCamera/OrbitCameraAction.hpp>
 #include <Camera/OrbitCamera/OrbitCameraController.hpp>
 #include <memory>
+#include <utility>
 
 namespace
 {
 	constexpr float kOrbitSensitivity = 0.005f; // Độ nhạy xoay camera (radian trên pixel)
-
 }
 
 namespace Domain::Camera::OrbitCamera::States
 {
-	void OrbitingState::OnEnter(OrbitCameraController& controller)
-	{
-		// Khi bắt đầu xoay, lock action Orbit để tránh tranh chấp với Pan/Dolly
-		controller.LockAction(OrbitCameraAction::Orbit);
-	}
-	void OrbitingState::OnExit(OrbitCameraController& controller)
-	{
-		controller.UnlockAction();
-	}
 	void OrbitingState::Update(OrbitCameraController& controller, float deltaTime)
 	{
+		// Có gesture khác vừa được nhấn đè lên -> nhường quyền cho nó, không áp delta frame này nữa.
+		if (auto next = controller.TryCreateOverridingState(OrbitCameraAction::Orbit))
+		{
+			controller.ChangeState(std::move(next));
+			return;
+		}
+
 		const auto& inputState = controller.GetInputState();
 
 		float mouseDeltaX = inputState.MouseInput->GetDeltaX();
@@ -42,6 +40,5 @@ namespace Domain::Camera::OrbitCamera::States
 			// Khi người dùng thả nút Orbit, trở về IdleState
 			controller.ChangeState(std::make_unique<IdleState>());
 		}
-
 	}
 } // namespace Domain::Camera::OrbitCamera::States

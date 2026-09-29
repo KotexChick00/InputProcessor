@@ -6,8 +6,6 @@ namespace Domain::Camera::OrbitCamera::States
 	class OrbitingState : public IOrbitControllerState
 	{
 	public:
-		void OnEnter(OrbitCameraController& controller) override;
 		void Update(OrbitCameraController& controller, float deltaTime) override;
-		void OnExit(OrbitCameraController& controller) override;
 	};
 } // namespace Domain::Camera::OrbitCamera::States

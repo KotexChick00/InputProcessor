@@ -1,41 +1,43 @@
 #include <pch.h>
 #include <Camera/OrbitCamera/OrbitCamera.hpp>
+#include <cmath>
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace
 {
-	constexpr float kEpsilon = glm::epsilon<float>(); // Độ lệch nhỏ để so sánh float
+	constexpr float kTwoPi = glm::two_pi<float>();
+	constexpr float kPi = glm::pi<float>();
+	constexpr float kHalfPi = glm::half_pi<float>();
 
-	constexpr float kTwoPi = glm::two_pi<float>(); // Góc 360 độ (2π radian)
-
-	constexpr float kPi = glm::pi<float>(); // Góc 180 độ (π radian)
-	constexpr float kNegativePi = -glm::pi<float>(); // Góc -180 độ (-π radian)
-
-	constexpr float kHalfPi = glm::half_pi<float>(); // Góc 90 độ (π/2 radian)
-	constexpr float kNegativeHalfPi = -glm::half_pi<float>(); // Góc -90 độ (-π/2 radian)
-
-	constexpr float kElevationEpsilon = 0.01f; // Độ lệch nhỏ để tránh gimbal lock khi elevation gần ±90°
-	constexpr float kMinZoomDistance = 0.1f; // Khoảng cách tối thiểu từ camera đến target
+	constexpr float kElevationEpsilon = 0.01f; // Giữ elevation cách ±90° một đoạn nhỏ để cross(forward, worldUp) không về 0
+	constexpr float kMinZoomDistance = 0.1f;   // Khoảng cách tối thiểu từ camera đến target
 	constexpr float kMaxZoomDistance = 1000.0f; // Khoảng cách tối đa từ camera đến target
+
+	// Đưa góc về [-π, π] để azimuth không tăng vô hạn (mất độ chính xác float khi quay lâu)
+	float WrapAngle(float angle)
+	{
+		return std::remainder(angle, kTwoPi);
+	}
+
+	float ClampElevation(float elevation)
+	{
+		return glm::clamp(elevation, -kHalfPi + kElevationEpsilon, kHalfPi - kElevationEpsilon);
+	}
 }
 
 namespace Domain::Camera::OrbitCamera
 {
-
-	OrbitCamera::OrbitCamera(const glm::vec3& target, float distance)
+	OrbitCamera::OrbitCamera(const glm::vec3& target, float distance, float azimuth, float elevation)
 		: m_target(target)
 		, m_distance(glm::clamp(distance, kMinZoomDistance, kMaxZoomDistance))
-		, m_initialTarget(target)
-		, m_initialDistance(glm::clamp(distance, kMinZoomDistance, kMaxZoomDistance))
-		, m_initialAzimuth(0.0f)
-		, m_initialElevation(0.0f)
-		, m_position(0.0f, 0.0f, 0.0f)
-		, m_forward(0.0f, 0.0f, -1.0f)
-		, m_up(0.0f, 1.0f, 0.0f)
-		, m_right(1.0f, 0.0f, 0.0f)
-		, m_viewMatrix(1.0f)
-		, m_projectionMatrix(1.0f)
+		, m_azimuth(WrapAngle(azimuth))
+		, m_elevation(ClampElevation(elevation))
+		, m_initialTarget(m_target)
+		, m_initialDistance(m_distance)
+		, m_initialAzimuth(m_azimuth)
+		, m_initialElevation(m_elevation)
 	{}
 	void OrbitCamera::SetTarget(const glm::vec3& target)
 	{
@@ -49,9 +51,8 @@ namespace Domain::Camera::OrbitCamera
 	}
 	void OrbitCamera::Rotate(float deltaAzimuth, float deltaElevation)
 	{
-		m_azimuth += deltaAzimuth;
-		m_elevation = glm::clamp(m_elevation + deltaElevation, kNegativeHalfPi + kElevationEpsilon, kHalfPi - kElevationEpsilon);
-
+		m_azimuth = WrapAngle(m_azimuth + deltaAzimuth);
+		m_elevation = ClampElevation(m_elevation + deltaElevation);
 		m_viewDirty = true;
 	}
 	void OrbitCamera::Zoom(float delta)
@@ -77,28 +78,31 @@ namespace Domain::Camera::OrbitCamera
 		RecalculateProjection();
 		return m_projectionMatrix;
 	}
-	const glm::vec3& OrbitCamera::GetPosition() const
+	glm::vec3 OrbitCamera::GetPosition() const
 	{
 		RecalculateCameraVectors();
 		return m_position;
 	}
-	const glm::vec3& OrbitCamera::GetForward() const
+	glm::vec3 OrbitCamera::GetForward() const
 	{
 		RecalculateCameraVectors();
 		return m_forward;
 	}
-	const glm::vec3& OrbitCamera::GetUp() const
+	glm::vec3 OrbitCamera::GetUp() const
 	{
 		RecalculateCameraVectors();
 		return m_up;
 	}
-	const glm::vec3& OrbitCamera::GetRight() const
+	glm::vec3 OrbitCamera::GetRight() const
 	{
 		RecalculateCameraVectors();
 		return m_right;
 	}
 	void OrbitCamera::SetPerspective(float fovY, float nearClip, float farClip)
 	{
+		// glm::perspective cho ra NaN/inf nếu tham số sai
+		if (fovY <= 0.0f || fovY >= kPi || nearClip <= 0.0f || farClip <= nearClip)
+			return;
 		m_fovY = fovY;
 		m_near = nearClip;
 		m_far = farClip;
@@ -106,21 +110,25 @@ namespace Domain::Camera::OrbitCamera
 	}
 	void OrbitCamera::SetViewportSize(uint32_t width, uint32_t height)
 	{
+		// Cửa sổ bị minimize -> 0x0. Giữ giá trị cũ, đợi lần resize hợp lệ tiếp theo.
+		if (width == 0 || height == 0) return;
 		m_aspect = static_cast<float>(width) / static_cast<float>(height);
+		m_viewportHeight = static_cast<float>(height);
 		m_projectionDirty = true;
 	}
 	void OrbitCamera::RecalculateCameraVectors() const
 	{
 		if (!m_viewDirty) return;
 
-		float x = m_distance * cos(m_elevation) * sin(m_azimuth);
-		float y = m_distance * sin(m_elevation);
-		float z = m_distance * cos(m_elevation) * cos(m_azimuth);
+		const float cosElevation = std::cos(m_elevation);
+		const float x = m_distance * cosElevation * std::sin(m_azimuth);
+		const float y = m_distance * std::sin(m_elevation);
+		const float z = m_distance * cosElevation * std::cos(m_azimuth);
 
 		m_position = m_target + glm::vec3(x, y, z);
 		m_forward = glm::normalize(m_target - m_position); // N - Hướng nhìn (Forward Vector)
-		m_right = glm::normalize(glm::cross(m_forward, glm::vec3(0.0f, 1.0f, 0.0f))); // U - Vector hướng sang phải (Right Vector)
-		m_up = glm::cross(m_right, m_forward); // V - Vector hướng lên (Up Vector)
+		m_right = glm::normalize(glm::cross(m_forward, glm::vec3(0.0f, 1.0f, 0.0f))); // U - Right Vector
+		m_up = glm::cross(m_right, m_forward); // V - Up Vector
 
 		m_viewMatrix = glm::lookAt(m_position, m_target, m_up);
 		m_viewDirty = false;

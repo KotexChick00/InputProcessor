@@ -45,6 +45,14 @@ namespace Domain::Camera
 					return !IsScrolling(scrollDir, inputState);
 				});
 		}
+		bool IsScrollBinding(TAction action) const
+		{
+			auto it = m_ActionBindings.find(action);
+			if (it == m_ActionBindings.end())
+				return false;
+			const InputBinding& binding = it->second;
+			return it != m_ActionBindings.end() && std::holds_alternative<MouseScrollDirection>(binding);
+		}
 	private:
 		static bool IsScrolling(MouseScrollDirection scrollDir, const CoreEngine::Input::InputState& inputState)
 		{
