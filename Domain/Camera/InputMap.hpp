@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include <Camera/InputBinding.hpp>
 #include <Input/InputState.hpp>
+// Temporary debug logging for null/dangling pointer detection
+#include <Windows.h>
+#include <cstdio>
 
 namespace Domain::Camera
 {
@@ -22,7 +25,14 @@ namespace Domain::Camera
 		{
 			return QueryAction(action, inputState,
 				[&](CoreEngine::Input::KeyboardKey key) { return inputState.KeyboardInput->CheckIsJustPressed(key); },
-				[&](CoreEngine::Input::MouseButton button) { return inputState.MouseInput->CheckIsJustPressed(button); },
+				[&](CoreEngine::Input::MouseButton button) {
+					if (inputState.MouseInput == nullptr) {
+						char buf[256]; sprintf_s(buf, "InputMap::IsJustPressed - MouseInput is null (ptr=%p)\n", (void*)inputState.MouseInput);
+						OutputDebugStringA(buf);
+						return false;
+					}
+					return inputState.MouseInput->CheckIsJustPressed(button);
+				},
 				[&](MouseScrollDirection scrollDir) {
 					return IsScrolling(scrollDir, inputState);
 				});
@@ -31,7 +41,14 @@ namespace Domain::Camera
 		{
 			return QueryAction(action, inputState,
 				[&](CoreEngine::Input::KeyboardKey key) { return inputState.KeyboardInput->CheckIsPressed(key); },
-				[&](CoreEngine::Input::MouseButton button) { return inputState.MouseInput->CheckIsPressed(button); },
+				[&](CoreEngine::Input::MouseButton button) {
+					if (inputState.MouseInput == nullptr) {
+						char buf[256]; printf_s(buf, "InputMap::IsContinuousPressed - MouseInput is null (ptr=%p)\n", (void*)inputState.MouseInput);
+						OutputDebugStringA(buf);
+						return false;
+					}
+					return inputState.MouseInput->CheckIsPressed(button);
+				},
 				[&](MouseScrollDirection scrollDir) {
 					return IsScrolling(scrollDir, inputState);
 				});
@@ -40,7 +57,14 @@ namespace Domain::Camera
 		{
 			return QueryAction(action, inputState,
 				[&](CoreEngine::Input::KeyboardKey key) { return inputState.KeyboardInput->CheckIsReleased(key); },
-				[&](CoreEngine::Input::MouseButton button) { return inputState.MouseInput->CheckIsReleased(button); },
+				[&](CoreEngine::Input::MouseButton button) {
+					if (inputState.MouseInput == nullptr) {
+						char buf[256]; sprintf_s(buf, "InputMap::IsReleased - MouseInput is null (ptr=%p)\n", (void*)inputState.MouseInput);
+						OutputDebugStringA(buf);
+						return false;
+					}
+					return inputState.MouseInput->CheckIsReleased(button);
+				},
 				[&](MouseScrollDirection scrollDir) {
 					return !IsScrolling(scrollDir, inputState);
 				});
@@ -57,6 +81,11 @@ namespace Domain::Camera
 		static bool IsScrolling(MouseScrollDirection scrollDir, const CoreEngine::Input::InputState& inputState)
 		{
 			constexpr float kEpsilon = 0.0001f; // Độ lệch nhỏ để so sánh float
+			if (inputState.MouseInput == nullptr) {
+				char buf[256]; sprintf_s(buf, "InputMap::IsScrolling - MouseInput is null (ptr=%p)\n", (void*)inputState.MouseInput);
+				OutputDebugStringA(buf);
+				return false;
+			}
 			float scrollY = inputState.MouseInput->GetScrollY();
 			if (scrollY < kEpsilon && scrollY > -kEpsilon) return false; // Không có cuộn
 			if (scrollDir == MouseScrollDirection::Up)

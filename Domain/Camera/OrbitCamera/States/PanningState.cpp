@@ -19,7 +19,7 @@ namespace Domain::Camera::OrbitCamera::States
 		// Có gesture khác vừa được nhấn đè lên -> nhường quyền cho nó, không áp delta frame này nữa.
 		if (auto next = controller.TryCreateOverridingState(OrbitCameraAction::Pan))
 		{
-			controller.ChangeState(std::move(next));
+			controller.RequestStateChange(std::move(next));
 			return;
 		}
 
@@ -29,10 +29,18 @@ namespace Domain::Camera::OrbitCamera::States
 		if (mouseDeltaX != 0.0f || mouseDeltaY != 0.0f)
 		{
 			auto& camera = controller.GetOrbitCamera();
+
+			float viewportHeight = camera.GetViewportHeight();
+
+			if (viewportHeight <= 0.0f)
+			{
+				return;
+			}
+
 			// Chiều cao mặt phẳng nhìn thấy tại khoảng cách d là 2*d*tan(fov/2);
 			// chia cho số pixel chiều cao viewport -> đơn vị world trên mỗi pixel.
 			float worldPerPixel = 2.0f * camera.GetDistance() * std::tan(camera.GetFovY() * 0.5f)
-				/ camera.GetViewportHeight();
+				/ viewportHeight;
 			glm::vec3 offset = (-mouseDeltaX * camera.GetRight() + mouseDeltaY * camera.GetUp())
 				* (worldPerPixel * kPanSpeed);
 			camera.SetTarget(camera.GetTarget() + offset);
@@ -43,7 +51,7 @@ namespace Domain::Camera::OrbitCamera::States
 		if (!controller.GetInputMap().IsContinuousPressed(OrbitCameraAction::Pan, inputState))
 		{
 			// Khi người dùng thả nút Pan, trở về IdleState
-			controller.ChangeState(std::make_unique<IdleState>());
+			controller.RequestStateChange(std::make_unique<IdleState>());
 		}
 	}
 } // namespace Domain::Camera::OrbitCamera::States

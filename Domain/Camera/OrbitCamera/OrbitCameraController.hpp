@@ -24,7 +24,7 @@ namespace Domain::Camera::OrbitCamera
 
 		// Chỉ đăng ký yêu cầu chuyển state; việc chuyển thật sự diễn ra
 		// ở cuối Update() để state hiện tại không bị hủy khi đang chạy.
-		void ChangeState(std::unique_ptr<IOrbitControllerState> next);
+		void RequestStateChange(std::unique_ptr<IOrbitControllerState> next);
 
 		// Nếu có gesture KHÁC `current` vừa được nhấn trong frame này thì trả về state tương ứng,
 		// ngược lại trả nullptr. Dùng để gesture nhấn sau giành quyền từ gesture đang chạy.

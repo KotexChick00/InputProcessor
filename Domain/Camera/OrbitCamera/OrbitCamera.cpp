@@ -116,6 +116,16 @@ namespace Domain::Camera::OrbitCamera
 		m_viewportHeight = static_cast<float>(height);
 		m_projectionDirty = true;
 	}
+	void OrbitCamera::SetAzimuth(float azimuth)
+	{
+		m_azimuth = WrapAngle(azimuth);
+		m_viewDirty = true;
+	}
+	void OrbitCamera::SetElevation(float elevation)
+	{
+		m_elevation = ClampElevation(elevation);
+		m_viewDirty = true;
+	}
 	void OrbitCamera::RecalculateCameraVectors() const
 	{
 		if (!m_viewDirty) return;
@@ -128,7 +138,7 @@ namespace Domain::Camera::OrbitCamera
 		m_position = m_target + glm::vec3(x, y, z);
 		m_forward = glm::normalize(m_target - m_position); // N - Hướng nhìn (Forward Vector)
 		m_right = glm::normalize(glm::cross(m_forward, glm::vec3(0.0f, 1.0f, 0.0f))); // U - Right Vector
-		m_up = glm::cross(m_right, m_forward); // V - Up Vector
+		m_up = glm::normalize(glm::cross(m_right, m_forward)); // V - Up Vector
 
 		m_viewMatrix = glm::lookAt(m_position, m_target, m_up);
 		m_viewDirty = false;

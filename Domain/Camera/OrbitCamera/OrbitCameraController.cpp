@@ -23,7 +23,7 @@ namespace Domain::Camera::OrbitCamera
 		m_state->OnEnter(*this);
 	}
 
-	void OrbitCameraController::ChangeState(std::unique_ptr<IOrbitControllerState> next)
+	void OrbitCameraController::RequestStateChange(std::unique_ptr<IOrbitControllerState> next)
 	{
 		if (next) m_pendingState = std::move(next);
 	}

@@ -52,6 +52,12 @@ namespace Domain::Camera::OrbitCamera
         // Lấy Vector hướng sang phải (Right Vector / U)
         glm::vec3 GetRight() const override;
 
+		// --- API riêng của OrbitCamera (không thuộc ICamera interface) --- //
+
+        /**
+         * Lấy điểm trung tâm quan sát (Target Point)
+         * @return Điểm trung tâm quan sát
+         */
         const glm::vec3& GetTarget() const { return m_target; }
 
         float GetDistance() const { return m_distance; }
@@ -62,7 +68,10 @@ namespace Domain::Camera::OrbitCamera
 
         float GetFovY() const { return m_fovY; }
 
+        float GetAspect() const { return m_aspect; }
+
         // Chiều cao viewport (pixel), dùng để đổi pixel chuột -> đơn vị world khi pan
+        // Phải được cập nhật qua SetViewportSize() trước khi pan, nếu không sẽ dùng giá trị mặc định 1080.
         float GetViewportHeight() const { return m_viewportHeight; }
 
         // Thiết lập các thông số chiếu phối cảnh (FOV, Near plane, Far plane)
@@ -70,6 +79,10 @@ namespace Domain::Camera::OrbitCamera
 
         // Cập nhật kích thước Viewport để tính lại Aspect Ratio (Tỷ lệ khung hình)
         void SetViewportSize(uint32_t width, uint32_t height) override;
+
+        void SetAzimuth(float azimuth);
+
+		void SetElevation(float elevation);
 
     private:
         // Cập nhật vị trí (C) và hệ tọa độ UVN (m_forward, m_up, m_right, m_viewMatrix) từ các góc xoay và target

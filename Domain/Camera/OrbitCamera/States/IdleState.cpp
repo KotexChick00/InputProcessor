@@ -20,17 +20,17 @@ namespace Domain::Camera::OrbitCamera::States
 		// lúc rảnh; khi đang có gesture, gesture nhấn sau sẽ thắng (xem TryCreateOverridingState).
 		if (inputMap.IsContinuousPressed(OrbitCameraAction::Orbit, inputState))
 		{
-			controller.ChangeState(std::make_unique<OrbitingState>());
+			controller.RequestStateChange(std::make_unique<OrbitingState>());
 			return;
 		}
 		else if (inputMap.IsContinuousPressed(OrbitCameraAction::Pan, inputState))
 		{
-			controller.ChangeState(std::make_unique<PanningState>());
+			controller.RequestStateChange(std::make_unique<PanningState>());
 			return;
 		}
 		else if (inputMap.IsContinuousPressed(OrbitCameraAction::Dolly, inputState))
 		{
-			controller.ChangeState(std::make_unique<DollyingState>());
+			controller.RequestStateChange(std::make_unique<DollyingState>());
 			return;
 		}
 	}

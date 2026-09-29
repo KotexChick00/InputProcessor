@@ -4,6 +4,7 @@
 // Chỉ phụ thuộc Assimp + GLM + IBoundingBox.hpp, không phụ thuộc engine.
 
 #include <Model/IBoundingBox.hpp>
+#include <Camera/OrbitCamera/OrbitCamera.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -187,4 +188,31 @@ namespace Model {
         cam.Projection = glm::perspective(fovY, aspect, cam.NearPlane, cam.FarPlane);
         return cam;
     }
+
+    inline void FitOrbitCameraToBox(
+        Domain::Camera::OrbitCamera::OrbitCamera& camera,
+        const BoundingBox3D& box,
+        float fovYDeg = 45.0f,
+        float yawDeg = 30.0f,
+        float pitchDeg = 20.0f,
+        float margin = 1.15f)
+    {
+        if (!box.isValid()) return;
+
+        const float aspect = camera.GetAspect();
+        auto setup = FitCameraToBox(box, fovYDeg, aspect, yawDeg, pitchDeg, margin);
+
+        const float distance = glm::length(setup.Position - setup.Target);
+
+        camera.SetTarget(setup.Target);
+        camera.SetDistance(distance);
+        camera.SetAzimuth(glm::radians(yawDeg));
+        camera.SetElevation(glm::radians(pitchDeg));
+        camera.SetPerspective(
+            glm::radians(fovYDeg),
+            setup.NearPlane,
+            setup.FarPlane
+        );
+    }
+
 };
