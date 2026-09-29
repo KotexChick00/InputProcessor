@@ -10,13 +10,10 @@
         "docking-experimental"
       ]
     },
+    "qtbase",
     "spdlog",
     "stb",
-    {
-      "name": "qt",
-      "features": [
-        "default-features"
-      ]
-    }
+    "qtdeclarative",
+    "qtsvg"
   ]
 }
