@@ -10,10 +10,8 @@
         "docking-experimental"
       ]
     },
-    "qtbase",
     "spdlog",
     "stb",
-    "qtdeclarative",
-    "qtsvg"
+    "wxwidgets"
   ]
 }
