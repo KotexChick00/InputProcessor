@@ -72,7 +72,7 @@
     <ClInclude Include="Core\Renderer\Resource\ITexture.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
-    <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IResourceManager.hpp" />
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="src\OBJ\ObjParser.h" />
@@ -138,5 +138,8 @@
     <ClInclude Include="Domain\Camera\OrbitCamera\States\OrbitingState.hpp" />
     <ClInclude Include="Domain\Camera\OrbitCamera\States\PanningState.hpp" />
     <ClInclude Include="Domain\Camera\OrbitCamera\States\DollyingState.hpp" />
+    <ClInclude Include="Core\Importer\IImporter.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IPostProcessEffect.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IPostProcessStack.hpp" />
   </ItemGroup>
 </Project>

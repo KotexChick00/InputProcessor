@@ -1,7 +1,7 @@
 #pragma once
 #include <Renderer/RendererPrimitives.hpp>
 #include <Renderer/IRendererCommand.hpp>
-#include <Renderer/Resource/IResouceManager.hpp>
+#include <Renderer/Resource/IResourceManager.hpp>
 #include <Renderer/Resource/IFrameBufferManager.hpp>
 #include <pch.h>
 

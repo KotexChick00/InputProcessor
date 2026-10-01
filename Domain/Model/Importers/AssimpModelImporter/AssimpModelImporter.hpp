@@ -3,7 +3,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <Model/Importers/IModelImporter.hpp>
-#include <Renderer/Resource/IResouceManager.hpp>
+#include <Renderer/Resource/IResourceManager.hpp>
 
 namespace Model {
 

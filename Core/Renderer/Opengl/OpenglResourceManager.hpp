@@ -1,5 +1,5 @@
 #pragma once
-#include <Renderer/Resource/IResouceManager.hpp>
+#include <Renderer/Resource/IResourceManager.hpp>
 #include <Renderer/Opengl/OpenglVertexBuffer.hpp>
 #include <Renderer/Opengl/OpenglIndexBuffer.hpp>
 #include <Renderer/Opengl/OpenglShader.hpp>
