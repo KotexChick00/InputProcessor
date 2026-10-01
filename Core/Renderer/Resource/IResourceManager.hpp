@@ -39,5 +39,8 @@ namespace CoreEngine::Renderer {
 		virtual ITexture* CreateTexture(const std::string& file) = 0;
 		virtual ICubeMap* CreateCubeMap(const CubemapTextureFiles& textureFiles) = 0;
 		virtual IUniformBuffer * CreateUniformBuffer() = 0;
+		// MỚI — framebuffer màu (kèm depth/stencil renderbuffer), dùng làm render target
+// cho scene (Forward pass) hoặc buffer trung gian cho Post-Process Pass.
+		virtual IFrameBuffer* CreateColorFrameBuffer(unsigned int width, unsigned int height) = 0;
 	};
 }

@@ -6,6 +6,7 @@
 #include <Renderer/Opengl/OpenglTexture.hpp>
 #include <Renderer/Opengl/OpenglCubeMap.hpp>
 #include <Renderer/Opengl/OpenglUniformBuffer.hpp>
+#include <Renderer/Opengl/OpenglFrameBuffer.hpp>
 #include <unordered_map>
 #include <vector>
 
@@ -43,6 +44,7 @@ namespace CoreEngine::Renderer::Opengl {
 		ITexture* CreateTexture(const std::string& file) override;
 		ICubeMap* CreateCubeMap(const CubemapTextureFiles& textureFiles) override;
 		IUniformBuffer* CreateUniformBuffer() override;
+		IFrameBuffer* CreateColorFrameBuffer(unsigned int width, unsigned int height) override;
 
 		void InsertVertexBuffer(OpenglVertexBuffer* vertexBuffer);
 		void InsertIndexBuffer(OpenglIndexBuffer* openglIndexBuffer);

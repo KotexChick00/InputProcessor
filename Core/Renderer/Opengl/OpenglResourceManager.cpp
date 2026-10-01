@@ -113,6 +113,12 @@ namespace CoreEngine::Renderer::Opengl {
 		return OpenglUniformBuffer::Create();
 	}
 
+	IFrameBuffer* OpenglResourceManager::CreateColorFrameBuffer(unsigned int width, unsigned int height)
+	{
+		FrameBufferCreateInfo info{ width, height };
+		return OpenglColorFrameBuffer::Create(info);
+	}
+
 	IIndexBuffer* OpenglResourceManager::GetIndexBuffer(IndexBufferID indexBufferId) {
 		if (mIndexBuffers.contains(indexBufferId)) {
 			IP_ENGINE_TRACE("OpenglResourceManager get vertex buffer with id: {}", indexBufferId);
