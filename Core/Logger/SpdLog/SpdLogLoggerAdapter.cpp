@@ -2,16 +2,12 @@
 
 namespace CoreEngine::Logger::SpdLog {
     SpdLogLoggerAdapter::SpdLogLoggerAdapter(const std::string& loggerName) {
-        if (!mLogger) {
-            auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-            consoleSink->set_pattern("%^[%H:%M:%S] [%s:%#] [%n] [Thread %t]: %v%$");
+        auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        consoleSink->set_pattern("%^[%H:%M:%S] [%s:%#] [%n] [Thread %t]: %v%$");
+        mLogger = std::make_unique<spdlog::logger>(loggerName, consoleSink);
 
-            mLogger = std::make_shared<spdlog::logger>(loggerName, consoleSink);
-
-            mLogger->set_level(spdlog::level::trace);
-
-            mLogger->flush_on(spdlog::level::err);
-        }
+        mLogger->set_level(spdlog::level::trace);
+        mLogger->flush_on(spdlog::level::err);
     }
 
     void SpdLogLoggerAdapter::Log(

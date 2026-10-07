@@ -25,6 +25,6 @@ namespace CoreEngine::Renderer::Opengl {
 		OpenglUniformBuffer(GLuint mBuffer);
 
 	public:
-		OpenglUniformBuffer* Create();
+		static OpenglUniformBuffer* Create();
 	};
 }

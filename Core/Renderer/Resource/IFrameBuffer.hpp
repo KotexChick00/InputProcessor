@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Renderer/Resource/IShader.hpp>
 
 namespace CoreEngine::Renderer {
-	class IFrameTextureAttachment {
+	class CORE_API IFrameTextureAttachment {
 	public:
 		virtual ~IFrameTextureAttachment() = default;
 
@@ -13,13 +13,13 @@ namespace CoreEngine::Renderer {
 
 	typedef unsigned int FrameBufferID;
 
-	struct ViewPortSize {
+	struct CORE_API ViewPortSize {
 		unsigned int Width;
 		unsigned int Height;
 	};
 
 	// Currently support Color Attachment and Depth Attachment
-	class IFrameBuffer {
+	class CORE_API IFrameBuffer {
 	public:
 		virtual ~IFrameBuffer() = default;
 

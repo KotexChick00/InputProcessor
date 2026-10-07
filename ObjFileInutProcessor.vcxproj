@@ -71,8 +71,11 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)Domain;D:\DoAnChuyenNganh\InputProcessor\Core;D:\DoAnChuyenNganh\InputProcessor\Library\Glad;$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
+    <IncludePath>$(ProjectDir)Domain;$(ProjectDir)Core;$(ProjectDir)Library\Glad;$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)src;$(IncludePath);$(ProjectDir)Core;$(ProjectDir)Domain</IncludePath>
@@ -86,6 +89,9 @@
   <PropertyGroup Label="Vcpkg">
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgAdditionalInstallOptions>--x-buildtrees-root=D:\bt --x-packages-root=D:\bp</VcpkgAdditionalInstallOptions>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -93,7 +99,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Core;$(ProjectDir)Domain;$(ProjectDir)Library\Glad;$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -113,7 +119,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Core;$(ProjectDir)Domain;$(ProjectDir)Library\Glad;$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +140,7 @@
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Core;$(ProjectDir)Domain;$(ProjectDir)Library\Glad;$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -154,7 +160,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Core;$(ProjectDir)Domain;$(ProjectDir)Library\Glad;$(ProjectDir)Library\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -166,9 +172,14 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Application\Application.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWKeyBoardInput.cpp" />
     <ClCompile Include="Core\Input\GLFW\GLFWMouseInput.cpp" />
+    <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
     <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
+    <ClCompile Include="Core\Memory\LinearMemoryAllocator.cpp" />
+    <ClCompile Include="Core\Memory\MemoryAllocator.cpp" />
+    <ClCompile Include="Core\Memory\StackMemoryAllocator.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBuffer.cpp" />
@@ -181,10 +192,20 @@
     <ClCompile Include="Core\Renderer\Opengl\OpenglTexture.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglUniformBuffer.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglVertexBuffer.cpp" />
+    <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIRenderer.cpp" />
     <ClCompile Include="Core\UI\Imgui\ImguiUIWindowVisitor.cpp" />
     <ClCompile Include="Core\Window\GLFW\GLFWWindow.cpp" />
-    <ClCompile Include="Domain\Model\OpenglRenderResourceFactory.cpp" />
+    <ClCompile Include="Core\Window\WindowPlatformFactory.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\OrbitCamera.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\OrbitCameraController.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\DollyingState.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\IdleState.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\OrbitingState.cpp" />
+    <ClCompile Include="Domain\Camera\OrbitCamera\States\PanningState.cpp" />
+    <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
+    <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
+    <ClCompile Include="Domain\Model\RenderModel.cpp" />
     <ClCompile Include="Library\Glad\src\glad.c" />
     <ClCompile Include="Library\ImGui\imgui.cpp" />
     <ClCompile Include="Library\ImGui\imgui_demo.cpp" />
@@ -193,21 +214,31 @@
     <ClCompile Include="Library\ImGui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Library\ImGui\imgui_tables.cpp" />
     <ClCompile Include="Library\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="src\AsciiReader.cpp" />
     <ClCompile Include="src\FormatChecker.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Core\Window\Wx\WxWindow.cpp" />
+    <ClCompile Include="Core\Input\Wx\WxKeyboardInput.cpp" />
+    <ClCompile Include="Core\Input\Wx\WxMouseInput.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Application\Application.hpp" />
+    <ClInclude Include="Core\Application\ApplicationEventContext.hpp" />
     <ClInclude Include="Core\Event\EventAction.hpp" />
     <ClInclude Include="Core\Event\EventContext.hpp" />
     <ClInclude Include="Core\Event\EventDispatcher.hpp" />
+    <ClInclude Include="Core\Importer\IImporter.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWKeyBoardInput.hpp" />
     <ClInclude Include="Core\Input\GLFW\GLFWMouseInput.hpp" />
-    <ClInclude Include="Core\Input\IKeyboardInput.hpp" />
-    <ClInclude Include="Core\Input\IMouseInput.hpp" />
+    <ClInclude Include="Core\Input\KeyboardInput.hpp" />
+    <ClInclude Include="Core\Input\MouseInput.hpp" />
     <ClInclude Include="Core\Input\InputState.hpp" />
     <ClInclude Include="Core\Logger\Logger.hpp" />
+    <ClInclude Include="Core\Logger\LoggerFactory.hpp" />
     <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
+    <ClInclude Include="Core\Memory\LinearMemoryAllocator.hpp" />
+    <ClInclude Include="Core\Memory\MemoryAllocator.hpp" />
+    <ClInclude Include="Core\Memory\StackMemoryAllocator.hpp" />
     <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />
     <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
@@ -223,28 +254,51 @@
     <ClInclude Include="Core\Renderer\Opengl\OpenglTexture.hpp" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Opengl\OpenglVertexBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
     <ClInclude Include="Core\Renderer\RendererPrimitives.hpp" />
     <ClInclude Include="Core\Renderer\Resource\ICubeMap.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IFrameBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IFrameBufferManager.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IIndexBuffer.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IPostProcessEffect.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IPostProcessStack.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IShader.hpp" />
     <ClInclude Include="Core\Renderer\Resource\ITexture.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IUniformBuffer.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IVertexBuffer.hpp" />
-    <ClInclude Include="Core\Renderer\Resource\IResouceManager.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IResourceManager.hpp" />
+    <ClInclude Include="Core\Time\Time.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElement.hpp" />
     <ClInclude Include="Core\UI\Elements\IUIElementFactory.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIWindowVisitor.hpp" />
     <ClInclude Include="Core\Window\GLFW\GLFWWindow.hpp" />
     <ClInclude Include="Core\Window\IWindow.hpp" />
     <ClInclude Include="Core\Window\IWindowVisitor.hpp" />
+    <ClInclude Include="Core\Window\WindowPlatformFactory.hpp" />
+    <ClInclude Include="Domain\Camera\FreeCamera\FreeCameara.hpp" />
+    <ClInclude Include="Domain\Camera\ICamera.hpp" />
+    <ClInclude Include="Domain\Camera\ICameraController.hpp" />
+    <ClInclude Include="Domain\Camera\InputBinding.hpp" />
+    <ClInclude Include="Domain\Camera\InputMap.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\IOrbitControllerState.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\OrbitCamera.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\OrbitCameraAction.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\OrbitCameraController.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\DollyingState.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\IdleState.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\OrbitingState.hpp" />
+    <ClInclude Include="Domain\Camera\OrbitCamera\States\PanningState.hpp" />
+    <ClInclude Include="Domain\Model\AdsMaterial.hpp" />
+    <ClInclude Include="Domain\Model\IBoundingBox.hpp" />
     <ClInclude Include="Domain\Model\IMaterial.hpp" />
-    <ClInclude Include="Domain\Model\Importers\AssimpModelImporterAdapter.hpp" />
+    <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpBoundingBox.h" />
+    <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.hpp" />
     <ClInclude Include="Domain\Model\Importers\IModelImporter.hpp" />
+    <ClInclude Include="Domain\Model\Importers\ModelImporter\ModelFormatHandler.hpp" />
+    <ClInclude Include="Domain\Model\Importers\ModelImporter\ModelImporter.hpp" />
+    <ClInclude Include="Domain\Model\Importers\ModelImporter\ObjModelFormatHandler.hpp" />
     <ClInclude Include="Domain\Model\IRenderResourceFactory.hpp" />
     <ClInclude Include="Domain\Model\Mesh.hpp" />
-    <ClInclude Include="Domain\Model\OpenglRenderResourceFactory.hpp" />
     <ClInclude Include="Domain\Model\RenderModel.hpp" />
     <ClInclude Include="Library\ImGui\imconfig.h" />
     <ClInclude Include="Library\ImGui\imgui.h" />
@@ -261,6 +315,9 @@
     <ClInclude Include="UI\ImGuiUIRendererAdapter.hpp" />
     <ClInclude Include="Core\UI\Imgui\ImguiUIRenderer.hpp" />
     <ClInclude Include="Core\UI\IUIRenderer.hpp" />
+    <ClInclude Include="Core\Window\Wx\WxWindow.hpp" />
+    <ClInclude Include="Core\Input\Wx\WxKeyboardInput.hpp" />
+    <ClInclude Include="Core\Input\Wx\WxMouseInput.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

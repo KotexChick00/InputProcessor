@@ -1,9 +1,9 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <Renderer/Resource/IFrameBuffer.hpp>
 
 namespace CoreEngine::Renderer {
-	class IFrameBufferManager {
+	class CORE_API IFrameBufferManager {
 	public:
 		virtual ~IFrameBufferManager() = default;
 		virtual IFrameBuffer* GetFrameBuffer(FrameBufferID frameBufferId) = 0;
