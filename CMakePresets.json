@@ -20,16 +20,29 @@
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
+      "name": "windows-msvc",
+      "hidden": true,
+      "description": "Force MSVC so stray MinGW/Perl compilers on PATH are never picked up.",
+      "generator": "Ninja",
+      "architecture": { "value": "x64", "strategy": "external" },
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    },
+    {
       "name": "vcpkg-debug",
-      "displayName": "Debug (vcpkg)",
-      "inherits": "debug",
-      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      "displayName": "Debug (vcpkg, MSVC)",
+      "inherits": [ "windows-msvc", "debug" ],
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
     },
     {
       "name": "vcpkg-release",
-      "displayName": "Release (vcpkg)",
-      "inherits": "release",
-      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      "displayName": "Release (vcpkg, MSVC)",
+      "inherits": [ "windows-msvc", "release" ],
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
     }
   ],
   "buildPresets": [

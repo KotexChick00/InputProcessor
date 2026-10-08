@@ -8,6 +8,23 @@ if(MSVC)
     add_compile_options(/utf-8)
 endif()
 
+# Fail early with a readable message instead of cryptic compile/link errors.
+if(WIN32 AND NOT MSVC AND VCPKG_TARGET_TRIPLET AND NOT VCPKG_TARGET_TRIPLET MATCHES "mingw")
+    message(FATAL_ERROR
+        "vcpkg triplet '${VCPKG_TARGET_TRIPLET}' builds libraries with MSVC, but the compiler is "
+        "${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER}).\n"
+        "Use the vcpkg-debug/vcpkg-release preset from Visual Studio, VS Code, or "
+        "'Developer PowerShell for VS', then delete the build folder and configure again.")
+endif()
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("#include <format>\nint main() { return std::format(\"{}\", 1).size() == 1 ? 0 : 1; }"
+    INPUTPROCESSOR_HAS_STD_FORMAT)
+if(NOT INPUTPROCESSOR_HAS_STD_FORMAT)
+    message(FATAL_ERROR
+        "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} does not provide C++20 <format>. "
+        "Use Visual Studio 2022/2026 (MSVC) or GCC 13+, then delete the build folder and configure again.")
+endif()
+
 find_package(OpenGL REQUIRED)
 find_package(wxWidgets 3.2 CONFIG QUIET)
 if(TARGET wx::core)
