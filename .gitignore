@@ -368,3 +368,7 @@ example.txt
 assets/tests/test_engine_logic
 /build/
 /CMakeUserPresets.json
+
+# Local-only: editor settings and personal docs
+.vscode/
+docs/
