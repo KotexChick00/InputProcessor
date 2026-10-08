@@ -46,6 +46,9 @@
     <ClCompile Include="Domain\Camera\OrbitCamera\States\DollyingState.cpp" />
     <ClCompile Include="Domain\Camera\OrbitCamera\States\IdleState.cpp" />
     <ClCompile Include="Domain\Camera\OrbitCamera\OrbitCameraController.cpp" />
+    <ClCompile Include="Core\Renderer\Forward\ForwardRenderPipeline.hpp" />
+    <ClCompile Include="Core\Renderer\IRenderPipeline.hpp" />
+    <ClCompile Include="Core\Renderer\Forward\ForwardRenderPipeline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Logger\Logger.hpp" />
@@ -141,5 +144,6 @@
     <ClInclude Include="Core\Importer\IImporter.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IPostProcessEffect.hpp" />
     <ClInclude Include="Core\Renderer\Resource\IPostProcessStack.hpp" />
+    <ClInclude Include="Core\Renderer\Resource\IRenderable.hpp" />
   </ItemGroup>
 </Project>

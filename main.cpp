@@ -6,6 +6,7 @@
 #include <Model/RenderModel.hpp>
 #include <Camera/OrbitCamera/OrbitCamera.hpp>
 #include <Camera/OrbitCamera/OrbitCameraController.hpp>
+#include <Renderer/Forward/ForwardRenderPipeline.hpp>
 
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -117,11 +118,16 @@ protected:
         config.DepthOptions.Operation = CoreEngine::Renderer::DepthOperation::ReadAndWrite;
         renderer->Config(config);
 
+        pipeline = std::make_unique<CoreEngine::Renderer::Forward::ForwardRenderPipeline>(renderer);
+
         shader = renderer->GetResourceManager()->CreateShaderFromSources(vertexSrc, fragmentSource);
         if (!shader) {
             IP_ENGINE_ERROR("DemoApp::OnInitClient: Failed to create shader");
             return;
         }
+
+        shader->Use();
+        shader->SetUniformMatrix4fv("uModel", glm::value_ptr(glm::mat4(1.0f)));
 
         const std::string modelPath = "./assets/models/Ak_47/Ak-47.obj";
 
@@ -155,27 +161,18 @@ protected:
     }
 
     void OnLoopClient() override {
-        // Cập nhật controller mỗi frame
         if (cameraController) {
             cameraController->Update(GetTime()->GetDeltaTime());
         }
 
-        GetRenderer()->GetRendererCommand()->ClearBuffers(
-            CoreEngine::Renderer::ClearBufferMasks::Color |
-            CoreEngine::Renderer::ClearBufferMasks::Depth
-        );
+        pipeline->BeginFrame();
 
         if (model && shader && camera) {
-            shader->Use();
+            pipeline->Submit({ model.get(), shader });
+        }
 
-            glm::mat4 modelMatrix = glm::mat4(1.0f);
-            glm::mat4 viewProjection =
-                camera->GetProjectionMatrix() * camera->GetViewMatrix();
-
-            shader->SetUniformMatrix4fv("uModel", glm::value_ptr(modelMatrix));
-            shader->SetUniformMatrix4fv("uViewProjection", glm::value_ptr(viewProjection));
-
-            model->Render(GetRenderer(), shader);
+        if (camera) {
+            pipeline->EndFrame(*camera);
         }
     }
 
@@ -189,6 +186,7 @@ private:
 
     std::unique_ptr<Domain::Camera::OrbitCamera::OrbitCamera> camera;
     std::unique_ptr<Domain::Camera::OrbitCamera::OrbitCameraController> cameraController;
+    std::unique_ptr<CoreEngine::Renderer::Forward::ForwardRenderPipeline> pipeline;
 };
 
 int main() {
