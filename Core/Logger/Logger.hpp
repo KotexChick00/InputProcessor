@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include <pch.h>
 #include <source_location>
 #include <format>
 
@@ -25,8 +25,8 @@ namespace CoreEngine::Logger {
 	// Format for log messages: [LEVEL] [HH:MM:SS] [Thread] Message
 	class Logger {
 	public:
-		static void SetEngineImplementation(std::shared_ptr<ILoggerImplentation> engineImplementation) { s_EngineImplementation = engineImplementation; }
-		static void SetClientImplementation(std::shared_ptr<ILoggerImplentation> clientImplementation) { s_ClientImplementation = clientImplementation; }
+		static void SetEngineImplementation(ILoggerImplentation* engineImplementation) { s_EngineImplementation.reset(engineImplementation); }
+		static void SetClientImplementation(ILoggerImplentation* clientImplementation) { s_ClientImplementation.reset(clientImplementation); }
 
 		template <typename... Args>
 		static void ClientLog(
@@ -55,8 +55,8 @@ namespace CoreEngine::Logger {
 		}
 
 	private:
-		inline static std::shared_ptr<ILoggerImplentation> s_EngineImplementation = nullptr;
-		inline static std::shared_ptr<ILoggerImplentation> s_ClientImplementation = nullptr;
+		inline static Unique<ILoggerImplentation> s_EngineImplementation = nullptr;
+		inline static Unique<ILoggerImplentation> s_ClientImplementation = nullptr;
 
 	private:
 		Logger() = default;

@@ -20,5 +20,8 @@ namespace CoreEngine::Renderer::Opengl {
 
 	public:
 		static OpenglTexture* FromFile(const std::string& file);
+		static OpenglTexture* FromMemory(const unsigned char* data, unsigned int size);
+	private:
+		static OpenglTexture* Upload(unsigned char* pixels, int width, int height);
 	};
 }

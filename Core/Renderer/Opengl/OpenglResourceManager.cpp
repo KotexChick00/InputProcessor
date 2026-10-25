@@ -55,6 +55,78 @@ namespace CoreEngine::Renderer::Opengl {
 		return nullptr;
 	}
 
+	IVertexBuffer* OpenglResourceManager::CreateVertexBuffer()
+	{
+		return OpenglVertexBuffer::Create();
+	}
+
+	IIndexBuffer* OpenglResourceManager::CreateIndexBuffer()
+	{
+		return OpenglIndexBuffer::Create();
+	}
+
+	IShader* OpenglResourceManager::CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource)
+	{
+		auto* shader = OpenglShader::FromSource(vertexSource, fragmentSource);
+		InsertShader(shader);
+		return shader;
+	}
+
+	IShader* OpenglResourceManager::CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile)
+	{
+		auto* shader = OpenglShader::FromFiles(vertexFile, fragmentFile);
+		InsertShader(shader);
+		return shader;
+	}
+
+	ITexture* OpenglResourceManager::CreateTexture(const std::string& file)
+	{
+		auto it = mTexturePathCache.find(file);
+		if (it != mTexturePathCache.end()) {
+			TextureID textureId = it->second;
+			IP_ENGINE_TRACE("OpenglResourceManager get cached texture with id: {} for file: {}", textureId, file);
+			return GetTexture(textureId);
+		}
+
+		OpenglTexture* texture = OpenglTexture::FromFile(file);
+
+		if (texture != nullptr) {
+			TextureID textureId = texture->GetTextureId();
+			mTexturePathCache[file] = textureId;
+			IP_ENGINE_TRACE("OpenglResourceManager create new texture with id: {} for file: {}", textureId, file);
+		}
+
+		return texture; // ham nay da bi sua
+	}
+
+	ITexture* OpenglResourceManager::CreateTextureFromMemory(const unsigned char* data, unsigned int size) {
+		return OpenglTexture::FromMemory(data, size);
+	}
+
+	ICubeMap* OpenglResourceManager::CreateCubeMap(const CubemapTextureFiles& textureFiles)
+	{
+		Opengl::CubeMapFiles cubemapFiles;
+		cubemapFiles.Front = textureFiles.Front;
+		cubemapFiles.Back = textureFiles.Back;
+		cubemapFiles.Bottom = textureFiles.Bot;
+		cubemapFiles.Top = textureFiles.Top;
+		cubemapFiles.Left = textureFiles.Left;
+		cubemapFiles.Right = textureFiles.Right;
+
+		return OpenglCubeMap::FromFiles(cubemapFiles);
+	}
+
+	IUniformBuffer* OpenglResourceManager::CreateUniformBuffer()
+	{
+		return OpenglUniformBuffer::Create();
+	}
+
+	IFrameBuffer* OpenglResourceManager::CreateColorFrameBuffer(unsigned int width, unsigned int height)
+	{
+		FrameBufferCreateInfo info{ width, height };
+		return OpenglColorFrameBuffer::Create(info);
+	}
+
 	IIndexBuffer* OpenglResourceManager::GetIndexBuffer(IndexBufferID indexBufferId) {
 		if (mIndexBuffers.contains(indexBufferId)) {
 			IP_ENGINE_TRACE("OpenglResourceManager get vertex buffer with id: {}", indexBufferId);
@@ -212,6 +284,13 @@ namespace CoreEngine::Renderer::Opengl {
 		if (isOnFree) return;
 		if (mTextures.contains(textureId)) {
 			mTextures.erase(textureId);
+			for (auto it = mTexturePathCache.begin(); it != mTexturePathCache.end(); ) {
+				if (it->second == textureId) {
+					it = mTexturePathCache.erase(it);
+				} else {
+					++it;
+				}
+			}
 			IP_ENGINE_TRACE("OpenglResourceManager removed texture with id: {}", textureId);
 			return;
 		}
@@ -228,4 +307,3 @@ namespace CoreEngine::Renderer::Opengl {
 		IP_ENGINE_WARN("OpenglResourceManager cannot remove cubemap with id {} because it does not exist", cubeMapId);
 	}
 }
-

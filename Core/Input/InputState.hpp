@@ -1,10 +1,10 @@
 #pragma once
-#include <Input/IKeyboardInput.hpp>
-#include <Input/IMouseInput.hpp>
+#include <Input/KeyboardInput.hpp>
+#include <Input/MouseInput.hpp>
 
 namespace CoreEngine::Input {
-	struct InputState {
-		IKeyboardInput* KeyboardInput;
-		IMouseInput* MouseInput;
+	struct CORE_API InputState {
+		CoreEngine::Input::KeyboardInput* KeyboardInput = nullptr;
+		CoreEngine::Input::MouseInput* MouseInput = nullptr;
 	};
 }

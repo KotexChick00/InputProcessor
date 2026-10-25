@@ -1,5 +1,6 @@
 #include <Renderer/Opengl/OpenglShader.hpp>
 #include <Renderer/Opengl/OpenglTexture.hpp>
+#include <Renderer/Opengl/OpenglResourceManager.hpp>
 #include <Renderer/Resource/ITexture.hpp>
 #include <Logger/Logger.hpp>
 #include <fstream>
@@ -48,12 +49,14 @@ namespace CoreEngine::Renderer::Opengl {
 
 	OpenglShader::~OpenglShader() {
 		if (mProgramID != 0) {
+			OpenglResourceManager::GetInstance()->RemoveShader(GetShaderId());
 			IP_ENGINE_TRACE("Shader program destroyed id: {}", mProgramID);
 			glDeleteProgram(mProgramID);
 		}
 	}
 
 	void OpenglShader::Use() {
+		mTextureUnitCounter = 0;
 		glUseProgram(mProgramID);
 	}
 

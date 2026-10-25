@@ -1,11 +1,12 @@
 #pragma once
-#include <Renderer/Resource/IResouceManager.hpp>
+#include <Renderer/Resource/IResourceManager.hpp>
 #include <Renderer/Opengl/OpenglVertexBuffer.hpp>
 #include <Renderer/Opengl/OpenglIndexBuffer.hpp>
 #include <Renderer/Opengl/OpenglShader.hpp>
 #include <Renderer/Opengl/OpenglTexture.hpp>
 #include <Renderer/Opengl/OpenglCubeMap.hpp>
 #include <Renderer/Opengl/OpenglUniformBuffer.hpp>
+#include <Renderer/Opengl/OpenglFrameBuffer.hpp>
 #include <unordered_map>
 #include <vector>
 
@@ -36,6 +37,16 @@ namespace CoreEngine::Renderer::Opengl {
 		// Uniform buffer API
 		IUniformBuffer* GetUniformBuffer(UniformBufferID uniformBufferId) override;
 
+		IVertexBuffer* CreateVertexBuffer() override;
+		IIndexBuffer* CreateIndexBuffer() override;
+		IShader* CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource) override;
+		IShader* CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile) override;
+		ITexture* CreateTexture(const std::string& file) override;
+		ITexture* CreateTextureFromMemory(const unsigned char* data, unsigned int size) override;
+		ICubeMap* CreateCubeMap(const CubemapTextureFiles& textureFiles) override;
+		IUniformBuffer* CreateUniformBuffer() override;
+		IFrameBuffer* CreateColorFrameBuffer(unsigned int width, unsigned int height) override;
+
 		void InsertVertexBuffer(OpenglVertexBuffer* vertexBuffer);
 		void InsertIndexBuffer(OpenglIndexBuffer* openglIndexBuffer);
 		void InsertShader(OpenglShader* shader);
@@ -57,6 +68,10 @@ namespace CoreEngine::Renderer::Opengl {
 		std::unordered_map<TextureID, OpenglTexture*> mTextures;
 		std::unordered_map<CubeMapID, OpenglCubeMap*> mCubeMaps;
 		std::unordered_map<UniformBufferID, OpenglUniformBuffer*> mUniformBuffers;
+
+		///
+		std::unordered_map<std::string, TextureID> mTexturePathCache;
+		///
 
 		bool isOnFree = false;
 

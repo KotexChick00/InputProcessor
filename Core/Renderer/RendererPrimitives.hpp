@@ -1,21 +1,26 @@
 #pragma once
+#include <pch.h>
 
 namespace CoreEngine::Renderer {
 #pragma region Buffers
-	enum class ClearBufferMasks {
+	enum class CORE_API ClearBufferMasks {
 		Color = 1,
 		Depth = 1 << 1
 	};
 
-	inline bool HasFlag(ClearBufferMasks a, ClearBufferMasks b) {
-		return static_cast<bool>(static_cast<int>(a) | static_cast<int>(b));
+	inline ClearBufferMasks operator|(ClearBufferMasks a, ClearBufferMasks b) {
+		return static_cast<ClearBufferMasks>(static_cast<int>(a) | static_cast<int>(b));
 	}
 
-	enum class RenderMode {
+	inline bool HasFlag(ClearBufferMasks a, ClearBufferMasks b) {
+		return static_cast<bool>(static_cast<int>(a) & static_cast<int>(b)) != 0;
+	}
+
+	enum class CORE_API RenderMode {
 		Triangles = 0
 	};
 
-	struct ColorRGB {
+	struct CORE_API ColorRGB {
 		float Red;
 		float Green;
 		float Blue;
@@ -23,7 +28,7 @@ namespace CoreEngine::Renderer {
 		ColorRGB(float red, float green, float blue) : Red(red), Green(green), Blue(blue) {}
 	};
 
-	struct ColorRGBA {
+	struct CORE_API ColorRGBA {
 		float Red;
 		float Green;
 		float Blue;
@@ -34,25 +39,25 @@ namespace CoreEngine::Renderer {
 
 #pragma endregion
 #pragma region CullFace
-	enum class CullFaceMode {
+	enum class CORE_API CullFaceMode {
 		Front = 0,
 		Back = 1,
 		FrontAndBack = 2
 	};
 
-	enum class CullFaceDirection {
+	enum class CORE_API CullFaceDirection {
 		ClockWise,
 		CounterClockWise
 	};
 
-	struct CullFaceOptions {
+	struct CORE_API CullFaceOptions {
 		bool Enabled = false;
-		CullFaceMode CullFaceMode = CullFaceMode::Back;
-		CullFaceDirection CullFaceDirection = CullFaceDirection::CounterClockWise;
+		CoreEngine::Renderer::CullFaceMode CullFaceMode = CullFaceMode::Back;
+		CoreEngine::Renderer::CullFaceDirection CullFaceDirection = CullFaceDirection::CounterClockWise;
 	};
 #pragma endregion
 #pragma region Depth
-	enum class DepthPassFunc {
+	enum class CORE_API DepthPassFunc {
 		Always,
 		Never,
 		Less,
@@ -63,19 +68,19 @@ namespace CoreEngine::Renderer {
 		GreaterEqual
 	};
 
-	enum class DepthOperation {
+	enum class CORE_API DepthOperation {
 		ReadOnly, // Although fragment passed but not write the value to the buffer
 		ReadAndWrite,
 	};
 
-	struct DepthOptions {
+	struct CORE_API DepthOptions {
 		bool Enabled = false;
 		DepthPassFunc PassFunc = DepthPassFunc::Less;
 		DepthOperation Operation = DepthOperation::ReadOnly;
 	};
 #pragma endregion
 #pragma region Stencil
-	enum class StencilPassFunc {
+	enum class CORE_API StencilPassFunc {
 		Always,
 		Never,
 		Less,
@@ -86,7 +91,7 @@ namespace CoreEngine::Renderer {
 		GreaterEqual
 	};
 
-	enum class StencilAction {
+	enum class CORE_API StencilAction {
 		Keep,
 		SetZero,
 		Replace,
@@ -97,7 +102,7 @@ namespace CoreEngine::Renderer {
 		InvertBitWise		// Invert bit in the buffer
 	};
 
-	struct StencilOptions {
+	struct CORE_API StencilOptions {
 		bool Enabled = false;
 		StencilPassFunc PassFunc = StencilPassFunc::Less;
 		int ReferenceValue = 0x00;
@@ -111,7 +116,7 @@ namespace CoreEngine::Renderer {
 #pragma region Blend
 
 	// Note: If use are trying to use Dual Source Blending, then you should export out when writing Fragment shader
-	enum class BlendEquation {
+	enum class CORE_API BlendEquation {
 		Add,
 		Substract,
 		ReverseSubstract,
@@ -119,7 +124,7 @@ namespace CoreEngine::Renderer {
 		Max
 	};
 
-	enum class BlendRGBFactorFunc {
+	enum class CORE_API BlendRGBFactorFunc {
 		Zero,
 		One,
 		SourceColor,
@@ -136,7 +141,7 @@ namespace CoreEngine::Renderer {
 		OneMinusConstantAlpha
 	};
 
-	enum class BlendAlphaFactorFunc {
+	enum class CORE_API BlendAlphaFactorFunc {
 		Zero,
 		One,
 		SourceAlpha,
@@ -147,9 +152,9 @@ namespace CoreEngine::Renderer {
 		OneMinusConstantAlpha
 	};
 
-	struct BlendOptions {
+	struct CORE_API BlendOptions {
 		bool Enabled = false;
-		BlendEquation BlendEquation = BlendEquation::Add;
+		CoreEngine::Renderer::BlendEquation BlendEquation = BlendEquation::Add;
 
 		BlendRGBFactorFunc SourceFactorRGBFunc = BlendRGBFactorFunc::One;
 		BlendRGBFactorFunc DestinationFactorRGBFunc = BlendRGBFactorFunc::One;
@@ -159,19 +164,19 @@ namespace CoreEngine::Renderer {
 
 #pragma endregion
 #pragma region Viewport
-	struct ViewPortOptions {
+	struct CORE_API ViewPortOptions {
 		unsigned int X = 0;
 		unsigned int Y = 0;
 		unsigned int Width;
 		unsigned int Height;
 	};
 #pragma endregion
-	struct RendererConfiguration {
+	struct CORE_API RendererConfiguration {
 		ColorRGBA ClearBufferColor;
-		ViewPortOptions ViewPortOptions;
-		DepthOptions DepthOptions;
-		CullFaceOptions CullFaceOptions;
-		StencilOptions StencilOptions;
-		BlendOptions BlendOptions;
+		CoreEngine::Renderer::ViewPortOptions ViewPortOptions;
+		CoreEngine::Renderer::DepthOptions DepthOptions;
+		CoreEngine::Renderer::CullFaceOptions CullFaceOptions;
+		CoreEngine::Renderer::StencilOptions StencilOptions;
+		CoreEngine::Renderer::BlendOptions BlendOptions;
 	};
 }

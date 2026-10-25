@@ -46,6 +46,7 @@ namespace CoreEngine::Renderer::Opengl {
 
 		GLuint newVboId = 0;
 		glGenBuffers(1, &newVboId);
+		mVboIds[location] = newVboId;
 		if (newVboId == 0) {
 			IP_ENGINE_ERROR("Can't create new Vertex Buffer Object");
 			return;
@@ -77,6 +78,7 @@ namespace CoreEngine::Renderer::Opengl {
 
 		unsigned int newVboId = 0;
 		glGenBuffers(1, &newVboId);
+		mVboIds[location] = newVboId;
 		if (newVboId == 0) {
 			IP_ENGINE_ERROR("Can't create new Vertex Buffer Object");
 			return;

@@ -35,9 +35,10 @@ namespace CoreEngine::Renderer::Opengl {
 		unsigned int size,
 		IndexBufferRenderMode renderMode
 	) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEboId);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, OpenglConstantFactory::ToGLRenderMode(renderMode));
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		// Storage upload must not alter VAO state or require a bound VAO in core profiles.
+		glBindBuffer(GL_COPY_WRITE_BUFFER, mEboId);
+		glBufferData(GL_COPY_WRITE_BUFFER, size, data, OpenglConstantFactory::ToGLRenderMode(renderMode));
+		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 	}
 
 	void OpenglIndexBuffer::Bind() {
