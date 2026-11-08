@@ -1,17 +1,10 @@
 {
   "dependencies": [
     "assimp",
-    "glad",
-    "glfw3",
     "glm",
-    {
-      "name": "imgui",
-      "features": [
-        "docking-experimental"
-      ]
-    },
     "spdlog",
     "stb",
-    "wxwidgets"
+    "wxwidgets",
+    "glad"
   ]
 }

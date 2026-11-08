@@ -1,6 +1,14 @@
+// Force `assert()` to remain active even when the build system defines
+// NDEBUG (Release presets, third-party toolchains). Without this guard the
+// entire test suite silently degrades to a no-op because every check is an
+// `assert(...)` call.
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+
 #include <glad/glad.h>
 #include <Application/Application.hpp>
-#include <Model/Importers/ModelImporter/GltfModelFormatHandler.hpp>
+#include <Model/Importers/AssimpModelImporter/AssimpModelImporter.hpp>
 #include <Camera/OrbitCamera/OrbitCameraController.hpp>
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
@@ -70,8 +78,8 @@ public:
         delete indexBuffer;
         assert(glGetError() == GL_NO_ERROR);
 
-        Model::GltfModelFormatHandler handler(GetRenderer()->GetResourceManager());
-        model.reset(handler.Handle(TEST_ASSET_DIR "/embedded.glb"));
+        Model::AssimpModelImporter importer(GetRenderer()->GetResourceManager());
+        model = importer.Import(TEST_ASSET_DIR "/embedded.glb");
         assert(model && glGetError() == GL_NO_ERROR); // Decode and upload the actual embedded PNG.
         shader = GetRenderer()->GetResourceManager()->CreateShaderFromSources(R"(#version 330 core
             layout(location=0) in vec3 position;

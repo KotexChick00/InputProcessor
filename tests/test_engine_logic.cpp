@@ -1,3 +1,11 @@
+// Force `assert()` to remain active even when the build system defines
+// NDEBUG (Release presets, third-party toolchains). Without this guard the
+// entire test suite silently degrades to a no-op because every check is an
+// `assert(...)` call.
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
+
 #include <iostream>
 #include <cassert>
 #include <cmath>
@@ -6,7 +14,7 @@
 #include <filesystem>
 #include <stdexcept>
 #include <wx/defs.h>
-#include <Model/Importers/ModelImporter/ModelImporter.hpp>
+#include <Model/Importers/AssimpModelImporter/AssimpModelImporter.hpp>
 #include <Model/Importers/AssimpModelImporter/AssimpBoundingBox.h>
 
 // Math & Core
@@ -23,8 +31,8 @@
 #include <Input/Wx/WxKeyboardInput.hpp>
 
 // Importers
-#include <Model/Importers/ModelImporter/ModelFormatHandler.hpp>
-#include <Model/Importers/ModelImporter/GltfModelFormatHandler.hpp>
+// (ModelImporter/ chain-of-responsibility folder removed; tests now use
+// AssimpModelImporter directly.)
 
 using OrbitCamera = Domain::Camera::OrbitCamera::OrbitCamera;
 using OrbitCameraController = Domain::Camera::OrbitCamera::OrbitCameraController;
@@ -209,40 +217,8 @@ void TestWxInputStateMachine() {
     std::cout << "  -> WxInput State Machine PASS!\n";
 }
 
-// Mock handler to test Chain of Responsibility forwarding
-class MockFallbackHandler : public ModelFormatHandler {
-public:
-    bool wasCalled = false;
-    std::string handledPath;
-
-    RenderModel* Handle(const char* file) override {
-        wasCalled = true;
-        handledPath = file;
-        return nullptr;
-    }
-};
-
-void TestGltfFormatChain() {
-    std::cout << "[RUN] Testing GltfModelFormatHandler Chain of Responsibility...\n";
-
-    // Test chain delegation when non-gltf file is passed
-    // GltfModelFormatHandler calls Next(file) for non-gltf files
-    GltfModelFormatHandler gltfHandler(nullptr);
-    MockFallbackHandler fallback;
-    gltfHandler.SetNext(&fallback);
-
-    // Non-gltf file should bypass gltf handler and reach fallback handler
-    gltfHandler.Handle("house.obj");
-    assert(fallback.wasCalled == true);
-    assert(fallback.handledPath == "house.obj");
-
-    fallback.wasCalled = false;
-    gltfHandler.Handle("scene.fbx");
-    assert(fallback.wasCalled == true);
-    assert(fallback.handledPath == "scene.fbx");
-
-    std::cout << "  -> GltfModelFormatHandler Chain PASS!\n";
-}
+// Mock handler removed (chain-of-responsibility folder was deleted).
+// TestRealGltfImports below now exercises AssimpModelImporter directly.
 
 #ifndef TEST_ASSET_DIR
 #define TEST_ASSET_DIR "tests/assets"
@@ -287,8 +263,7 @@ public:
 void TestRealGltfImports() {
     std::cout << "[RUN] Reading real GLTF and GLB assets...\n";
     TestResources resources;
-    GltfModelFormatHandler handler(&resources);
-    ModelImporter importer(&handler);
+    AssimpModelImporter importer(&resources);
     auto load = [&](const char* name) {
         return importer.Import((std::filesystem::path(TEST_ASSET_DIR) / name).string().c_str());
     };
@@ -321,15 +296,12 @@ void TestRealGltfImports() {
     assert(shared && resources.embeddedCount == 2); // Cache keys must not outlive an Assimp scene.
     assert(!load("invalid.gltf"));
     assert(!load("missing.glb"));
+    // .obj fallback is now handled by Assimp directly (no chain); an unknown
+    // .obj file is reported as a load failure rather than forwarded to a
+    // chain-of-responsibility next handler.
     assert(!load("unknown.obj"));
     assert(!importer.Import(nullptr));
     assert(!importer.Import(""));
-    MockFallbackHandler fallback;
-    handler.SetNext(&fallback);
-    handler.Handle("missing.GLTF");
-    assert(!fallback.wasCalled); // Uppercase extensions route through the importer.
-    ModelImporter empty(nullptr);
-    assert(!empty.Import("triangle.gltf"));
     std::cout << "  -> Real GLTF/GLB imports PASS!\n";
 }
 
@@ -459,7 +431,6 @@ int main() {
     TestOrbitCamera();
     TestOrbitCameraController();
     TestWxInputStateMachine();
-    TestGltfFormatChain();
     TestRealGltfImports();
     TestCameraBoundariesAndKeyboard();
     TestCameraBindingsAndGestures();

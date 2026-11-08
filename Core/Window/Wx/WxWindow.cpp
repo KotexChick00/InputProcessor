@@ -24,9 +24,10 @@ namespace CoreEngine::Window::Wx {
         WxEngineFrame(WxWindow* owner,
                       const wxString& title,
                       wxSize size)
-            : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size)
+            : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)
             , mOwner(owner)
         {
+            (void)size; // size applied via SetClientSize below; passed for API symmetry.
             Bind(wxEVT_CLOSE_WINDOW, &WxEngineFrame::OnClose, this);
         }
 
@@ -121,7 +122,12 @@ namespace CoreEngine::Window::Wx {
             if (mouseInput) {
                 if (!mouseInput->CheckIsPressed(inputBtn))
                     mouseInput->SetDelta(0.0f, 0.0f);
-                static_cast<Input::Wx::WxMouseInput*>(mouseInput)->NotifyButtonDown(inputBtn);
+                // Use dynamic_cast so a non-Wx MouseInput injected via
+                // ApplicationConfiguration::InjectedWindow is rejected with a clear
+                // assertion instead of UB.
+                auto* wxMouse = dynamic_cast<Input::Wx::WxMouseInput*>(mouseInput);
+                CORE_ASSERT(wxMouse != nullptr && "WxEngineCanvas expects a WxMouseInput");
+                if (wxMouse) wxMouse->NotifyButtonDown(inputBtn);
             }
 
             auto cb = mOwner->GetMouseButtonEventCallback();
@@ -138,8 +144,11 @@ namespace CoreEngine::Window::Wx {
 
             Input::MouseButton inputBtn = _ToInputMouseButton(btn);
             auto mouseInput = mOwner->GetInput().MouseInput;
-            if (mouseInput)
-                static_cast<Input::Wx::WxMouseInput*>(mouseInput)->NotifyButtonUp(inputBtn);
+            if (mouseInput) {
+                auto* wxMouse = dynamic_cast<Input::Wx::WxMouseInput*>(mouseInput);
+                CORE_ASSERT(wxMouse != nullptr && "WxEngineCanvas expects a WxMouseInput");
+                if (wxMouse) wxMouse->NotifyButtonUp(inputBtn);
+            }
 
             auto cb = mOwner->GetMouseButtonEventCallback();
             if (cb) cb({ btn, state });
@@ -184,8 +193,11 @@ namespace CoreEngine::Window::Wx {
             int kc = evt.GetKeyCode();
 
             auto kbInput = mOwner->GetInput().KeyboardInput;
-            if (kbInput)
-                static_cast<Input::Wx::WxKeyboardInput*>(kbInput)->NotifyKeyDown(kc);
+            if (kbInput) {
+                auto* wxKb = dynamic_cast<Input::Wx::WxKeyboardInput*>(kbInput);
+                CORE_ASSERT(wxKb != nullptr && "WxEngineCanvas expects a WxKeyboardInput");
+                if (wxKb) wxKb->NotifyKeyDown(kc);
+            }
 
             WindowKeyboardKey      key   = WxWindow::_ToWindowKeyboardKey(kc);
             WindowKeyboardKeyState state = evt.IsAutoRepeat()
@@ -204,8 +216,11 @@ namespace CoreEngine::Window::Wx {
             int kc = evt.GetKeyCode();
 
             auto kbInput = mOwner->GetInput().KeyboardInput;
-            if (kbInput)
-                static_cast<Input::Wx::WxKeyboardInput*>(kbInput)->NotifyKeyUp(kc);
+            if (kbInput) {
+                auto* wxKb = dynamic_cast<Input::Wx::WxKeyboardInput*>(kbInput);
+                CORE_ASSERT(wxKb != nullptr && "WxEngineCanvas expects a WxKeyboardInput");
+                if (wxKb) wxKb->NotifyKeyUp(kc);
+            }
 
             WindowKeyboardKey key = WxWindow::_ToWindowKeyboardKey(kc);
             auto cb = mOwner->GetKeyboardEventCallback();
@@ -232,8 +247,16 @@ namespace CoreEngine::Window::Wx {
         void ResetInput() {
             if (!mOwner) return;
             auto input = mOwner->GetInput();
-            if (input.KeyboardInput) *static_cast<Input::Wx::WxKeyboardInput*>(input.KeyboardInput) = Input::Wx::WxKeyboardInput();
-            if (input.MouseInput) *static_cast<Input::Wx::WxMouseInput*>(input.MouseInput) = Input::Wx::WxMouseInput();
+            if (input.KeyboardInput) {
+                auto* wxKb = dynamic_cast<Input::Wx::WxKeyboardInput*>(input.KeyboardInput);
+                CORE_ASSERT(wxKb != nullptr && "WxEngineCanvas expects a WxKeyboardInput");
+                if (wxKb) *wxKb = Input::Wx::WxKeyboardInput();
+            }
+            if (input.MouseInput) {
+                auto* wxMouse = dynamic_cast<Input::Wx::WxMouseInput*>(input.MouseInput);
+                CORE_ASSERT(wxMouse != nullptr && "WxEngineCanvas expects a WxMouseInput");
+                if (wxMouse) *wxMouse = Input::Wx::WxMouseInput();
+            }
         }
 
         void OnFocusLost(wxFocusEvent& evt) {
@@ -279,15 +302,27 @@ namespace CoreEngine::Window::Wx {
     WxWindow::WxWindow() = default;
 
     WxWindow::~WxWindow() {
-        if (mGLCanvas && mGLCanvas->HasCapture()) mGLCanvas->ReleaseMouse();
+        // Guard against double-free: if the wxFrame was force-destroyed by wxWidgets
+        // (e.g. OS taskkill, session logout, or wxApp cleanup), mFrame may already
+        // be invalid. We null each member after deleting so a second pass is safe.
+        if (mGLCanvas) {
+            if (mGLCanvas->HasCapture()) mGLCanvas->ReleaseMouse();
+            mGLCanvas = nullptr; // mGLCanvas is a child of mFrame; deleted below via mFrame.
+        }
         delete mGLContext;
-        // No event dispatch is in progress here; the application loop has stopped.
-        delete mFrame;
+        mGLContext = nullptr;
+        if (mFrame) {
+            // Destroy() handles child destruction (canvas, etc.) and is safe to call
+            // even if the frame is in the process of being closed.
+            mFrame->Destroy();
+            mFrame = nullptr;
+        }
         mEventLoopActivator.reset();
         mEventLoop.reset();
         if (mOwnsWxApp) {
             wxTheApp->OnExit();
             wxEntryCleanup();
+            mOwnsWxApp = false;
         }
     }
 
@@ -307,9 +342,9 @@ namespace CoreEngine::Window::Wx {
             mEventLoopActivator = std::make_unique<wxEventLoopActivator>(mEventLoop.get());
         }
 
-        mKeyboardInput = std::make_shared<Input::Wx::WxKeyboardInput>();
-        mMouseInput = std::make_shared<Input::Wx::WxMouseInput>();
-        mFrame = new WxEngineFrame(this, wxString::FromUTF8(config.Title.c_str()), wxDefaultSize);
+        mKeyboardInput = std::make_unique<Input::Wx::WxKeyboardInput>();
+        mMouseInput = std::make_unique<Input::Wx::WxMouseInput>();
+        mFrame = new WxEngineFrame(this, wxString::FromUTF8(config.Title.c_str()), wxSize(config.Width, config.Height));
         mFrame->SetClientSize(config.Width, config.Height);
         wxGLAttributes display;
         display.PlatformDefaults().RGBA().DoubleBuffer().Depth(24).Stencil(8).EndList();

@@ -7,152 +7,149 @@
 #include <stdexcept>
 
 namespace CoreEngine {
-	Application::Application(ApplicationConfiguration& configuration) : mConfig(configuration) { }
+        Application::Application(ApplicationConfiguration& configuration) : mConfig(configuration) { }
 
-	bool Application::Init() {
-		if (!mConfig.Width || !mConfig.Height || !mConfig.MaxFPS || !mConfig.Title)
-			throw std::invalid_argument("Invalid application configuration");
-		SetupLogger();
-		SetupWindow();
-		if (!mWindow || mWindow->CheckShouldClose()) return false;
-		SetupRenderer();
-		SetupEvents();
-		GetTime()->SetTimeNow(mWindow->GetCurrentSeconds());
-		return mRenderer != nullptr;
-	}
+        bool Application::Init() {
+                if (!mConfig.Width || !mConfig.Height || !mConfig.MaxFPS || !mConfig.Title)
+                        throw std::invalid_argument("Invalid application configuration");
+                SetupLogger();
+                SetupWindow();
+                if (!mWindow || mWindow->CheckShouldClose()) return false;
+                SetupRenderer();
+                SetupEvents();
+                GetTime()->SetTimeNow(mWindow->GetCurrentSeconds());
+                return mRenderer != nullptr;
+        }
 
-	void Application::Run() {
-		if (!Init()) throw std::runtime_error("Failed to initialize application");
-		try {
-			OnInitClient();
-			while (!mCloseRequested && !mWindow->CheckShouldClose()) {
-				BeginLoop();
-				if (mCloseRequested || mWindow->CheckShouldClose()) break;
-				OnLoopClient();
-				EndLoop();
-			}
-		} catch (...) {
-			OnShutdownClient();
-			Shutdown();
-			throw;
-		}
-		OnShutdownClient();
-		Shutdown();
-	}
+        void Application::Run() {
+                if (!Init()) throw std::runtime_error("Failed to initialize application");
+                try {
+                        OnInitClient();
+                        while (!mCloseRequested && !mWindow->CheckShouldClose()) {
+                                BeginLoop();
+                                if (mCloseRequested || mWindow->CheckShouldClose()) break;
+                                OnLoopClient();
+                                EndLoop();
+                        }
+                } catch (...) {
+                        OnShutdownClient();
+                        Shutdown();
+                        throw;
+                }
+                OnShutdownClient();
+                Shutdown();
+        }
 
-	void Application::BeginLoop() {
-		Time::Time* time = GetTime();
-		float minDeltaTime = 1.f / mConfig.MaxFPS;
-		float prevFrameTime = time->GetTimeNow();
+        void Application::BeginLoop() {
+                Time::Time* time = GetTime();
+                float minDeltaTime = 1.f / mConfig.MaxFPS;
+                float prevFrameTime = time->GetTimeNow();
 
-		float remaining = minDeltaTime - (mWindow->GetCurrentSeconds() - prevFrameTime);
-		if (remaining > 0) std::this_thread::sleep_for(std::chrono::duration<float>(remaining));
-		float currentTime = mWindow->GetCurrentSeconds();
-		time->SetDeltaTime(currentTime - prevFrameTime);
-		time->SetTimeNow(currentTime);
+                float remaining = minDeltaTime - (mWindow->GetCurrentSeconds() - prevFrameTime);
+                if (remaining > 0) std::this_thread::sleep_for(std::chrono::duration<float>(remaining));
+                float currentTime = mWindow->GetCurrentSeconds();
+                time->SetDeltaTime(currentTime - prevFrameTime);
+                time->SetTimeNow(currentTime);
 
-		mWindow->PollEvents();
-	}
+                mWindow->PollEvents();
+        }
 
-	void Application::EndLoop() {
-		mWindow->EndFrame();
-		mWindow->SwapBuffers();
-	}
+        void Application::EndLoop() {
+                mWindow->EndFrame();
+                mWindow->SwapBuffers();
+        }
 
-	void Application::Shutdown() {
-		mRenderer.reset(); // Release GPU resources while the window's context is current.
-		if (mWindow) mWindow->Close();
-		mWindow.reset();
-		mInputState = {};
-	}
+        void Application::Shutdown() {
+                mRenderer.reset(); // Release GPU resources while the window's context is current.
+                if (mWindow) mWindow->Close();
+                mWindow.reset();
+                mInputState = {};
+        }
 
-	void Application::SetupWindow() {
-		if (mConfig.WindowPlatformSpec == WindowPlatformSpec::Injection) {
-			mWindow.reset(mConfig.InjectedWindow);
-		}
-		else {
-			Window::IWindow* window = nullptr;
-			switch (mConfig.WindowPlatformSpec) {
-			case WindowPlatformSpec::GLFW:
-				window = Window::WindowPlatformFactory::Create(Window::WindowPlatformSpec::GLFW);
-				break;
-			case WindowPlatformSpec::Wx:
-				window = Window::WindowPlatformFactory::Create(Window::WindowPlatformSpec::Wx);
-				break;
-			case WindowPlatformSpec::SDL:
-				window = Window::WindowPlatformFactory::Create(Window::WindowPlatformSpec::SDL);
-				break;
-			default:
-				CORE_ASSERT("Currently Window platform spec not found");
-			}
-			mWindow.reset(window);
-		}
+        void Application::SetupWindow() {
+                if (mConfig.WindowPlatformSpec == WindowPlatformSpec::Injection) {
+                        mWindow.reset(mConfig.InjectedWindow);
+                }
+                else {
+                        Window::IWindow* window = nullptr;
+                        switch (mConfig.WindowPlatformSpec) {
+                        case WindowPlatformSpec::Wx:
+                                window = Window::WindowPlatformFactory::Create(Window::WindowPlatformSpec::Wx);
+                                break;
+                        case WindowPlatformSpec::SDL:
+                                window = Window::WindowPlatformFactory::Create(Window::WindowPlatformSpec::SDL);
+                                break;
+                        default:
+                                CORE_ASSERT(false && "Currently Window platform spec not found");
+                        }
+                        mWindow.reset(window);
+                }
 
-		Window::WindowConfiguration windowConfig;
-		windowConfig.Width = mConfig.Width;
-		windowConfig.Height = mConfig.Height;
-		windowConfig.Title = mConfig.Title;
+                Window::WindowConfiguration windowConfig;
+                windowConfig.Width = mConfig.Width;
+                windowConfig.Height = mConfig.Height;
+                windowConfig.Title = mConfig.Title;
 
-		if (mWindow) {
-			mWindow->Init(windowConfig);
-			mInputState = mWindow->GetInput();
-		}
-	}
+                if (mWindow) {
+                        mWindow->Init(windowConfig);
+                        mInputState = mWindow->GetInput();
+                }
+        }
 
-	void Application::SetupLogger() {
-		Logger::Logger::SetClientImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CLIENT"));
-		Logger::Logger::SetEngineImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CORE_ENGINE"));
-	}
+        void Application::SetupLogger() {
+                Logger::Logger::SetClientImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CLIENT"));
+                Logger::Logger::SetEngineImplementation(Logger::LoggerFactory::Create(Logger::LoggerSpec::SpdLog, "CORE_ENGINE"));
+        }
 
-	void Application::SetupRenderer() {
-		if (mConfig.RenderAPI == RenderAPI::Injection) {
-			mRenderer.reset(mConfig.InjectedRenderer);
-		}
-		else {
-			Renderer::RendererSpec spec = Renderer::RendererSpec::Opengl;;
-			switch (mConfig.RenderAPI) {
-			case RenderAPI::Opengl: 
-				spec = Renderer::RendererSpec::Opengl;
-				break;
-			case RenderAPI::DirectX:
-				spec = Renderer::RendererSpec::DirectX;
-				break;
-			case RenderAPI::Vulkan:
-				spec = Renderer::RendererSpec::Vulkan;
-				break;
-			default:
-				CORE_ASSERT("Can't find the renderer API match");
-				break;
-			}
+        void Application::SetupRenderer() {
+                if (mConfig.RenderAPI == RenderAPI::Injection) {
+                        mRenderer.reset(mConfig.InjectedRenderer);
+                }
+                else {
+                        Renderer::RendererSpec spec = Renderer::RendererSpec::Opengl;;
+                        switch (mConfig.RenderAPI) {
+                        case RenderAPI::Opengl: 
+                                spec = Renderer::RendererSpec::Opengl;
+                                break;
+                        case RenderAPI::DirectX:
+                                spec = Renderer::RendererSpec::DirectX;
+                                break;
+                        case RenderAPI::Vulkan:
+                                spec = Renderer::RendererSpec::Vulkan;
+                                break;
+                        default:
+                                CORE_ASSERT("Can't find the renderer API match");
+                                break;
+                        }
 
-			mRenderer.reset(Renderer::RendererFactory::Create(spec));
-		}
+                        mRenderer.reset(Renderer::RendererFactory::Create(spec));
+                }
         
-		if (!mRenderer) throw std::runtime_error("Renderer is unavailable");
+                if (!mRenderer) throw std::runtime_error("Renderer is unavailable");
         auto config = mRenderer->GetConfig();
         config.ViewPortOptions.X = 0;
         config.ViewPortOptions.Y = 0;
         config.ViewPortOptions.Width = mConfig.Width;
         config.ViewPortOptions.Height = mConfig.Height;
         mRenderer->Config(config);
-	}
+        }
 
-	void Application::SetupEvents() {
-		mWindow->OnWindowReiszeEventCallback([this](CoreEngine::Window::WindowResizeEventContext ec) {
-			if (mRenderer && ec.Width && ec.Height) {
-				auto config = mRenderer->GetConfig();
-				config.ViewPortOptions.Width = ec.Width;
-				config.ViewPortOptions.Height = ec.Height;
-				mRenderer->Config(config);
-			}
-			WindowResizeEventContext evc(ec.Width, ec.Height);
-			this->mEventDispatcher.Notify(evc);
-			});
+        void Application::SetupEvents() {
+                mWindow->OnWindowReiszeEventCallback([this](CoreEngine::Window::WindowResizeEventContext ec) {
+                        if (mRenderer && ec.Width && ec.Height) {
+                                auto config = mRenderer->GetConfig();
+                                config.ViewPortOptions.Width = ec.Width;
+                                config.ViewPortOptions.Height = ec.Height;
+                                mRenderer->Config(config);
+                        }
+                        WindowResizeEventContext evc(ec.Width, ec.Height);
+                        this->mEventDispatcher.Notify(evc);
+                        });
 
-		mWindow->OnKeyboardEventCallback([this](CoreEngine::Window::WindowKeyboardKeyEventContext ec) {
+                mWindow->OnKeyboardEventCallback([this](CoreEngine::Window::WindowKeyboardKeyEventContext ec) {
             KeyBoardKeyEventContext evc(ToApplicationKeyboardKey(ec.Key), ToApplicationKeyboardKeyState(ec.State));
             this->mEventDispatcher.Notify(evc);
-			});
+                        });
 
         mWindow->OnMouseButtonEventCallback([this](CoreEngine::Window::WindowMouseButtonEventContext ec) {
             MouseButtonEventContext evc(ToApplicationMouseButton(ec.Button), ToApplicationMouseButtonState(ec.State));
@@ -163,7 +160,7 @@ namespace CoreEngine {
             MouseScrollEventContext evc(ec.OffsetX, ec.OffsetY);
             this->mEventDispatcher.Notify(evc);
             });
-	}
+        }
 
     KeyboardKey Application::ToApplicationKeyboardKey(Window::WindowKeyboardKey key) {
         switch (key) {
@@ -299,7 +296,7 @@ namespace CoreEngine {
         }
     }
 
-	KeyboardKeyState Application::ToApplicationKeyboardKeyState(Window::WindowKeyboardKeyState keyState) {
+        KeyboardKeyState Application::ToApplicationKeyboardKeyState(Window::WindowKeyboardKeyState keyState) {
         switch (keyState) {
         case Window::WindowKeyboardKeyState::None:          return KeyboardKeyState::None;
         case Window::WindowKeyboardKeyState::Pressed:       return KeyboardKeyState::Pressed;
@@ -308,7 +305,7 @@ namespace CoreEngine {
 
         default:                                            return KeyboardKeyState::None;
         }
-	}
+        }
 
     MouseButton Application::ToApplicationMouseButton(Window::WindowMouseButton mouseButton) {
         switch (mouseButton) {
@@ -325,7 +322,7 @@ namespace CoreEngine {
         }
     }
 
-	MouseButtonState Application::ToApplicationMouseButtonState(Window::WindowMouseButtonState mouseButtonState) {
+        MouseButtonState Application::ToApplicationMouseButtonState(Window::WindowMouseButtonState mouseButtonState) {
         switch (mouseButtonState) {
         case Window::WindowMouseButtonState::None:          return MouseButtonState::None;
         case Window::WindowMouseButtonState::Pressed:       return MouseButtonState::Pressed;
@@ -334,5 +331,5 @@ namespace CoreEngine {
 
         default:                                            return MouseButtonState::None;
         }
-	}
+        }
 }

@@ -4,66 +4,72 @@
 #include <Logger/Logger.hpp>
 
 namespace CoreEngine::Window::GLFW {
-	using namespace CoreEngine::Logger;
+        using namespace CoreEngine::Logger;
 
-	void GLFWWindow::Init(const WindowConfiguration& config) {
-		if (!glfwInit()) {
-			IP_ENGINE_CRITICAL("Failed to initialize GLFW.");
-			return;
-		}
+        void GLFWWindow::Init(const WindowConfiguration& config) {
+                if (!glfwInit()) {
+                        IP_ENGINE_CRITICAL("Failed to initialize GLFW.");
+                        return;
+                }
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+                glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+                glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+                glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+                glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-		mWindow = glfwCreateWindow(
-			config.Width,
-			config.Height,
-			config.Title.c_str(),
-			nullptr,
-			nullptr
-		);
+                mWindow = glfwCreateWindow(
+                        config.Width,
+                        config.Height,
+                        config.Title.c_str(),
+                        nullptr,
+                        nullptr
+                );
 
-		if (!mWindow) {
-			IP_ENGINE_CRITICAL("Failed to create GLFW window: '{}' ({}x{})", config.Title, config.Width, config.Height);
-			glfwTerminate();
-			return;
-		}
+                if (!mWindow) {
+                        IP_ENGINE_CRITICAL("Failed to create GLFW window: '{}' ({}x{})", config.Title, config.Width, config.Height);
+                        glfwTerminate();
+                        return;
+                }
 
-		glfwMakeContextCurrent(mWindow);
+                glfwMakeContextCurrent(mWindow);
 
-		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
-			IP_ENGINE_CRITICAL("Failed to initialize OpenGL loader (GLAD).");
-			Close();
-			return;
-		}
+                if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+                        IP_ENGINE_CRITICAL("Failed to initialize OpenGL loader (GLAD).");
+                        Close();
+                        return;
+                }
 
-		glfwSetWindowUserPointer(mWindow, this);
+                glfwSetWindowUserPointer(mWindow, this);
 
-		IP_ENGINE_TRACE("Window initialized successfully: '{}' ({}x{})", config.Title, config.Width, config.Height);
+                IP_ENGINE_TRACE("Window initialized successfully: '{}' ({}x{})", config.Title, config.Width, config.Height);
     
         mKeyboardInput.reset(new Input::GLFW::GLFWKeyBoardInput(mWindow));
         mMouseInput.reset(new Input::GLFW::GLFWMouseInput(mWindow));
 
         glfwSetCursorPosCallback(mWindow, [](GLFWwindow* window, double xPos, double yPos) {
             GLFWWindow* handler = static_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
-            
-            if (handler) {
-                static double lastFrameX = xPos;
-                static double lastFrameY = yPos;
 
-                double dx = xPos - lastFrameX;
-                double dy = yPos - lastFrameY;
+            if (handler) {
+                // Per-window delta tracking. Previously these were `static`
+                // locals, which shared state across every GLFWWindow instance
+                // and across create/destroy cycles, producing wrong deltas.
+                double dx, dy;
+                if (handler->mHaveLastCursorPos) {
+                    dx = xPos - handler->mLastCursorX;
+                    dy = yPos - handler->mLastCursorY;
+                } else {
+                    dx = 0.0;
+                    dy = 0.0;
+                }
+                handler->mLastCursorX = xPos;
+                handler->mLastCursorY = yPos;
+                handler->mHaveLastCursorPos = true;
 
                 auto mouseInput = handler->GetInput().MouseInput;
                 mouseInput->SetDelta(dx, dy);
                 mouseInput->SetPosition(xPos, yPos);
-                
-                lastFrameX = xPos;
-                lastFrameY = yPos;
 
                 auto callback = handler->GetMouseMoveEventCallback();
                 if (callback) {
@@ -128,44 +134,50 @@ namespace CoreEngine::Window::GLFW {
         });
     }
 
-	void GLFWWindow::PollEvents() {
-		glfwPollEvents();
-	}
+        void GLFWWindow::PollEvents() {
+                glfwPollEvents();
+        }
 
-	GLFWwindow* GLFWWindow::GetNativeWindow() {
-		return mWindow;
-	}
+        GLFWwindow* GLFWWindow::GetNativeWindow() {
+                return mWindow;
+        }
 
-	void GLFWWindow::SwapBuffers() {
-		if (mWindow) {
-			glfwSwapBuffers(mWindow);
-		}
-	}
+        void GLFWWindow::SwapBuffers() {
+                if (mWindow) {
+                        glfwSwapBuffers(mWindow);
+                }
+        }
 
-	bool GLFWWindow::CheckShouldClose() {
-		return mWindow ? glfwWindowShouldClose(mWindow) : true;
-	}
+        bool GLFWWindow::CheckShouldClose() {
+                return mWindow ? glfwWindowShouldClose(mWindow) : true;
+        }
 
-	void GLFWWindow::Close() {
-		if (mWindow) {
-			glfwDestroyWindow(mWindow);
-			mWindow = nullptr;
-			glfwTerminate();
-			IP_ENGINE_TRACE("Window closed and GLFW terminated.");
-		}
-	}
+        void GLFWWindow::Close() {
+                if (mWindow) {
+                        glfwDestroyWindow(mWindow);
+                        mWindow = nullptr;
+                        // NOTE: glfwTerminate() is intentionally NOT called here.
+                        // It tears down *all* GLFW windows and resources process-wide
+                        // (including any other GLFWWindow instance and ImGui's
+                        // imgui_impl_glfw backend). Process-wide teardown, if needed,
+                        // should be driven by an explicit RAII guard at application
+                        // scope, not per-window.
+                        mHaveLastCursorPos = false;
+                        IP_ENGINE_TRACE("Window closed.");
+                }
+        }
 
-	void GLFWWindow::OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) {
-		mMouseMoveEventCallback = callback;
-	}
+        void GLFWWindow::OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) {
+                mMouseMoveEventCallback = callback;
+        }
 
-	void GLFWWindow::OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) {
-		mMouseButtonCallback = callback;
-	}
+        void GLFWWindow::OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) {
+                mMouseButtonCallback = callback;
+        }
 
-	void GLFWWindow::OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) {
-		mWindowKeyboardKeyCallback = callback;
-	}
+        void GLFWWindow::OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) {
+                mWindowKeyboardKeyCallback = callback;
+        }
 
     void GLFWWindow::OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) {
         mMouseScrollCallback = callback;
@@ -183,36 +195,36 @@ namespace CoreEngine::Window::GLFW {
         return glfwGetTime();
     }
 
-	void GLFWWindow::Accept(IWindowVisitor* visitor) {
-		visitor->VisitGlfwWindow(this);
-	}
+        void GLFWWindow::Accept(IWindowVisitor* visitor) {
+                visitor->VisitGlfwWindow(this);
+        }
 
-	void GLFWWindow::EndFrame() {
-		mKeyboardInput->Update();
-		mMouseInput->Update();
-	}
+        void GLFWWindow::EndFrame() {
+                mKeyboardInput->Update();
+                mMouseInput->Update();
+        }
 
-	WindowMouseButton GLFWWindow::_ToWindowMouseButton(int button) {
-		switch (button) {
-		case GLFW_MOUSE_BUTTON_1: return WindowMouseButton::Button1;
-		case GLFW_MOUSE_BUTTON_2: return WindowMouseButton::Button2;
-		case GLFW_MOUSE_BUTTON_3: return WindowMouseButton::Button3;
-		case GLFW_MOUSE_BUTTON_4: return WindowMouseButton::Button4;
-		case GLFW_MOUSE_BUTTON_5: return WindowMouseButton::Button5;
-		case GLFW_MOUSE_BUTTON_6: return WindowMouseButton::Button6;
-		case GLFW_MOUSE_BUTTON_7: return WindowMouseButton::Button7;
-		case GLFW_MOUSE_BUTTON_8: return WindowMouseButton::Button8;
-		default: return WindowMouseButton::ButtonLast;
-		}
-	}
+        WindowMouseButton GLFWWindow::_ToWindowMouseButton(int button) {
+                switch (button) {
+                case GLFW_MOUSE_BUTTON_1: return WindowMouseButton::Button1;
+                case GLFW_MOUSE_BUTTON_2: return WindowMouseButton::Button2;
+                case GLFW_MOUSE_BUTTON_3: return WindowMouseButton::Button3;
+                case GLFW_MOUSE_BUTTON_4: return WindowMouseButton::Button4;
+                case GLFW_MOUSE_BUTTON_5: return WindowMouseButton::Button5;
+                case GLFW_MOUSE_BUTTON_6: return WindowMouseButton::Button6;
+                case GLFW_MOUSE_BUTTON_7: return WindowMouseButton::Button7;
+                case GLFW_MOUSE_BUTTON_8: return WindowMouseButton::Button8;
+                default: return WindowMouseButton::ButtonLast;
+                }
+        }
 
-	WindowMouseButtonState GLFWWindow::_ToWindowMouseButtonState(int action) {
-		switch (action) {
-		case GLFW_PRESS: return WindowMouseButtonState::Pressed;
-		case GLFW_RELEASE: return WindowMouseButtonState::Released;
-		default: return WindowMouseButtonState::None;
-		}
-	}
+        WindowMouseButtonState GLFWWindow::_ToWindowMouseButtonState(int action) {
+                switch (action) {
+                case GLFW_PRESS: return WindowMouseButtonState::Pressed;
+                case GLFW_RELEASE: return WindowMouseButtonState::Released;
+                default: return WindowMouseButtonState::None;
+                }
+        }
 
     WindowKeyboardKey GLFWWindow::_ToWindowKeyboardKey(int key) {
         switch (key) {
@@ -355,12 +367,12 @@ namespace CoreEngine::Window::GLFW {
         }
     }
 
-	WindowKeyboardKeyState GLFWWindow::_ToWindowKeyboardState(int action) {
+        WindowKeyboardKeyState GLFWWindow::_ToWindowKeyboardState(int action) {
         switch (action) {
         case GLFW_PRESS: return WindowKeyboardKeyState::Pressed;
         case GLFW_RELEASE: return WindowKeyboardKeyState::Released;
         case GLFW_REPEAT: return WindowKeyboardKeyState::Held;
         default: return WindowKeyboardKeyState::None;
         }
-	}
+        }
 }

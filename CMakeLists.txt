@@ -34,24 +34,20 @@ else()
     include(${wxWidgets_USE_FILE})
     set(WX_LIBRARIES ${wxWidgets_LIBRARIES})
 endif()
-find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_path(GLM_INCLUDE_DIR glm/glm.hpp REQUIRED)
 find_path(STB_INCLUDE_DIR stb_image.h PATH_SUFFIXES stb REQUIRED)
 
 file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
-    Core/Application/*.cpp Core/Input/*/*.cpp Core/Window/*/*.cpp
+    Core/Application/*.cpp Core/Input/Wx/*.cpp Core/Window/Wx/*.cpp
     Core/Renderer/Opengl/*.cpp Core/Logger/*.cpp Core/Logger/SpdLog/*.cpp
     Domain/Camera/OrbitCamera/*.cpp Domain/Camera/OrbitCamera/States/*.cpp
     Domain/Model/Importers/AssimpModelImporter/*.cpp)
 add_library(engine STATIC ${ENGINE_SOURCES} Core/Window/WindowPlatformFactory.cpp
     Core/Renderer/RendererFactory.cpp Domain/Model/RenderModel.cpp Domain/Model/AdsMaterial.cpp Library/Glad/src/glad.c)
 target_include_directories(engine PUBLIC Core Domain Library/Glad ${GLM_INCLUDE_DIR} PRIVATE ${STB_INCLUDE_DIR})
-target_link_libraries(engine PUBLIC ${WX_LIBRARIES} OpenGL::GL glfw assimp::assimp spdlog::spdlog ${CMAKE_DL_LIBS})
-add_executable(InputProcessor examples/gltf_viewer.cpp)
-target_link_libraries(InputProcessor PRIVATE engine)
-target_compile_definitions(InputProcessor PRIVATE INPUTPROCESSOR_SAMPLE_MODEL="${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/textured.gltf")
+target_link_libraries(engine PUBLIC ${WX_LIBRARIES} OpenGL::GL assimp::assimp spdlog::spdlog ${CMAKE_DL_LIBS})
 add_executable(DomainDemo main.cpp)
 target_link_libraries(DomainDemo PRIVATE engine)
 
@@ -68,7 +64,4 @@ foreach(test_name IN ITEMS test_engine_logic test_wx_integration)
 endforeach()
 add_test(NAME engine_logic COMMAND test_engine_logic)
 add_test(NAME wx_integration COMMAND test_wx_integration)
-add_test(NAME gltf_viewer COMMAND InputProcessor "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/textured.gltf" --frames 3)
-add_test(NAME glb_viewer COMMAND InputProcessor "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/embedded.glb" --frames 3)
-add_test(NAME sample_viewer COMMAND InputProcessor --frames 3)
-set_tests_properties(engine_logic wx_integration gltf_viewer glb_viewer sample_viewer PROPERTIES TIMEOUT 30)
+set_tests_properties(engine_logic wx_integration PROPERTIES TIMEOUT 30)

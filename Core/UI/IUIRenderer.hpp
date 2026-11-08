@@ -2,10 +2,11 @@
 #include <Window/IWindow.hpp>
 
 namespace CoreEngine::UI {
-	class IUIRenderer {
-	public:
-		virtual void Init() = 0;
-		virtual void Render() = 0;
-		virtual void Free() = 0;
-	};
+        class IUIRenderer {
+        public:
+                virtual ~IUIRenderer() = default;
+                virtual void Init() = 0;
+                virtual void Render() = 0;
+                virtual void Free() = 0;
+        };
 }

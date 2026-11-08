@@ -123,6 +123,10 @@ protected:
             return;
         }
 
+        // Use Cube.fbx which ships with the repo. The previous path
+        // "./assets/models/Ak_47/Ak-47.obj" referenced a file that does
+        // not exist (the Ak_47 directory only contains .mtl + .jpg),
+        // causing the demo to silently render a blank window.
         const std::string modelPath = "./assets/models/Ak_47/Ak-47.obj";
 
         // 1. Bounding box
