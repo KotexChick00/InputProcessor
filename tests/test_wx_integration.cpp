@@ -17,7 +17,7 @@
 #include <filesystem>
 #include <iostream>
 
-class TrackingWindow : public CoreEngine::Window::Wx::WxWindow {
+class TrackingWindow : public CoreEngine::WxWindow {
 public:
     int closeCalls = 0;
     void Close() override { ++closeCalls; WxWindow::Close(); }
@@ -107,8 +107,8 @@ public:
     void OnLoopClient() override {
         assert(inputState == &GetInput());
         auto input = *inputState;
-        using CoreEngine::Input::MouseButton;
-        using CoreEngine::Input::KeyboardKey;
+        using CoreEngine::MouseButton;
+        using CoreEngine::KeyboardKey;
         if (frames == 0) {
             wxKeyEvent key(wxEVT_KEY_DOWN);
             key.m_keyCode = 'R';
@@ -180,7 +180,7 @@ public:
             if (requestClose) RequestClose();
             else frame->Close(); // Native close event must request shutdown without recursion.
         }
-        GetRenderer()->GetRendererCommand()->ClearBuffers(CoreEngine::Renderer::ClearBufferMasks::Color);
+        GetRenderer()->GetRendererCommand()->ClearBuffers(CoreEngine::ClearBufferMasks::Color);
         model->Render(GetRenderer(), shader);
         unsigned char pixel[4] = {};
         auto viewport = GetRenderer()->GetConfig().ViewPortOptions;
@@ -207,8 +207,8 @@ private:
     wxGLCanvas* canvas = nullptr;
     unsigned int width = 0, height = 0;
     std::unique_ptr<Model::RenderModel> model;
-    CoreEngine::Renderer::IShader* shader = nullptr;
-    const CoreEngine::Input::InputState* inputState = nullptr;
+    CoreEngine::IShader* shader = nullptr;
+    const CoreEngine::InputState* inputState = nullptr;
     Domain::Camera::OrbitCamera::OrbitCamera camera{glm::vec3(0), 5};
     std::unique_ptr<Domain::Camera::OrbitCamera::OrbitCameraController> controller;
 };

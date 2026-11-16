@@ -2,7 +2,6 @@
 #include <Logger/Logger.hpp>
 
 namespace Model {
-	namespace Renderer = CoreEngine::Renderer;
 
 	RenderModel::RenderModel(std::vector<Mesh> meshes)
 		: mMeshes(std::move(meshes)) {}
@@ -14,7 +13,7 @@ namespace Model {
 		delete mIndexBuffer;
 	}
 
-	void RenderModel::UploadToGPU(Renderer::IResourceManager* resourceManager) {
+	void RenderModel::UploadToGPU(CoreEngine::IResourceManager* resourceManager) {
 		std::vector<glm::vec3> positions;
 		std::vector<glm::vec3> normals;
 		std::vector<glm::vec2> texCoords;
@@ -58,7 +57,7 @@ namespace Model {
 		mIndexBuffer->SetData(indices.data(), static_cast<unsigned int>(indices.size() * sizeof(unsigned int)));
 	}
 
-	void RenderModel::Render(Renderer::IRenderer* renderer, Renderer::IShader* shader) {
+	void RenderModel::Render(CoreEngine::IRenderer* renderer, CoreEngine::IShader* shader) {
 		if (!renderer || !shader) {
 			IP_ENGINE_WARN("RenderModel::Render: renderer or shader is null, skip");
 			return;
@@ -78,7 +77,7 @@ namespace Model {
 				sub.Material->Apply(shader);
 			}
 			renderer->GetRendererCommand()->DrawIndex(
-				Renderer::RenderMode::Triangles,
+				CoreEngine::RenderMode::Triangles,
 				sub.IndexCount,
 				sub.StartIndexByteOffset
 			);

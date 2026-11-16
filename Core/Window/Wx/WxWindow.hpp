@@ -13,10 +13,12 @@ class wxGLContext;
 class wxEventLoopBase;
 class wxEventLoopActivator;
 
-namespace CoreEngine::Window::Wx {
+namespace CoreEngine
+{
 
     // Engine-owned render loop dispatches wx events through one active wx event loop.
-    class CORE_API WxWindow : public IWindow {
+    class CORE_API WxWindow : public IWindow
+    {
     public:
         WxWindow();
         ~WxWindow() override;
@@ -46,10 +48,10 @@ namespace CoreEngine::Window::Wx {
         void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) override;
         void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) override;
         void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override;
-        void OnWindowReiszeEventCallback(std::function<void(const WindowResizeEventContext&)> callback) override;
+        void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) override;
 
-        Input::InputState GetInput() const override;
-        float             GetCurrentSeconds() override;
+        InputState GetInput() const override;
+        float GetCurrentSeconds() override;
 
         void Accept(IWindowVisitor* visitor) override;
 
@@ -59,30 +61,30 @@ namespace CoreEngine::Window::Wx {
         // ------------------------------------------------------------------
         // Accessors used by event handlers (defined inline for performance)
         // ------------------------------------------------------------------
-        CORE_FORCE_INLINE std::function<void(const WindowMouseMoveEventContext&)>   GetMouseMoveEventCallback()   const { return mMouseMoveCallback;    }
-        CORE_FORCE_INLINE std::function<void(const WindowMouseButtonEventContext&)> GetMouseButtonEventCallback() const { return mMouseButtonCallback;   }
-        CORE_FORCE_INLINE std::function<void(const WindowKeyboardKeyEventContext&)> GetKeyboardEventCallback()    const { return mKeyboardCallback;      }
-        CORE_FORCE_INLINE std::function<void(const WindowMouseScrollEventContext&)> GetMouseScrollEventCallback() const { return mMouseScrollCallback;   }
-        CORE_FORCE_INLINE std::function<void(const WindowResizeEventContext&)>      GetWindowResizeEventCallback() const { return mWindowResizeCallback; }
+        CORE_FORCE_INLINE std::function<void(const WindowMouseMoveEventContext&)> GetMouseMoveEventCallback() const { return mMouseMoveCallback; }
+        CORE_FORCE_INLINE std::function<void(const WindowMouseButtonEventContext&)> GetMouseButtonEventCallback() const { return mMouseButtonCallback; }
+        CORE_FORCE_INLINE std::function<void(const WindowKeyboardKeyEventContext&)> GetKeyboardEventCallback() const { return mKeyboardCallback; }
+        CORE_FORCE_INLINE std::function<void(const WindowMouseScrollEventContext&)> GetMouseScrollEventCallback() const { return mMouseScrollCallback; }
+        CORE_FORCE_INLINE std::function<void(const WindowSizeEventContext&)> GetWindowResizeEventCallback() const { return mWindowResizeCallback; }
 
     private:
         friend class WxEngineCanvas;
 
         // The frame owns its canvas; this wrapper owns the frame and GL context.
-        wxFrame*     mFrame     = nullptr;
-        wxGLCanvas*  mGLCanvas  = nullptr;
+        wxFrame* mFrame = nullptr;
+        wxGLCanvas* mGLCanvas = nullptr;
         wxGLContext* mGLContext = nullptr;
 
         // Input objects
-        Unique<Input::Wx::WxKeyboardInput> mKeyboardInput = nullptr;
-        Unique<Input::Wx::WxMouseInput>    mMouseInput    = nullptr;
+        Unique<WxKeyboardInput> mKeyboardInput = nullptr;
+        Unique<WxMouseInput> mMouseInput = nullptr;
 
         // Callbacks registered by the engine
-        std::function<void(const WindowMouseMoveEventContext&)>   mMouseMoveCallback    = nullptr;
-        std::function<void(const WindowMouseButtonEventContext&)> mMouseButtonCallback  = nullptr;
-        std::function<void(const WindowKeyboardKeyEventContext&)> mKeyboardCallback     = nullptr;
-        std::function<void(const WindowMouseScrollEventContext&)> mMouseScrollCallback  = nullptr;
-        std::function<void(const WindowResizeEventContext&)>      mWindowResizeCallback = nullptr;
+        std::function<void(const WindowMouseMoveEventContext&)> mMouseMoveCallback = nullptr;
+        std::function<void(const WindowMouseButtonEventContext&)> mMouseButtonCallback = nullptr;
+        std::function<void(const WindowKeyboardKeyEventContext&)> mKeyboardCallback = nullptr;
+        std::function<void(const WindowMouseScrollEventContext&)> mMouseScrollCallback = nullptr;
+        std::function<void(const WindowSizeEventContext&)> mWindowResizeCallback = nullptr;
 
         bool mShouldClose = false;
         bool mOwnsWxApp = false;
@@ -95,10 +97,10 @@ namespace CoreEngine::Window::Wx {
         // ------------------------------------------------------------------
         // Helpers
         // ------------------------------------------------------------------
-        static WindowMouseButton     _ToWindowMouseButton(int button);
-        static WindowMouseButtonState _ToWindowMouseButtonState(bool isDown);
-        static WindowKeyboardKey      _ToWindowKeyboardKey(int wxKeyCode);
-        static WindowKeyboardKeyState _ToWindowKeyboardKeyState(bool isDown, bool isRepeat);
+        static WindowMouseButton ToWindowMouseButton(int button);
+        static WindowMouseButtonState ToWindowMouseButtonState(bool isDown);
+        static WindowKeyboardKey ToWindowKeyboardKey(int wxKeyCode);
+        static WindowKeyboardKeyState ToWindowKeyboardKeyState(bool isDown, bool isRepeat);
     };
 
-} // namespace CoreEngine::Window::Wx
+} // namespace CoreEngine

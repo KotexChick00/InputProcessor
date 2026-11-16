@@ -1,13 +1,15 @@
 #pragma once
 #include <Input/MouseInput.hpp>
 
-namespace CoreEngine::Input::Wx {
+namespace CoreEngine
+{
     /// wxWidgets-backed MouseInput.
     ///
     /// Mouse state is maintained by WxWindow calling Notify* methods from
     /// wx event handlers. Update() is called in EndFrame() to advance the
     /// state machine and reset per-frame deltas.
-    class WxMouseInput : public MouseInput {
+    class WxMouseInput : public MouseInput
+    {
     public:
         WxMouseInput();
         ~WxMouseInput() = default;
@@ -30,4 +32,4 @@ namespace CoreEngine::Input::Wx {
         std::unordered_map<MouseButton, bool> mWasPressed;
         std::unordered_map<MouseButton, bool> mJustReleased;
     };
-} // namespace CoreEngine::Input::Wx
+} // namespace CoreEngine

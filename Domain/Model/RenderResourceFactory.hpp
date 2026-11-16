@@ -5,7 +5,7 @@
 #include <Renderer/Resource/IResourceManager.hpp>
 #include <Model/IRenderResourceFactory.hpp>
 
-namespace CoreEngine::Renderer {
+namespace CoreEngine {
         // Wraps an IResourceManager with a path-keyed texture cache.
         // Returned ITexture* pointers are non-owning; the manager (and this
         // factory's cache) retains ownership.

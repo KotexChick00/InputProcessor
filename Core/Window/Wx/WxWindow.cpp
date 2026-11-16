@@ -9,8 +9,8 @@
 #include <wx/evtloop.h>
 #include <stdexcept>
 
-namespace CoreEngine::Window::Wx {
-    using namespace CoreEngine::Logger;
+namespace CoreEngine
+{
 
     // =========================================================================
     // Internal wxFrame subclass
@@ -19,7 +19,8 @@ namespace CoreEngine::Window::Wx {
     // can reach back into the engine's callback / input objects without using
     // wxGetApp() or a global.
     // =========================================================================
-    class WxEngineFrame : public wxFrame {
+    class WxEngineFrame : public wxFrame
+    {
     public:
         WxEngineFrame(WxWindow* owner,
                       const wxString& title,
@@ -32,7 +33,8 @@ namespace CoreEngine::Window::Wx {
         }
 
     private:
-        void OnClose(wxCloseEvent& evt) {
+        void OnClose(wxCloseEvent& evt)
+        {
             // Signal the engine's render loop
             if (mOwner) mOwner->Close();
             // Preserve the GL context until application shutdown releases GPU resources.
@@ -49,7 +51,8 @@ namespace CoreEngine::Window::Wx {
     //   a) update the InputState objects, and
     //   b) invoke the engine callbacks.
     // =========================================================================
-    class WxEngineCanvas : public wxGLCanvas {
+    class WxEngineCanvas : public wxGLCanvas
+    {
     public:
         WxEngineCanvas(WxWindow* owner, wxWindow* parent, const wxGLAttributes& attrs)
             : wxGLCanvas(parent, attrs)
@@ -57,38 +60,44 @@ namespace CoreEngine::Window::Wx {
         {
             SetFocus(); // Capture keyboard
 
-            Bind(wxEVT_MOTION,           &WxEngineCanvas::OnMouseMove,   this);
-            Bind(wxEVT_LEFT_DOWN,        &WxEngineCanvas::OnMouseDown,   this);
-            Bind(wxEVT_LEFT_UP,          &WxEngineCanvas::OnMouseUp,     this);
-            Bind(wxEVT_RIGHT_DOWN,       &WxEngineCanvas::OnMouseDown,   this);
-            Bind(wxEVT_RIGHT_UP,         &WxEngineCanvas::OnMouseUp,     this);
-            Bind(wxEVT_MIDDLE_DOWN,      &WxEngineCanvas::OnMouseDown,   this);
-            Bind(wxEVT_MIDDLE_UP,        &WxEngineCanvas::OnMouseUp,     this);
-            Bind(wxEVT_AUX1_DOWN,        &WxEngineCanvas::OnMouseDown,   this);
-            Bind(wxEVT_AUX1_UP,          &WxEngineCanvas::OnMouseUp,     this);
-            Bind(wxEVT_AUX2_DOWN,        &WxEngineCanvas::OnMouseDown,   this);
-            Bind(wxEVT_AUX2_UP,          &WxEngineCanvas::OnMouseUp,     this);
-            Bind(wxEVT_MOUSEWHEEL,       &WxEngineCanvas::OnMouseWheel,  this);
-            Bind(wxEVT_KEY_DOWN,         &WxEngineCanvas::OnKeyDown,     this);
-            Bind(wxEVT_KEY_UP,           &WxEngineCanvas::OnKeyUp,       this);
+            Bind(wxEVT_MOTION, &WxEngineCanvas::OnMouseMove, this);
+            Bind(wxEVT_LEFT_DOWN, &WxEngineCanvas::OnMouseDown, this);
+            Bind(wxEVT_LEFT_UP, &WxEngineCanvas::OnMouseUp, this);
+            Bind(wxEVT_RIGHT_DOWN, &WxEngineCanvas::OnMouseDown, this);
+            Bind(wxEVT_RIGHT_UP, &WxEngineCanvas::OnMouseUp, this);
+            Bind(wxEVT_MIDDLE_DOWN, &WxEngineCanvas::OnMouseDown, this);
+            Bind(wxEVT_MIDDLE_UP, &WxEngineCanvas::OnMouseUp, this);
+            Bind(wxEVT_AUX1_DOWN, &WxEngineCanvas::OnMouseDown, this);
+            Bind(wxEVT_AUX1_UP, &WxEngineCanvas::OnMouseUp, this);
+            Bind(wxEVT_AUX2_DOWN, &WxEngineCanvas::OnMouseDown, this);
+            Bind(wxEVT_AUX2_UP, &WxEngineCanvas::OnMouseUp, this);
+            Bind(wxEVT_MOUSEWHEEL, &WxEngineCanvas::OnMouseWheel, this);
+            Bind(wxEVT_KEY_DOWN, &WxEngineCanvas::OnKeyDown, this);
+            Bind(wxEVT_KEY_UP, &WxEngineCanvas::OnKeyUp, this);
             Bind(wxEVT_PAINT, [this](wxPaintEvent&) { wxPaintDC dc(this); });
             Bind(wxEVT_KILL_FOCUS, &WxEngineCanvas::OnFocusLost, this);
             Bind(wxEVT_MOUSE_CAPTURE_LOST, &WxEngineCanvas::OnCaptureLost, this);
-            Bind(wxEVT_SIZE,             &WxEngineCanvas::OnSize,        this);
+            Bind(wxEVT_SIZE, &WxEngineCanvas::OnSize, this);
         }
 
     private:
         // ------------------------------------------------------------------ //
         // Mouse move
         // ------------------------------------------------------------------ //
-        void OnMouseMove(wxMouseEvent& evt) {
-            if (!mOwner) { evt.Skip(); return; }
+        void OnMouseMove(wxMouseEvent& evt)
+        {
+            if (!mOwner)
+            {
+                evt.Skip();
+                return;
+            }
 
             double xPos = static_cast<double>(evt.GetX());
             double yPos = static_cast<double>(evt.GetY());
 
             auto mouseInput = mOwner->GetInput().MouseInput;
-            if (mouseInput) {
+            if (mouseInput)
+            {
                 float dx = static_cast<float>(xPos - mouseInput->GetPositionX());
                 float dy = static_cast<float>(yPos - mouseInput->GetPositionY());
                 mouseInput->SetDelta(mouseInput->GetDeltaX() + dx, mouseInput->GetDeltaY() + dy);
@@ -97,7 +106,7 @@ namespace CoreEngine::Window::Wx {
             }
 
             auto cb = mOwner->GetMouseMoveEventCallback();
-            if (cb) cb({ xPos, yPos });
+            if (cb) cb({xPos, yPos});
 
             evt.Skip();
         }
@@ -105,10 +114,15 @@ namespace CoreEngine::Window::Wx {
         // ------------------------------------------------------------------ //
         // Mouse buttons
         // ------------------------------------------------------------------ //
-        void OnMouseDown(wxMouseEvent& evt) {
-            if (!mOwner) { evt.Skip(); return; }
+        void OnMouseDown(wxMouseEvent& evt)
+        {
+            if (!mOwner)
+            {
+                evt.Skip();
+                return;
+            }
 
-            WindowMouseButton btn   = WxWindow::_ToWindowMouseButton(evt.GetButton());
+            WindowMouseButton btn = WxWindow::ToWindowMouseButton(evt.GetButton());
             WindowMouseButtonState state = WindowMouseButtonState::Pressed;
 
             SetFocus();
@@ -117,41 +131,48 @@ namespace CoreEngine::Window::Wx {
                 mouse->SetPosition(evt.GetX(), evt.GetY());
 
             // Notify input object
-            Input::MouseButton inputBtn = _ToInputMouseButton(btn);
+            MouseButton inputBtn = ToInputMouseButton(btn);
             auto mouseInput = mOwner->GetInput().MouseInput;
-            if (mouseInput) {
+            if (mouseInput)
+            {
                 if (!mouseInput->CheckIsPressed(inputBtn))
                     mouseInput->SetDelta(0.0f, 0.0f);
                 // Use dynamic_cast so a non-Wx MouseInput injected via
                 // ApplicationConfiguration::InjectedWindow is rejected with a clear
                 // assertion instead of UB.
-                auto* wxMouse = dynamic_cast<Input::Wx::WxMouseInput*>(mouseInput);
+                auto* wxMouse = dynamic_cast<WxMouseInput*>(mouseInput);
                 CORE_ASSERT(wxMouse != nullptr && "WxEngineCanvas expects a WxMouseInput");
                 if (wxMouse) wxMouse->NotifyButtonDown(inputBtn);
             }
 
             auto cb = mOwner->GetMouseButtonEventCallback();
-            if (cb) cb({ btn, state });
+            if (cb) cb({btn, state});
 
             evt.Skip();
         }
 
-        void OnMouseUp(wxMouseEvent& evt) {
-            if (!mOwner) { evt.Skip(); return; }
+        void OnMouseUp(wxMouseEvent& evt)
+        {
+            if (!mOwner)
+            {
+                evt.Skip();
+                return;
+            }
 
-            WindowMouseButton btn   = WxWindow::_ToWindowMouseButton(evt.GetButton());
+            WindowMouseButton btn = WxWindow::ToWindowMouseButton(evt.GetButton());
             WindowMouseButtonState state = WindowMouseButtonState::Released;
 
-            Input::MouseButton inputBtn = _ToInputMouseButton(btn);
+            MouseButton inputBtn = ToInputMouseButton(btn);
             auto mouseInput = mOwner->GetInput().MouseInput;
-            if (mouseInput) {
-                auto* wxMouse = dynamic_cast<Input::Wx::WxMouseInput*>(mouseInput);
+            if (mouseInput)
+            {
+                auto* wxMouse = dynamic_cast<WxMouseInput*>(mouseInput);
                 CORE_ASSERT(wxMouse != nullptr && "WxEngineCanvas expects a WxMouseInput");
                 if (wxMouse) wxMouse->NotifyButtonUp(inputBtn);
             }
 
             auto cb = mOwner->GetMouseButtonEventCallback();
-            if (cb) cb({ btn, state });
+            if (cb) cb({btn, state});
             if (!evt.LeftIsDown() && !evt.RightIsDown() && !evt.MiddleIsDown() && HasCapture())
                 ReleaseMouse();
             evt.Skip();
@@ -160,8 +181,13 @@ namespace CoreEngine::Window::Wx {
         // ------------------------------------------------------------------ //
         // Mouse scroll
         // ------------------------------------------------------------------ //
-        void OnMouseWheel(wxMouseEvent& evt) {
-            if (!mOwner) { evt.Skip(); return; }
+        void OnMouseWheel(wxMouseEvent& evt)
+        {
+            if (!mOwner)
+            {
+                evt.Skip();
+                return;
+            }
 
             // wxMouseEvent::GetWheelAxis(): wxMOUSE_WHEEL_VERTICAL (default) or _HORIZONTAL
             double dx = 0.0, dy = 0.0;
@@ -179,7 +205,7 @@ namespace CoreEngine::Window::Wx {
                                       mouseInput->GetScrollY() + static_cast<float>(dy));
 
             auto cb = mOwner->GetMouseScrollEventCallback();
-            if (cb) cb({ dx, dy });
+            if (cb) cb({dx, dy});
 
             evt.Skip();
         }
@@ -187,44 +213,56 @@ namespace CoreEngine::Window::Wx {
         // ------------------------------------------------------------------ //
         // Keyboard
         // ------------------------------------------------------------------ //
-        void OnKeyDown(wxKeyEvent& evt) {
-            if (!mOwner) { evt.Skip(); return; }
+        void OnKeyDown(wxKeyEvent& evt)
+        {
+            if (!mOwner)
+            {
+                evt.Skip();
+                return;
+            }
 
             int kc = evt.GetKeyCode();
 
             auto kbInput = mOwner->GetInput().KeyboardInput;
-            if (kbInput) {
-                auto* wxKb = dynamic_cast<Input::Wx::WxKeyboardInput*>(kbInput);
+            if (kbInput)
+            {
+                auto* wxKb = dynamic_cast<WxKeyboardInput*>(kbInput);
                 CORE_ASSERT(wxKb != nullptr && "WxEngineCanvas expects a WxKeyboardInput");
                 if (wxKb) wxKb->NotifyKeyDown(kc);
             }
 
-            WindowKeyboardKey      key   = WxWindow::_ToWindowKeyboardKey(kc);
+            WindowKeyboardKey key = WxWindow::ToWindowKeyboardKey(kc);
             WindowKeyboardKeyState state = evt.IsAutoRepeat()
-                ? WindowKeyboardKeyState::Held
-                : WindowKeyboardKeyState::Pressed;
+                                               ? WindowKeyboardKeyState::Held
+                                               : WindowKeyboardKeyState::Pressed;
 
             auto cb = mOwner->GetKeyboardEventCallback();
-            if (cb) cb({ key, state });
+            if (cb) cb({key, state});
 
             evt.Skip();
         }
 
-        void OnKeyUp(wxKeyEvent& evt) {
-            if (!mOwner) { evt.Skip(); return; }
+        void OnKeyUp(wxKeyEvent& evt)
+        {
+            if (!mOwner)
+            {
+                evt.Skip();
+                return;
+            }
 
             int kc = evt.GetKeyCode();
 
             auto kbInput = mOwner->GetInput().KeyboardInput;
-            if (kbInput) {
-                auto* wxKb = dynamic_cast<Input::Wx::WxKeyboardInput*>(kbInput);
+            if (kbInput)
+            {
+                auto* wxKb = dynamic_cast<WxKeyboardInput*>(kbInput);
                 CORE_ASSERT(wxKb != nullptr && "WxEngineCanvas expects a WxKeyboardInput");
                 if (wxKb) wxKb->NotifyKeyUp(kc);
             }
 
-            WindowKeyboardKey key = WxWindow::_ToWindowKeyboardKey(kc);
+            WindowKeyboardKey key = WxWindow::ToWindowKeyboardKey(kc);
             auto cb = mOwner->GetKeyboardEventCallback();
-            if (cb) cb({ key, WindowKeyboardKeyState::Released });
+            if (cb) cb({key, WindowKeyboardKeyState::Released});
 
             evt.Skip();
         }
@@ -232,34 +270,43 @@ namespace CoreEngine::Window::Wx {
         // ------------------------------------------------------------------ //
         // Resize
         // ------------------------------------------------------------------ //
-        void OnSize(wxSizeEvent& evt) {
-            if (!mOwner) { evt.Skip(); return; }
+        void OnSize(wxSizeEvent& evt)
+        {
+            if (!mOwner)
+            {
+                evt.Skip();
+                return;
+            }
 
             wxSize sz = evt.GetSize();
             auto cb = mOwner->GetWindowResizeEventCallback();
             if (cb)
-                cb({ static_cast<unsigned int>(std::max(0, sz.GetWidth()) * GetContentScaleFactor()),
-                     static_cast<unsigned int>(std::max(0, sz.GetHeight()) * GetContentScaleFactor()) });
+                cb({static_cast<unsigned int>(std::max(0, sz.GetWidth()) * GetContentScaleFactor()),
+                    static_cast<unsigned int>(std::max(0, sz.GetHeight()) * GetContentScaleFactor())});
 
             evt.Skip();
         }
 
-        void ResetInput() {
+        void ResetInput()
+        {
             if (!mOwner) return;
             auto input = mOwner->GetInput();
-            if (input.KeyboardInput) {
-                auto* wxKb = dynamic_cast<Input::Wx::WxKeyboardInput*>(input.KeyboardInput);
+            if (input.KeyboardInput)
+            {
+                auto* wxKb = dynamic_cast<WxKeyboardInput*>(input.KeyboardInput);
                 CORE_ASSERT(wxKb != nullptr && "WxEngineCanvas expects a WxKeyboardInput");
-                if (wxKb) *wxKb = Input::Wx::WxKeyboardInput();
+                if (wxKb) *wxKb = WxKeyboardInput();
             }
-            if (input.MouseInput) {
-                auto* wxMouse = dynamic_cast<Input::Wx::WxMouseInput*>(input.MouseInput);
+            if (input.MouseInput)
+            {
+                auto* wxMouse = dynamic_cast<WxMouseInput*>(input.MouseInput);
                 CORE_ASSERT(wxMouse != nullptr && "WxEngineCanvas expects a WxMouseInput");
-                if (wxMouse) *wxMouse = Input::Wx::WxMouseInput();
+                if (wxMouse) *wxMouse = WxMouseInput();
             }
         }
 
-        void OnFocusLost(wxFocusEvent& evt) {
+        void OnFocusLost(wxFocusEvent& evt)
+        {
             ResetInput();
             if (HasCapture()) ReleaseMouse();
             evt.Skip();
@@ -270,14 +317,16 @@ namespace CoreEngine::Window::Wx {
         // ------------------------------------------------------------------ //
         // Helpers
         // ------------------------------------------------------------------ //
-        static Input::MouseButton _ToInputMouseButton(WindowMouseButton btn) {
-            switch (btn) {
-            case WindowMouseButton::Button1: return Input::MouseButton::Button1;
-            case WindowMouseButton::Button2: return Input::MouseButton::Button2;
-            case WindowMouseButton::Button3: return Input::MouseButton::Button3;
-            case WindowMouseButton::Button4: return Input::MouseButton::Button4;
-            case WindowMouseButton::Button5: return Input::MouseButton::Button5;
-            default:                         return Input::MouseButton::Button1;
+        static MouseButton ToInputMouseButton(WindowMouseButton btn)
+        {
+            switch (btn)
+            {
+            case WindowMouseButton::Button1: return MouseButton::Button1;
+            case WindowMouseButton::Button2: return MouseButton::Button2;
+            case WindowMouseButton::Button3: return MouseButton::Button3;
+            case WindowMouseButton::Button4: return MouseButton::Button4;
+            case WindowMouseButton::Button5: return MouseButton::Button5;
+            default:                         return MouseButton::Button1;
             }
         }
 
@@ -290,7 +339,8 @@ namespace CoreEngine::Window::Wx {
     // Required by wxWidgets so wxEntryStart() has a valid app object.
     // If the host process already provides a wxApp, Init() skips creation.
     // =========================================================================
-    class WxEngineApp : public wxApp {
+    class WxEngineApp : public wxApp
+    {
     public:
         bool OnInit() override { return true; }
     };
@@ -301,17 +351,20 @@ namespace CoreEngine::Window::Wx {
 
     WxWindow::WxWindow() = default;
 
-    WxWindow::~WxWindow() {
+    WxWindow::~WxWindow()
+    {
         // Guard against double-free: if the wxFrame was force-destroyed by wxWidgets
         // (e.g. OS taskkill, session logout, or wxApp cleanup), mFrame may already
         // be invalid. We null each member after deleting so a second pass is safe.
-        if (mGLCanvas) {
+        if (mGLCanvas)
+        {
             if (mGLCanvas->HasCapture()) mGLCanvas->ReleaseMouse();
             mGLCanvas = nullptr; // mGLCanvas is a child of mFrame; deleted below via mFrame.
         }
         delete mGLContext;
         mGLContext = nullptr;
-        if (mFrame) {
+        if (mFrame)
+        {
             // Destroy() handles child destruction (canvas, etc.) and is safe to call
             // even if the frame is in the process of being closed.
             mFrame->Destroy();
@@ -319,15 +372,18 @@ namespace CoreEngine::Window::Wx {
         }
         mEventLoopActivator.reset();
         mEventLoop.reset();
-        if (mOwnsWxApp) {
+        if (mOwnsWxApp)
+        {
             wxTheApp->OnExit();
             wxEntryCleanup();
             mOwnsWxApp = false;
         }
     }
 
-    void WxWindow::Init(const WindowConfiguration& config) {
-        if (!wxTheApp) {
+    void WxWindow::Init(const WindowConfiguration& config)
+    {
+        if (!wxTheApp)
+        {
             wxApp::SetInstance(new WxEngineApp());
             int argc = 0;
             char** argv = nullptr;
@@ -337,13 +393,14 @@ namespace CoreEngine::Window::Wx {
             if (!wxTheApp->CallOnInit())
                 throw std::runtime_error("Failed to initialize wxApp");
         }
-        if (!wxEventLoopBase::GetActive()) {
+        if (!wxEventLoopBase::GetActive())
+        {
             mEventLoop = std::make_unique<wxEventLoop>();
             mEventLoopActivator = std::make_unique<wxEventLoopActivator>(mEventLoop.get());
         }
 
-        mKeyboardInput = std::make_unique<Input::Wx::WxKeyboardInput>();
-        mMouseInput = std::make_unique<Input::Wx::WxMouseInput>();
+        mKeyboardInput = std::make_unique<WxKeyboardInput>();
+        mMouseInput = std::make_unique<WxMouseInput>();
         mFrame = new WxEngineFrame(this, wxString::FromUTF8(config.Title.c_str()), wxSize(config.Width, config.Height));
         mFrame->SetClientSize(config.Width, config.Height);
         wxGLAttributes display;
@@ -371,7 +428,8 @@ namespace CoreEngine::Window::Wx {
         IP_ENGINE_TRACE("[WxWindow] Initialized '{}'", config.Title);
     }
 
-    void WxWindow::PollEvents() {
+    void WxWindow::PollEvents()
+    {
         wxTheApp->ProcessPendingEvents();
         auto* loop = wxEventLoopBase::GetActive();
         while (!mShouldClose && loop && loop->Pending()) loop->Dispatch();
@@ -379,48 +437,58 @@ namespace CoreEngine::Window::Wx {
         if (mGLCanvas && mGLContext) mGLCanvas->SetCurrent(*mGLContext);
     }
 
-    void WxWindow::SwapBuffers() {
-        if (mGLCanvas && mGLContext) {
+    void WxWindow::SwapBuffers()
+    {
+        if (mGLCanvas && mGLContext)
+        {
             mGLCanvas->SwapBuffers();
         }
     }
 
     // -------------------------------------------------------------------------
 
-    bool WxWindow::CheckShouldClose() {
+    bool WxWindow::CheckShouldClose()
+    {
         return mShouldClose;
     }
 
     // -------------------------------------------------------------------------
 
-    void WxWindow::Close() {
+    void WxWindow::Close()
+    {
         mShouldClose = true;
     }
 
     void WxWindow::OnMouseMoveEventCallback(
-        std::function<void(const WindowMouseMoveEventContext&)> callback) {
+        std::function<void(const WindowMouseMoveEventContext&)> callback)
+    {
         mMouseMoveCallback = callback;
     }
 
     void WxWindow::OnMouseButtonEventCallback(
-        std::function<void(const WindowMouseButtonEventContext&)> callback) {
+        std::function<void(const WindowMouseButtonEventContext&)> callback)
+    {
         mMouseButtonCallback = callback;
     }
 
     void WxWindow::OnKeyboardEventCallback(
-        std::function<void(const WindowKeyboardKeyEventContext&)> callback) {
+        std::function<void(const WindowKeyboardKeyEventContext&)> callback)
+    {
         mKeyboardCallback = callback;
     }
 
     void WxWindow::OnMouseSrollEventCallback(
-        std::function<void(const WindowMouseScrollEventContext&)> callback) {
+        std::function<void(const WindowMouseScrollEventContext&)> callback)
+    {
         mMouseScrollCallback = callback;
     }
 
     void WxWindow::OnWindowReiszeEventCallback(
-        std::function<void(const WindowResizeEventContext&)> callback) {
+        std::function<void(const WindowSizeEventContext&)> callback)
+    {
         mWindowResizeCallback = callback;
-        if (mGLCanvas && callback) {
+        if (mGLCanvas && callback)
+        {
             auto size = mGLCanvas->GetClientSize();
             auto scale = mGLCanvas->GetContentScaleFactor();
             callback({static_cast<unsigned int>(size.x * scale), static_cast<unsigned int>(size.y * scale)});
@@ -429,54 +497,63 @@ namespace CoreEngine::Window::Wx {
 
     // -------------------------------------------------------------------------
 
-    Input::InputState WxWindow::GetInput() const {
-        return { mKeyboardInput.get(), mMouseInput.get() };
+    InputState WxWindow::GetInput() const
+    {
+        return {mKeyboardInput.get(), mMouseInput.get()};
     }
 
     // -------------------------------------------------------------------------
 
-    float WxWindow::GetCurrentSeconds() {
-        auto now     = std::chrono::steady_clock::now();
+    float WxWindow::GetCurrentSeconds()
+    {
+        auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration<float>(now - mStartTime);
         return elapsed.count();
     }
 
     // -------------------------------------------------------------------------
 
-    void WxWindow::Accept(IWindowVisitor* visitor) {
+    void WxWindow::Accept(IWindowVisitor* visitor)
+    {
         visitor->VisitWxWindow(this);
     }
 
     // -------------------------------------------------------------------------
 
-    void WxWindow::EndFrame() {
+    void WxWindow::EndFrame()
+    {
         if (mKeyboardInput) mKeyboardInput->Update();
-        if (mMouseInput)    mMouseInput->Update();
+        if (mMouseInput) mMouseInput->Update();
     }
 
     // =========================================================================
     // Static conversion helpers
     // =========================================================================
 
-    WindowMouseButton WxWindow::_ToWindowMouseButton(int button) {
-        switch (button) {
-        case wxMOUSE_BTN_LEFT:    return WindowMouseButton::Button1;
-        case wxMOUSE_BTN_RIGHT:   return WindowMouseButton::Button2;
-        case wxMOUSE_BTN_MIDDLE:  return WindowMouseButton::Button3;
+    WindowMouseButton WxWindow::ToWindowMouseButton(int button)
+    {
+        switch (button)
+        {
+        case wxMOUSE_BTN_LEFT:   return WindowMouseButton::Button1;
+        case wxMOUSE_BTN_RIGHT:  return WindowMouseButton::Button2;
+        case wxMOUSE_BTN_MIDDLE: return WindowMouseButton::Button3;
         case wxMOUSE_BTN_AUX1:   return WindowMouseButton::Button4;
         case wxMOUSE_BTN_AUX2:   return WindowMouseButton::Button5;
-        default:                  return WindowMouseButton::ButtonLast;
+        default:                 return WindowMouseButton::ButtonLast;
         }
     }
 
-    WindowMouseButtonState WxWindow::_ToWindowMouseButtonState(bool isDown) {
+    WindowMouseButtonState WxWindow::ToWindowMouseButtonState(bool isDown)
+    {
         return isDown ? WindowMouseButtonState::Pressed
                       : WindowMouseButtonState::Released;
     }
 
-    WindowKeyboardKey WxWindow::_ToWindowKeyboardKey(int kc) {
+    WindowKeyboardKey WxWindow::ToWindowKeyboardKey(int kc)
+    {
         // Letters (wxWidgets gives uppercase ASCII)
-        if (kc >= 'A' && kc <= 'Z') {
+        if (kc >= 'A' && kc <= 'Z')
+        {
             static const WindowKeyboardKey letters[] = {
                 WindowKeyboardKey::A, WindowKeyboardKey::B, WindowKeyboardKey::C,
                 WindowKeyboardKey::D, WindowKeyboardKey::E, WindowKeyboardKey::F,
@@ -486,45 +563,45 @@ namespace CoreEngine::Window::Wx {
                 WindowKeyboardKey::P, WindowKeyboardKey::Q, WindowKeyboardKey::R,
                 WindowKeyboardKey::S, WindowKeyboardKey::T, WindowKeyboardKey::U,
                 WindowKeyboardKey::V, WindowKeyboardKey::W, WindowKeyboardKey::X,
-                WindowKeyboardKey::Y, WindowKeyboardKey::Z
-            };
+                WindowKeyboardKey::Y, WindowKeyboardKey::Z};
             return letters[kc - 'A'];
         }
-        if (kc >= '0' && kc <= '9') {
+        if (kc >= '0' && kc <= '9')
+        {
             static const WindowKeyboardKey digits[] = {
-                WindowKeyboardKey::Zero,  WindowKeyboardKey::One,   WindowKeyboardKey::Two,
-                WindowKeyboardKey::Three, WindowKeyboardKey::Four,  WindowKeyboardKey::Five,
-                WindowKeyboardKey::Six,   WindowKeyboardKey::Seven, WindowKeyboardKey::Eight,
-                WindowKeyboardKey::Nine
-            };
+                WindowKeyboardKey::Zero, WindowKeyboardKey::One, WindowKeyboardKey::Two,
+                WindowKeyboardKey::Three, WindowKeyboardKey::Four, WindowKeyboardKey::Five,
+                WindowKeyboardKey::Six, WindowKeyboardKey::Seven, WindowKeyboardKey::Eight,
+                WindowKeyboardKey::Nine};
             return digits[kc - '0'];
         }
-        if (kc >= WXK_F1 && kc <= WXK_F24) {
+        if (kc >= WXK_F1 && kc <= WXK_F24)
+        {
             static const WindowKeyboardKey fkeys[] = {
-                WindowKeyboardKey::F1,  WindowKeyboardKey::F2,  WindowKeyboardKey::F3,
-                WindowKeyboardKey::F4,  WindowKeyboardKey::F5,  WindowKeyboardKey::F6,
-                WindowKeyboardKey::F7,  WindowKeyboardKey::F8,  WindowKeyboardKey::F9,
+                WindowKeyboardKey::F1, WindowKeyboardKey::F2, WindowKeyboardKey::F3,
+                WindowKeyboardKey::F4, WindowKeyboardKey::F5, WindowKeyboardKey::F6,
+                WindowKeyboardKey::F7, WindowKeyboardKey::F8, WindowKeyboardKey::F9,
                 WindowKeyboardKey::F10, WindowKeyboardKey::F11, WindowKeyboardKey::F12,
                 WindowKeyboardKey::F13, WindowKeyboardKey::F14, WindowKeyboardKey::F15,
                 WindowKeyboardKey::F16, WindowKeyboardKey::F17, WindowKeyboardKey::F18,
                 WindowKeyboardKey::F19, WindowKeyboardKey::F20, WindowKeyboardKey::F21,
-                WindowKeyboardKey::F22, WindowKeyboardKey::F23, WindowKeyboardKey::F24
-            };
+                WindowKeyboardKey::F22, WindowKeyboardKey::F23, WindowKeyboardKey::F24};
             int idx = kc - WXK_F1;
             if (idx < 24) return fkeys[idx];
         }
-        if (kc >= WXK_NUMPAD0 && kc <= WXK_NUMPAD9) {
+        if (kc >= WXK_NUMPAD0 && kc <= WXK_NUMPAD9)
+        {
             static const WindowKeyboardKey np[] = {
                 WindowKeyboardKey::Numpad0, WindowKeyboardKey::Numpad1,
                 WindowKeyboardKey::Numpad2, WindowKeyboardKey::Numpad3,
                 WindowKeyboardKey::Numpad4, WindowKeyboardKey::Numpad5,
                 WindowKeyboardKey::Numpad6, WindowKeyboardKey::Numpad7,
-                WindowKeyboardKey::Numpad8, WindowKeyboardKey::Numpad9
-            };
+                WindowKeyboardKey::Numpad8, WindowKeyboardKey::Numpad9};
             return np[kc - WXK_NUMPAD0];
         }
 
-        switch (kc) {
+        switch (kc)
+        {
         case WXK_SPACE:           return WindowKeyboardKey::Space;
         case WXK_ESCAPE:          return WindowKeyboardKey::Escape;
         case WXK_RETURN:          return WindowKeyboardKey::Enter;
@@ -559,25 +636,26 @@ namespace CoreEngine::Window::Wx {
         case WXK_NUMPAD_ENTER:    return WindowKeyboardKey::NumpadEnter;
         case WXK_NUMPAD_EQUAL:    return WindowKeyboardKey::NumpadEqual;
         // Punctuation (raw ASCII)
-        case '\'':  return WindowKeyboardKey::Apostrophe;
-        case ',':   return WindowKeyboardKey::Comma;
-        case '-':   return WindowKeyboardKey::Minus;
-        case '.':   return WindowKeyboardKey::Period;
-        case '/':   return WindowKeyboardKey::Slash;
-        case ';':   return WindowKeyboardKey::Semicolon;
-        case '=':   return WindowKeyboardKey::Equal;
-        case '[':   return WindowKeyboardKey::LeftBracket;
-        case '\\':  return WindowKeyboardKey::Backslash;
-        case ']':   return WindowKeyboardKey::RightBracket;
-        case '`':   return WindowKeyboardKey::GraveAccent;
-        default:    return WindowKeyboardKey::Unknow;
+        case '\'':                return WindowKeyboardKey::Apostrophe;
+        case ',':                 return WindowKeyboardKey::Comma;
+        case '-':                 return WindowKeyboardKey::Minus;
+        case '.':                 return WindowKeyboardKey::Period;
+        case '/':                 return WindowKeyboardKey::Slash;
+        case ';':                 return WindowKeyboardKey::Semicolon;
+        case '=':                 return WindowKeyboardKey::Equal;
+        case '[':                 return WindowKeyboardKey::LeftBracket;
+        case '\\':                return WindowKeyboardKey::Backslash;
+        case ']':                 return WindowKeyboardKey::RightBracket;
+        case '`':                 return WindowKeyboardKey::GraveAccent;
+        default:                  return WindowKeyboardKey::Unknow;
         }
     }
 
-    WindowKeyboardKeyState WxWindow::_ToWindowKeyboardKeyState(bool isDown, bool isRepeat) {
-        if (!isDown)    return WindowKeyboardKeyState::Released;
-        if (isRepeat)   return WindowKeyboardKeyState::Held;
+    WindowKeyboardKeyState WxWindow::ToWindowKeyboardKeyState(bool isDown, bool isRepeat)
+    {
+        if (!isDown) return WindowKeyboardKeyState::Released;
+        if (isRepeat) return WindowKeyboardKeyState::Held;
         return WindowKeyboardKeyState::Pressed;
     }
 
-} // namespace CoreEngine::Window::Wx
+} // namespace CoreEngine

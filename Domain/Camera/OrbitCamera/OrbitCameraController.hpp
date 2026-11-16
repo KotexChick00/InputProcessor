@@ -15,7 +15,7 @@ namespace Domain::Camera::OrbitCamera
 	class OrbitCameraController : public ICameraController
 	{
 	public:
-		OrbitCameraController(OrbitCamera& camera, const CoreEngine::Input::InputState& inputState);
+		OrbitCameraController(OrbitCamera& camera, const CoreEngine::InputState& inputState);
 
 		void Update(float dt) override;
 		ICamera& GetCamera() override { return m_camera; }
@@ -31,7 +31,7 @@ namespace Domain::Camera::OrbitCamera
 		std::unique_ptr<IOrbitControllerState> TryCreateOverridingState(OrbitCameraAction current) const;
 
 		OrbitCamera& GetOrbitCamera() { return m_camera; }
-		const CoreEngine::Input::InputState& GetInputState() const { return m_inputState; }
+		const CoreEngine::InputState& GetInputState() const { return m_inputState; }
 		InputMap<OrbitCameraAction>& GetInputMap() { return m_inputMap; }
 		const InputMap<OrbitCameraAction>& GetInputMap() const { return m_inputMap; }
 		bool IsGesturePressed(OrbitCameraAction gesture) const { return IsGestureActive(gesture, false); }
@@ -40,7 +40,7 @@ namespace Domain::Camera::OrbitCamera
 	private:
 		bool IsGestureActive(OrbitCameraAction gesture, bool justPressed) const;
 		OrbitCamera& m_camera;
-		const CoreEngine::Input::InputState& m_inputState;
+		const CoreEngine::InputState& m_inputState;
 		InputMap<OrbitCameraAction> m_inputMap;
 		std::unique_ptr<IOrbitControllerState> m_state;
 		std::unique_ptr<IOrbitControllerState> m_pendingState;

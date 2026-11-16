@@ -41,7 +41,7 @@ find_path(STB_INCLUDE_DIR stb_image.h PATH_SUFFIXES stb REQUIRED)
 
 file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     Core/Application/*.cpp Core/Input/Wx/*.cpp Core/Window/Wx/*.cpp
-    Core/Renderer/Opengl/*.cpp Core/Logger/*.cpp Core/Logger/SpdLog/*.cpp
+    Core/Renderer/Opengl/*.cpp Core/Logger/*.cpp Core/Logger/SpdLog/*.cpp Core/Memory/*.cpp
     Domain/Camera/OrbitCamera/*.cpp Domain/Camera/OrbitCamera/States/*.cpp
     Domain/Model/Importers/AssimpModelImporter/*.cpp)
 add_library(engine STATIC ${ENGINE_SOURCES} Core/Window/WindowPlatformFactory.cpp
@@ -52,7 +52,7 @@ add_executable(DomainDemo main.cpp)
 target_link_libraries(DomainDemo PRIVATE engine)
 
 enable_testing()
-foreach(test_name IN ITEMS test_engine_logic test_wx_integration)
+foreach(test_name IN ITEMS test_core test_engine_logic test_wx_integration)
     add_executable(${test_name} tests/${test_name}.cpp)
     target_link_libraries(${test_name} PRIVATE engine)
     target_compile_definitions(${test_name} PRIVATE TEST_ASSET_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/assets")
@@ -62,6 +62,7 @@ foreach(test_name IN ITEMS test_engine_logic test_wx_integration)
         target_compile_options(${test_name} PRIVATE -UNDEBUG)
     endif()
 endforeach()
+add_test(NAME core COMMAND test_core)
 add_test(NAME engine_logic COMMAND test_engine_logic)
 add_test(NAME wx_integration COMMAND test_wx_integration)
-set_tests_properties(engine_logic wx_integration PROPERTIES TIMEOUT 30)
+set_tests_properties(core engine_logic wx_integration PROPERTIES TIMEOUT 30)

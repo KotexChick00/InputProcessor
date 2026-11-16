@@ -18,29 +18,29 @@ namespace Domain::Camera
 		{
 			m_ActionBindings.erase(action);
 		}
-		bool IsJustPressed(TAction action, const CoreEngine::Input::InputState& inputState) const
+		bool IsJustPressed(TAction action, const CoreEngine::InputState& inputState) const
 		{
 			return QueryAction(action, inputState,
-				[&](CoreEngine::Input::KeyboardKey key) { return inputState.KeyboardInput->CheckIsJustPressed(key); },
-				[&](CoreEngine::Input::MouseButton button) { return inputState.MouseInput->CheckIsJustPressed(button); },
+				[&](CoreEngine::KeyboardKey key) { return inputState.KeyboardInput->CheckIsJustPressed(key); },
+				[&](CoreEngine::MouseButton button) { return inputState.MouseInput->CheckIsJustPressed(button); },
 				[&](MouseScrollDirection scrollDir) {
 					return IsScrolling(scrollDir, inputState);
 				});
 		}
-		bool IsContinuousPressed(TAction action, const CoreEngine::Input::InputState& inputState) const
+		bool IsContinuousPressed(TAction action, const CoreEngine::InputState& inputState) const
 		{
 			return QueryAction(action, inputState,
-				[&](CoreEngine::Input::KeyboardKey key) { return inputState.KeyboardInput->CheckIsPressed(key); },
-				[&](CoreEngine::Input::MouseButton button) { return inputState.MouseInput->CheckIsPressed(button); },
+				[&](CoreEngine::KeyboardKey key) { return inputState.KeyboardInput->CheckIsPressed(key); },
+				[&](CoreEngine::MouseButton button) { return inputState.MouseInput->CheckIsPressed(button); },
 				[&](MouseScrollDirection scrollDir) {
 					return IsScrolling(scrollDir, inputState);
 				});
 		}
-		bool IsReleased(TAction action, const CoreEngine::Input::InputState& inputState) const
+		bool IsReleased(TAction action, const CoreEngine::InputState& inputState) const
 		{
 			return QueryAction(action, inputState,
-				[&](CoreEngine::Input::KeyboardKey key) { return inputState.KeyboardInput->CheckIsReleased(key); },
-				[&](CoreEngine::Input::MouseButton button) { return inputState.MouseInput->CheckIsReleased(button); },
+				[&](CoreEngine::KeyboardKey key) { return inputState.KeyboardInput->CheckIsReleased(key); },
+				[&](CoreEngine::MouseButton button) { return inputState.MouseInput->CheckIsReleased(button); },
 				[&](MouseScrollDirection scrollDir) {
 					return !IsScrolling(scrollDir, inputState);
 				});
@@ -54,7 +54,7 @@ namespace Domain::Camera
 			return it != m_ActionBindings.end() && std::holds_alternative<MouseScrollDirection>(binding);
 		}
 	private:
-		static bool IsScrolling(MouseScrollDirection scrollDir, const CoreEngine::Input::InputState& inputState)
+		static bool IsScrolling(MouseScrollDirection scrollDir, const CoreEngine::InputState& inputState)
 		{
 			constexpr float kEpsilon = 0.0001f; // Độ lệch nhỏ để so sánh float
 			if (!inputState.MouseInput) return false;
@@ -68,20 +68,20 @@ namespace Domain::Camera
 
 		}
 		template<typename KeyboardFunc, typename MouseFunc, typename ScrollFunc>
-		bool QueryAction(TAction action, const CoreEngine::Input::InputState& inputState, KeyboardFunc keyboardFunc, MouseFunc mouseFunc, ScrollFunc scrollFunc) const
+		bool QueryAction(TAction action, const CoreEngine::InputState& inputState, KeyboardFunc keyboardFunc, MouseFunc mouseFunc, ScrollFunc scrollFunc) const
 		{
 			auto it = m_ActionBindings.find(action);
 			if (it == m_ActionBindings.end())
 				return false;
 			const InputBinding& binding = it->second;
-			if (std::holds_alternative<CoreEngine::Input::KeyboardKey>(binding))
+			if (std::holds_alternative<CoreEngine::KeyboardKey>(binding))
 			{
-				CoreEngine::Input::KeyboardKey key = std::get<CoreEngine::Input::KeyboardKey>(binding);
+				CoreEngine::KeyboardKey key = std::get<CoreEngine::KeyboardKey>(binding);
 				return inputState.KeyboardInput && keyboardFunc(key);
 			}
-			else if (std::holds_alternative<CoreEngine::Input::MouseButton>(binding))
+			else if (std::holds_alternative<CoreEngine::MouseButton>(binding))
 			{
-				CoreEngine::Input::MouseButton button = std::get<CoreEngine::Input::MouseButton>(binding);
+				CoreEngine::MouseButton button = std::get<CoreEngine::MouseButton>(binding);
 				return inputState.MouseInput && mouseFunc(button);
 			}
 			else if (std::holds_alternative<MouseScrollDirection>(binding))

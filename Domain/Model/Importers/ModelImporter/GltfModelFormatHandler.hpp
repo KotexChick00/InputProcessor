@@ -10,7 +10,7 @@ namespace Model {
 
 	class GltfModelFormatHandler : public ModelFormatHandler {
 	public:
-		explicit GltfModelFormatHandler(CoreEngine::Renderer::IResourceManager* resourceManager)
+		explicit GltfModelFormatHandler(CoreEngine::IResourceManager* resourceManager)
 			: mImporter(resourceManager)
 		{}
 

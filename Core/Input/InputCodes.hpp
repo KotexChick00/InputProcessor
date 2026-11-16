@@ -1,25 +1,19 @@
 #pragma once
 #include <pch.h>
-#include <Event/EventContext.hpp>
 
-namespace CoreEngine {
-	class CORE_API WindowResizeEventContext : public Event::EventContext {
-	public:
-		WindowResizeEventContext(unsigned int width, unsigned int height) : mWidth(width), mHeight(height) {}
-		CORE_FORCE_INLINE unsigned int GetWidth() const { return mWidth; }
-		CORE_FORCE_INLINE unsigned int GetHeight() const { return mHeight; }
-
-	private:
-		unsigned int mWidth, mHeight;
-	};
-
-	enum class CORE_API KeyboardKey {
+// Platform-independent input codes shared by the polling input API
+// (KeyboardInput / MouseInput) and the application events (Event/EventContext.hpp).
+namespace CoreEngine
+{
+    enum class CORE_API KeyboardKey
+    {
+        // Special Keys and notations
         Unknow,
         Space,
-        Apostrophe,
+        Apostrophe, /* The apostrophe (') key */
         Comma,
         Minus,
-        Period,
+        Period, /* The period or full stop or dot (.) key */
         Slash,
         Semicolon,
         Equal,
@@ -27,9 +21,12 @@ namespace CoreEngine {
         Backslash,
         RightBracket,
         GraveAccent,
-        World1,
-        World2,
-
+        World1, /* Bounded to OEM-102 key */
+        World2, /* Bounded to OEM-102 key */
+                // Both World1 and World2 keys are bounded to OEM-102 key,
+        // which is located between the left Shift and Z keys on a standard US keyboard layout.
+        // Theirs equivalent key in SDL3 is named SDL_SCANCODE_NONUSBACKSLASH.
+        //NonUS_Backslash, // The Non-US Backslash key is located between the left Shift and Z keys on a standard US keyboard layout.
 
         // Numbers in the upper character parts
         Zero,
@@ -144,27 +141,27 @@ namespace CoreEngine {
         RightAlt,
         RightSuper, // Window right key
         Menu
-	};
+    };
 
-    enum class CORE_API KeyboardKeyState {
+    // Polling state returned by KeyboardInput::GetKeyState
+    enum class CORE_API KeyState
+    {
+        None,
+        Pressed,
+        Released
+    };
+
+    // State carried by KeyBoardKeyEventContext
+    enum class CORE_API KeyboardKeyState
+    {
         None,
         Pressed,
         Held,
         Released
     };
 
-    class CORE_API KeyBoardKeyEventContext : public Event::EventContext {
-    public:
-        KeyBoardKeyEventContext(KeyboardKey key, KeyboardKeyState state): mKey(key), mState(state) { }
-        CORE_FORCE_INLINE KeyboardKey GetKey() const { return mKey; }
-        CORE_FORCE_INLINE KeyboardKeyState GetState() const { return mState; }
-
-    private:
-        KeyboardKey mKey;
-        KeyboardKeyState mState;
-    };
-
-    enum class CORE_API MouseButton {
+    enum class CORE_API MouseButton
+    {
         Button1, // Left
         Button2, // Right
         Button3, // Middle
@@ -179,29 +176,12 @@ namespace CoreEngine {
         ButtonMiddle = Button3
     };
 
-    enum class CORE_API MouseButtonState {
+    // Held is only reported by events; MouseInput::GetMouseButtonState returns None/Pressed/Released
+    enum class CORE_API MouseButtonState
+    {
         None,
         Pressed,
         Held,
         Released
-    };
-
-    class CORE_API MouseButtonEventContext : public Event::EventContext {
-    public:
-        MouseButtonEventContext(MouseButton button, MouseButtonState state) : mButton(button), mState(state) { }
-        CORE_FORCE_INLINE MouseButton GetButton() const { return mButton; }
-        CORE_FORCE_INLINE MouseButtonState GetButtonState() const { return mState; }
-    private:
-        MouseButton mButton;
-        MouseButtonState mState;
-    };
-
-    class CORE_API MouseScrollEventContext : public Event::EventContext {
-    public:
-        MouseScrollEventContext(double deltaX, double deltaY): mDeltaX(deltaX), mDeltaY(deltaY) { }
-        CORE_FORCE_INLINE double GetDeltaX() const { return mDeltaX; }
-        CORE_FORCE_INLINE double GetDeltaY() const { return mDeltaY; }
-    private:
-        double mDeltaX, mDeltaY;
     };
 }

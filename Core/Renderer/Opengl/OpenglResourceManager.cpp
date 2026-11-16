@@ -3,307 +3,359 @@
 #include <string>
 #include <fstream>
 
-namespace CoreEngine::Renderer::Opengl {
-	using namespace CoreEngine::Logger;
+namespace CoreEngine
+{
 
-	OpenglResourceManager::~OpenglResourceManager() {
-		IP_ENGINE_TRACE("OpenglResourceManager destroy resources");
+    OpenglResourceManager::~OpenglResourceManager()
+    {
+        IP_ENGINE_TRACE("OpenglResourceManager destroy resources");
 
-		isOnFree = true;
+        isOnFree = true;
 
-		for (auto kv : mVertexBuffers) {
-			delete kv.second;
-		}
+        for (auto kv : mVertexBuffers)
+        {
+            delete kv.second;
+        }
 
-		for (auto kv : mIndexBuffers) {
-			delete kv.second;
-		}
+        for (auto kv : mIndexBuffers)
+        {
+            delete kv.second;
+        }
 
-		for (auto kv : mShaders) {
-			delete kv.second;
-		}
+        for (auto kv : mShaders)
+        {
+            delete kv.second;
+        }
 
-		for (auto kv : mTextures) {
-			delete kv.second;
-		}
+        for (auto kv : mTextures)
+        {
+            delete kv.second;
+        }
 
-		for (auto kv : mCubeMaps) {
-			delete kv.second;
-		}
-		for (auto kv : mUniformBuffers) {
-			delete kv.second;
-		}
-	}
+        for (auto kv : mCubeMaps)
+        {
+            delete kv.second;
+        }
+        for (auto kv : mUniformBuffers)
+        {
+            delete kv.second;
+        }
+    }
 
-	IVertexBuffer* OpenglResourceManager::GetVertexBuffer(VertexBufferID vertexBufferId) {
-		if (mVertexBuffers.contains(vertexBufferId)) {
-			IP_ENGINE_TRACE("OpenglResourceManager get vertex buffer with id: {}", vertexBufferId);
-			return mVertexBuffers.at(vertexBufferId);
-		}
+    IVertexBuffer* OpenglResourceManager::GetVertexBuffer(VertexBufferID vertexBufferId)
+    {
+        if (mVertexBuffers.contains(vertexBufferId))
+        {
+            IP_ENGINE_TRACE("OpenglResourceManager get vertex buffer with id: {}", vertexBufferId);
+            return mVertexBuffers.at(vertexBufferId);
+        }
 
-		IP_ENGINE_WARN("OpenglResourceManager not found vertex buffer with id {}, return null", vertexBufferId);
-		return nullptr;
-	}
+        IP_ENGINE_WARN("OpenglResourceManager not found vertex buffer with id {}, return null", vertexBufferId);
+        return nullptr;
+    }
 
-	IUniformBuffer* OpenglResourceManager::GetUniformBuffer(UniformBufferID uniformBufferId) {
-		if (mUniformBuffers.contains(uniformBufferId)) {
-			IP_ENGINE_TRACE("OpenglResourceManager get uniform buffer with id: {}", uniformBufferId);
-			return mUniformBuffers.at(uniformBufferId);
-		}
+    IUniformBuffer* OpenglResourceManager::GetUniformBuffer(UniformBufferID uniformBufferId)
+    {
+        if (mUniformBuffers.contains(uniformBufferId))
+        {
+            IP_ENGINE_TRACE("OpenglResourceManager get uniform buffer with id: {}", uniformBufferId);
+            return mUniformBuffers.at(uniformBufferId);
+        }
 
-		IP_ENGINE_WARN("OpenglResourceManager not found uniform buffer with id {}, return null", uniformBufferId);
-		return nullptr;
-	}
+        IP_ENGINE_WARN("OpenglResourceManager not found uniform buffer with id {}, return null", uniformBufferId);
+        return nullptr;
+    }
 
-	IVertexBuffer* OpenglResourceManager::CreateVertexBuffer()
-	{
-		return OpenglVertexBuffer::Create();
-	}
+    IVertexBuffer* OpenglResourceManager::CreateVertexBuffer()
+    {
+        return OpenglVertexBuffer::Create();
+    }
 
-	IIndexBuffer* OpenglResourceManager::CreateIndexBuffer()
-	{
-		return OpenglIndexBuffer::Create();
-	}
+    IIndexBuffer* OpenglResourceManager::CreateIndexBuffer()
+    {
+        return OpenglIndexBuffer::Create();
+    }
 
-	IShader* OpenglResourceManager::CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource)
-	{
-		auto* shader = OpenglShader::FromSource(vertexSource, fragmentSource);
-		InsertShader(shader);
-		return shader;
-	}
+    IShader* OpenglResourceManager::CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource)
+    {
+        auto* shader = OpenglShader::FromSource(vertexSource, fragmentSource);
+        InsertShader(shader);
+        return shader;
+    }
 
-	IShader* OpenglResourceManager::CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile)
-	{
-		auto* shader = OpenglShader::FromFiles(vertexFile, fragmentFile);
-		InsertShader(shader);
-		return shader;
-	}
+    IShader* OpenglResourceManager::CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile)
+    {
+        auto* shader = OpenglShader::FromFiles(vertexFile, fragmentFile);
+        InsertShader(shader);
+        return shader;
+    }
 
-	ITexture* OpenglResourceManager::CreateTexture(const std::string& file)
-	{
-		auto it = mTexturePathCache.find(file);
-		if (it != mTexturePathCache.end()) {
-			TextureID textureId = it->second;
-			IP_ENGINE_TRACE("OpenglResourceManager get cached texture with id: {} for file: {}", textureId, file);
-			return GetTexture(textureId);
-		}
+    ITexture* OpenglResourceManager::CreateTexture(const std::string& file)
+    {
+        auto it = mTexturePathCache.find(file);
+        if (it != mTexturePathCache.end())
+        {
+            TextureID textureId = it->second;
+            IP_ENGINE_TRACE("OpenglResourceManager get cached texture with id: {} for file: {}", textureId, file);
+            return GetTexture(textureId);
+        }
 
-		OpenglTexture* texture = OpenglTexture::FromFile(file);
+        OpenglTexture* texture = OpenglTexture::FromFile(file);
 
-		if (texture != nullptr) {
-			TextureID textureId = texture->GetTextureId();
-			mTexturePathCache[file] = textureId;
-			IP_ENGINE_TRACE("OpenglResourceManager create new texture with id: {} for file: {}", textureId, file);
-		}
+        if (texture != nullptr)
+        {
+            TextureID textureId = texture->GetTextureId();
+            mTexturePathCache[file] = textureId;
+            IP_ENGINE_TRACE("OpenglResourceManager create new texture with id: {} for file: {}", textureId, file);
+        }
 
-		return texture; // ham nay da bi sua
-	}
+        return texture; // ham nay da bi sua
+    }
 
-	ITexture* OpenglResourceManager::CreateTextureFromMemory(const unsigned char* data, unsigned int size) {
-		return OpenglTexture::FromMemory(data, size);
-	}
+    ITexture* OpenglResourceManager::CreateTextureFromMemory(const unsigned char* data, unsigned int size)
+    {
+        return OpenglTexture::FromMemory(data, size);
+    }
 
-	ICubeMap* OpenglResourceManager::CreateCubeMap(const CubemapTextureFiles& textureFiles)
-	{
-		Opengl::CubeMapFiles cubemapFiles;
-		cubemapFiles.Front = textureFiles.Front;
-		cubemapFiles.Back = textureFiles.Back;
-		cubemapFiles.Bottom = textureFiles.Bot;
-		cubemapFiles.Top = textureFiles.Top;
-		cubemapFiles.Left = textureFiles.Left;
-		cubemapFiles.Right = textureFiles.Right;
+    ICubeMap* OpenglResourceManager::CreateCubeMap(const CubemapTextureFiles& textureFiles)
+    {
+        CubeMapFiles cubemapFiles;
+        cubemapFiles.Front = textureFiles.Front;
+        cubemapFiles.Back = textureFiles.Back;
+        cubemapFiles.Bottom = textureFiles.Bot;
+        cubemapFiles.Top = textureFiles.Top;
+        cubemapFiles.Left = textureFiles.Left;
+        cubemapFiles.Right = textureFiles.Right;
 
-		return OpenglCubeMap::FromFiles(cubemapFiles);
-	}
+        return OpenglCubeMap::FromFiles(cubemapFiles);
+    }
 
-	IUniformBuffer* OpenglResourceManager::CreateUniformBuffer()
-	{
-		return OpenglUniformBuffer::Create();
-	}
+    IUniformBuffer* OpenglResourceManager::CreateUniformBuffer()
+    {
+        return OpenglUniformBuffer::Create();
+    }
 
-	IFrameBuffer* OpenglResourceManager::CreateColorFrameBuffer(unsigned int width, unsigned int height)
-	{
-		FrameBufferCreateInfo info{ width, height };
-		return OpenglColorFrameBuffer::Create(info);
-	}
+    IFrameBuffer* OpenglResourceManager::CreateColorFrameBuffer(unsigned int width, unsigned int height)
+    {
+        FrameBufferCreateInfo info{width, height};
+        return OpenglColorFrameBuffer::Create(info);
+    }
 
-	IIndexBuffer* OpenglResourceManager::GetIndexBuffer(IndexBufferID indexBufferId) {
-		if (mIndexBuffers.contains(indexBufferId)) {
-			IP_ENGINE_TRACE("OpenglResourceManager get vertex buffer with id: {}", indexBufferId);
-			return mIndexBuffers.at(indexBufferId);
-		}
+    IIndexBuffer* OpenglResourceManager::GetIndexBuffer(IndexBufferID indexBufferId)
+    {
+        if (mIndexBuffers.contains(indexBufferId))
+        {
+            IP_ENGINE_TRACE("OpenglResourceManager get vertex buffer with id: {}", indexBufferId);
+            return mIndexBuffers.at(indexBufferId);
+        }
 
-		IP_ENGINE_WARN("OpenglResourceManager not found index buffer with id {}, return null", indexBufferId);
-		return nullptr;
-	}
+        IP_ENGINE_WARN("OpenglResourceManager not found index buffer with id {}, return null", indexBufferId);
+        return nullptr;
+    }
 
-	IShader* OpenglResourceManager::GetShader(ShaderID shaderId) {
-		if (mShaders.contains(shaderId)) {
-			IP_ENGINE_TRACE("OpenglResourceManager get shader with id: {}", shaderId);
-			return mShaders.at(shaderId);
-		}
+    IShader* OpenglResourceManager::GetShader(ShaderID shaderId)
+    {
+        if (mShaders.contains(shaderId))
+        {
+            IP_ENGINE_TRACE("OpenglResourceManager get shader with id: {}", shaderId);
+            return mShaders.at(shaderId);
+        }
 
-		IP_ENGINE_WARN("OpenglResourceManager not found shader with id {}, return null", shaderId);
-		return nullptr;
-	}
+        IP_ENGINE_WARN("OpenglResourceManager not found shader with id {}, return null", shaderId);
+        return nullptr;
+    }
 
-	ITexture* OpenglResourceManager::GetTexture(TextureID textureId) {
-		if (mTextures.contains(textureId)) {
-			IP_ENGINE_TRACE("OpenglResourceManager get texture with id: {}", textureId);
-			return mTextures.at(textureId);
-		}
+    ITexture* OpenglResourceManager::GetTexture(TextureID textureId)
+    {
+        if (mTextures.contains(textureId))
+        {
+            IP_ENGINE_TRACE("OpenglResourceManager get texture with id: {}", textureId);
+            return mTextures.at(textureId);
+        }
 
-		IP_ENGINE_WARN("OpenglResourceManager not found texture with id {}, return null", textureId);
-		return nullptr;
-	}
+        IP_ENGINE_WARN("OpenglResourceManager not found texture with id {}, return null", textureId);
+        return nullptr;
+    }
 
-	ICubeMap* OpenglResourceManager::GetCubeMap(CubeMapID cubeMapId) {
-		if (mCubeMaps.contains(cubeMapId)) {
-			IP_ENGINE_TRACE("OpenglResourceManager get cube map with id: {}", cubeMapId);
-			return mCubeMaps.at(cubeMapId);
-		}
+    ICubeMap* OpenglResourceManager::GetCubeMap(CubeMapID cubeMapId)
+    {
+        if (mCubeMaps.contains(cubeMapId))
+        {
+            IP_ENGINE_TRACE("OpenglResourceManager get cube map with id: {}", cubeMapId);
+            return mCubeMaps.at(cubeMapId);
+        }
 
-		IP_ENGINE_WARN("OpenglResourceManager not found cube map with id {}, return null", cubeMapId);
-		return nullptr;
-	}
+        IP_ENGINE_WARN("OpenglResourceManager not found cube map with id {}, return null", cubeMapId);
+        return nullptr;
+    }
 
-	void OpenglResourceManager::Free() {
-		if (sInstance != nullptr) {
-			delete sInstance;
-			sInstance = nullptr;
-		}
-	}
+    void OpenglResourceManager::Free()
+    {
+        if (sInstance != nullptr)
+        {
+            delete sInstance;
+            sInstance = nullptr;
+        }
+    }
 
-	void OpenglResourceManager::InsertVertexBuffer(OpenglVertexBuffer* vertexBuffer) {
-		if (vertexBuffer == nullptr) return;
-		VertexBufferID id = vertexBuffer->GetVertexBufferId();
-		if (mVertexBuffers.contains(id)) {
-			IP_ENGINE_WARN("OpenglResourceManager vertex buffer with id {} already exists, skipping insert", id);
-			return;
-		}
-		mVertexBuffers.insert({ id, vertexBuffer });
-		IP_ENGINE_TRACE("OpenglResourceManager insert vertex buffer with id: {}", id);
-	}
+    void OpenglResourceManager::InsertVertexBuffer(OpenglVertexBuffer* vertexBuffer)
+    {
+        if (vertexBuffer == nullptr) return;
+        VertexBufferID id = vertexBuffer->GetVertexBufferId();
+        if (mVertexBuffers.contains(id))
+        {
+            IP_ENGINE_WARN("OpenglResourceManager vertex buffer with id {} already exists, skipping insert", id);
+            return;
+        }
+        mVertexBuffers.insert({id, vertexBuffer});
+        IP_ENGINE_TRACE("OpenglResourceManager insert vertex buffer with id: {}", id);
+    }
 
-	void OpenglResourceManager::InsertIndexBuffer(OpenglIndexBuffer* openglIndexBuffer) {
-		if (openglIndexBuffer == nullptr) return;
-		IndexBufferID id = openglIndexBuffer->GetIndexBufferId();
-		if (mIndexBuffers.contains(id)) {
-			IP_ENGINE_WARN("OpenglResourceManager index buffer with id {} already exists, skipping insert", id);
-			return;
-		}
-		mIndexBuffers.insert({ id, openglIndexBuffer });
-		IP_ENGINE_TRACE("OpenglResourceManager insert index buffer with id: {}", id);
-	}
+    void OpenglResourceManager::InsertIndexBuffer(OpenglIndexBuffer* openglIndexBuffer)
+    {
+        if (openglIndexBuffer == nullptr) return;
+        IndexBufferID id = openglIndexBuffer->GetIndexBufferId();
+        if (mIndexBuffers.contains(id))
+        {
+            IP_ENGINE_WARN("OpenglResourceManager index buffer with id {} already exists, skipping insert", id);
+            return;
+        }
+        mIndexBuffers.insert({id, openglIndexBuffer});
+        IP_ENGINE_TRACE("OpenglResourceManager insert index buffer with id: {}", id);
+    }
 
-	void OpenglResourceManager::InsertShader(OpenglShader* shader) {
-		if (shader == nullptr) return;
-		ShaderID id = shader->GetShaderId();
-		if (mShaders.contains(id)) {
-			IP_ENGINE_WARN("OpenglResourceManager shader with id {} already exists, skipping insert", id);
-			return;
-		}
-		mShaders.insert({ id, shader });
-		IP_ENGINE_TRACE("OpenglResourceManager insert shader with id: {}", id);
-	}
+    void OpenglResourceManager::InsertShader(OpenglShader* shader)
+    {
+        if (shader == nullptr) return;
+        ShaderID id = shader->GetShaderId();
+        if (mShaders.contains(id))
+        {
+            IP_ENGINE_WARN("OpenglResourceManager shader with id {} already exists, skipping insert", id);
+            return;
+        }
+        mShaders.insert({id, shader});
+        IP_ENGINE_TRACE("OpenglResourceManager insert shader with id: {}", id);
+    }
 
-	void OpenglResourceManager::InsertTexture(OpenglTexture* texture) {
-		if (texture == nullptr) return;
-		TextureID id = texture->GetTextureId();
-		if (mTextures.contains(id)) {
-			IP_ENGINE_WARN("OpenglResourceManager texture with id {} already exists, skipping insert", id);
-			return;
-		}
-		mTextures.insert({ id, texture });
-		IP_ENGINE_TRACE("OpenglResourceManager insert texture with id: {}", id);
-	}
+    void OpenglResourceManager::InsertTexture(OpenglTexture* texture)
+    {
+        if (texture == nullptr) return;
+        TextureID id = texture->GetTextureId();
+        if (mTextures.contains(id))
+        {
+            IP_ENGINE_WARN("OpenglResourceManager texture with id {} already exists, skipping insert", id);
+            return;
+        }
+        mTextures.insert({id, texture});
+        IP_ENGINE_TRACE("OpenglResourceManager insert texture with id: {}", id);
+    }
 
-	void OpenglResourceManager::InsertCubeMap(OpenglCubeMap* cubeMap) {
-		if (cubeMap == nullptr) return;
-		CubeMapID id = cubeMap->GetCubeMapId();
-		if (mCubeMaps.contains(id)) {
-			IP_ENGINE_WARN("OpenglResourceManager cubemap with id {} already exists, skipping insert", id);
-			return;
-		}
-		mCubeMaps.insert({ id, cubeMap });
-		IP_ENGINE_TRACE("OpenglResourceManager insert cubemap with id: {}", id);
-	}
+    void OpenglResourceManager::InsertCubeMap(OpenglCubeMap* cubeMap)
+    {
+        if (cubeMap == nullptr) return;
+        CubeMapID id = cubeMap->GetCubeMapId();
+        if (mCubeMaps.contains(id))
+        {
+            IP_ENGINE_WARN("OpenglResourceManager cubemap with id {} already exists, skipping insert", id);
+            return;
+        }
+        mCubeMaps.insert({id, cubeMap});
+        IP_ENGINE_TRACE("OpenglResourceManager insert cubemap with id: {}", id);
+    }
 
-	void OpenglResourceManager::InsertUniformBuffer(OpenglUniformBuffer* uniformBuffer) {
-		if (uniformBuffer == nullptr) return;
-		UniformBufferID id = uniformBuffer->GetUniformId();
-		if (mUniformBuffers.contains(id)) {
-			IP_ENGINE_WARN("OpenglResourceManager uniform buffer with id {} already exists, skipping insert", id);
-			return;
-		}
-		mUniformBuffers.insert({ id, uniformBuffer });
-		IP_ENGINE_TRACE("OpenglResourceManager insert uniform buffer with id: {}", id);
-	}
+    void OpenglResourceManager::InsertUniformBuffer(OpenglUniformBuffer* uniformBuffer)
+    {
+        if (uniformBuffer == nullptr) return;
+        UniformBufferID id = uniformBuffer->GetUniformId();
+        if (mUniformBuffers.contains(id))
+        {
+            IP_ENGINE_WARN("OpenglResourceManager uniform buffer with id {} already exists, skipping insert", id);
+            return;
+        }
+        mUniformBuffers.insert({id, uniformBuffer});
+        IP_ENGINE_TRACE("OpenglResourceManager insert uniform buffer with id: {}", id);
+    }
 
-	void OpenglResourceManager::RemoveUniformBuffer(UniformBufferID uniformBufferId) {
-		if (isOnFree) return;
-		if (mUniformBuffers.contains(uniformBufferId)) {
-			mUniformBuffers.erase(uniformBufferId);
-			IP_ENGINE_TRACE("OpenglResourceManager removed uniform buffer with id: {}", uniformBufferId);
-			return;
-		}
-		IP_ENGINE_WARN("OpenglResourceManager cannot remove uniform buffer with id {} because it does not exist", uniformBufferId);
-	}
+    void OpenglResourceManager::RemoveUniformBuffer(UniformBufferID uniformBufferId)
+    {
+        if (isOnFree) return;
+        if (mUniformBuffers.contains(uniformBufferId))
+        {
+            mUniformBuffers.erase(uniformBufferId);
+            IP_ENGINE_TRACE("OpenglResourceManager removed uniform buffer with id: {}", uniformBufferId);
+            return;
+        }
+        IP_ENGINE_WARN("OpenglResourceManager cannot remove uniform buffer with id {} because it does not exist", uniformBufferId);
+    }
 
-	void OpenglResourceManager::RemoveVertexBuffer(VertexBufferID vertexBufferId) {
-		if (isOnFree) return;
-		if (mVertexBuffers.contains(vertexBufferId)) {
-			mVertexBuffers.erase(vertexBufferId);
-			IP_ENGINE_TRACE("OpenglResourceManager removed vertex buffer with id: {}", vertexBufferId);
-			return;
-		}
-		IP_ENGINE_WARN("OpenglResourceManager cannot remove vertex buffer with id {} because it does not exist", vertexBufferId);
-	}
+    void OpenglResourceManager::RemoveVertexBuffer(VertexBufferID vertexBufferId)
+    {
+        if (isOnFree) return;
+        if (mVertexBuffers.contains(vertexBufferId))
+        {
+            mVertexBuffers.erase(vertexBufferId);
+            IP_ENGINE_TRACE("OpenglResourceManager removed vertex buffer with id: {}", vertexBufferId);
+            return;
+        }
+        IP_ENGINE_WARN("OpenglResourceManager cannot remove vertex buffer with id {} because it does not exist", vertexBufferId);
+    }
 
-	void OpenglResourceManager::RemoveIndexBuffer(IndexBufferID indexBufferId) {
-		if (isOnFree) return;
-		if (mIndexBuffers.contains(indexBufferId)) {
-			mIndexBuffers.erase(indexBufferId);
-			IP_ENGINE_TRACE("OpenglResourceManager removed index buffer with id: {}", indexBufferId);
-			return;
-		}
-		IP_ENGINE_WARN("OpenglResourceManager cannot remove index buffer with id {} because it does not exist", indexBufferId);
-	}
+    void OpenglResourceManager::RemoveIndexBuffer(IndexBufferID indexBufferId)
+    {
+        if (isOnFree) return;
+        if (mIndexBuffers.contains(indexBufferId))
+        {
+            mIndexBuffers.erase(indexBufferId);
+            IP_ENGINE_TRACE("OpenglResourceManager removed index buffer with id: {}", indexBufferId);
+            return;
+        }
+        IP_ENGINE_WARN("OpenglResourceManager cannot remove index buffer with id {} because it does not exist", indexBufferId);
+    }
 
-	void OpenglResourceManager::RemoveShader(ShaderID shaderId) {
-		if (isOnFree) return;
-		if (mShaders.contains(shaderId)) {
-			mShaders.erase(shaderId);
-			IP_ENGINE_TRACE("OpenglResourceManager removed shader with id: {}", shaderId);
-			return;
-		}
-		IP_ENGINE_WARN("OpenglResourceManager cannot remove shader with id {} because it does not exist", shaderId);
-	}
+    void OpenglResourceManager::RemoveShader(ShaderID shaderId)
+    {
+        if (isOnFree) return;
+        if (mShaders.contains(shaderId))
+        {
+            mShaders.erase(shaderId);
+            IP_ENGINE_TRACE("OpenglResourceManager removed shader with id: {}", shaderId);
+            return;
+        }
+        IP_ENGINE_WARN("OpenglResourceManager cannot remove shader with id {} because it does not exist", shaderId);
+    }
 
-	void OpenglResourceManager::RemoveTexture(TextureID textureId) {
-		if (isOnFree) return;
-		if (mTextures.contains(textureId)) {
-			mTextures.erase(textureId);
-			for (auto it = mTexturePathCache.begin(); it != mTexturePathCache.end(); ) {
-				if (it->second == textureId) {
-					it = mTexturePathCache.erase(it);
-				} else {
-					++it;
-				}
-			}
-			IP_ENGINE_TRACE("OpenglResourceManager removed texture with id: {}", textureId);
-			return;
-		}
-		IP_ENGINE_WARN("OpenglResourceManager cannot remove texture with id {} because it does not exist", textureId);
-	}
+    void OpenglResourceManager::RemoveTexture(TextureID textureId)
+    {
+        if (isOnFree) return;
+        if (mTextures.contains(textureId))
+        {
+            mTextures.erase(textureId);
+            for (auto it = mTexturePathCache.begin(); it != mTexturePathCache.end();)
+            {
+                if (it->second == textureId)
+                {
+                    it = mTexturePathCache.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+            IP_ENGINE_TRACE("OpenglResourceManager removed texture with id: {}", textureId);
+            return;
+        }
+        IP_ENGINE_WARN("OpenglResourceManager cannot remove texture with id {} because it does not exist", textureId);
+    }
 
-	void OpenglResourceManager::RemoveCubeMap(CubeMapID cubeMapId) {
-		if (isOnFree) return;
-		if (mCubeMaps.contains(cubeMapId)) {
-			mCubeMaps.erase(cubeMapId);
-			IP_ENGINE_TRACE("OpenglResourceManager removed cubemap with id: {}", cubeMapId);
-			return;
-		}
-		IP_ENGINE_WARN("OpenglResourceManager cannot remove cubemap with id {} because it does not exist", cubeMapId);
-	}
+    void OpenglResourceManager::RemoveCubeMap(CubeMapID cubeMapId)
+    {
+        if (isOnFree) return;
+        if (mCubeMaps.contains(cubeMapId))
+        {
+            mCubeMaps.erase(cubeMapId);
+            IP_ENGINE_TRACE("OpenglResourceManager removed cubemap with id: {}", cubeMapId);
+            return;
+        }
+        IP_ENGINE_WARN("OpenglResourceManager cannot remove cubemap with id {} because it does not exist", cubeMapId);
+    }
 }

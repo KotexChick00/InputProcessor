@@ -2,7 +2,7 @@
 #include <string>
 #include <Renderer/Resource/ITexture.hpp>
 
-namespace CoreEngine::Renderer {
+namespace CoreEngine {
 	class IRenderResourceFactory {
 	public:
 		virtual ~IRenderResourceFactory() = default;

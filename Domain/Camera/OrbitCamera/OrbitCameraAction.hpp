@@ -22,18 +22,18 @@ namespace Domain::Camera::OrbitCamera
 	{
 
 		InputMap<OrbitCameraAction> inputMap;
-		inputMap.BindAction(OrbitCameraAction::Orbit, CoreEngine::Input::MouseButton::Button1);
+		inputMap.BindAction(OrbitCameraAction::Orbit, CoreEngine::MouseButton::Button1);
 
-		inputMap.BindAction(OrbitCameraAction::Pan, CoreEngine::Input::MouseButton::Button2);
+		inputMap.BindAction(OrbitCameraAction::Pan, CoreEngine::MouseButton::Button2);
 
-		inputMap.BindAction(OrbitCameraAction::Dolly, CoreEngine::Input::MouseButton::Button3);
+		inputMap.BindAction(OrbitCameraAction::Dolly, CoreEngine::MouseButton::Button3);
 
 		inputMap.BindAction(OrbitCameraAction::ZoomIn, MouseScrollDirection::Up);
 
 		inputMap.BindAction(OrbitCameraAction::ZoomOut, MouseScrollDirection::Down);
 
-		inputMap.BindAction(OrbitCameraAction::Reset, CoreEngine::Input::KeyboardKey::R);
-		using CoreEngine::Input::KeyboardKey;
+		inputMap.BindAction(OrbitCameraAction::Reset, CoreEngine::KeyboardKey::R);
+		using CoreEngine::KeyboardKey;
 		inputMap.BindAction(OrbitCameraAction::OrbitLeft, KeyboardKey::Left);
 		inputMap.BindAction(OrbitCameraAction::OrbitRight, KeyboardKey::Right);
 		inputMap.BindAction(OrbitCameraAction::OrbitUp, KeyboardKey::Up);

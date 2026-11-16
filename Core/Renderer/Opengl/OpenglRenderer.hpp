@@ -5,27 +5,29 @@
 #include <Renderer/Opengl/OpenglFrameBufferManager.hpp>
 #include <memory>
 
-namespace CoreEngine::Renderer::Opengl {
-	class OpenglRenderer : public IRenderer {
-	public:
-		~OpenglRenderer() override;
-		static OpenglRenderer* GetInstance();
-		
-		static void SFree();
+namespace CoreEngine
+{
+    class OpenglRenderer : public IRenderer
+    {
+    public:
+        ~OpenglRenderer() override;
+        static OpenglRenderer* GetInstance();
 
-		void Free() override;
-		void Config(RendererConfiguration configuration) override;
-		IRendererCommand* GetRendererCommand() override;
-		IResourceManager* GetResourceManager() override;
-		IFrameBufferManager* GetFrameBufferManager() override;
+        static void SFree();
 
-		RendererConfiguration GetConfig() override;
+        void Free() override;
+        void Config(RendererConfiguration configuration) override;
+        IRendererCommand* GetRendererCommand() override;
+        IResourceManager* GetResourceManager() override;
+        IFrameBufferManager* GetFrameBufferManager() override;
 
-	private:
-		OpenglRenderer();
+        RendererConfiguration GetConfig() override;
 
-		RendererConfiguration mConfiguration;
+    private:
+        OpenglRenderer();
 
-		inline static OpenglRenderer* sInstance = nullptr;
-	};
+        RendererConfiguration mConfiguration;
+
+        inline static OpenglRenderer* sInstance = nullptr;
+    };
 }

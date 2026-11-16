@@ -1,13 +1,15 @@
 #pragma once
 #include <Input/KeyboardInput.hpp>
 
-namespace CoreEngine::Input::Wx {
+namespace CoreEngine
+{
     /// wxWidgets-backed KeyboardInput.
     ///
     /// Key state is maintained manually: WxWindow feeds raw wxKeyEvent data
     /// into NotifyKeyDown / NotifyKeyUp; Update() is called in EndFrame() to
     /// advance state machine and record wasPressed history.
-    class WxKeyboardInput : public KeyboardInput {
+    class WxKeyboardInput : public KeyboardInput
+    {
     public:
         WxKeyboardInput();
         ~WxKeyboardInput() = default;
@@ -32,4 +34,4 @@ namespace CoreEngine::Input::Wx {
 
         static KeyboardKey ToKeyboardKey(int wxKeyCode);
     };
-} // namespace CoreEngine::Input::Wx
+} // namespace CoreEngine

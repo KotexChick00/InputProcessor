@@ -1,7 +1,7 @@
 #include <Model/RenderResourceFactory.hpp>
 #include <Logger/Logger.hpp>
 
-namespace CoreEngine::Renderer {
+namespace CoreEngine {
 
         ITexture* RenderResourceFactory::CreateTexture(const std::string& filePath) {
                 if (!mResourceManager) {

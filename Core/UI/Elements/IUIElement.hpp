@@ -4,126 +4,144 @@
 #include <functional>
 #include <cfloat>
 
-namespace CoreEngine::UI {
-        enum class SizeMode {
-                Absolute,
-                ParentRelative
-        };
+namespace CoreEngine
+{
+    enum class SizeMode
+    {
+        Absolute,
+        ParentRelative
+    };
 
-        struct SizeInfo {
-                SizeMode SizeMode;
-                
-                // If size mode is ParentRelative
-                float WidthFraction = 1.f;
-                float HeightFraction = 1.f;
+    struct SizeInfo
+    {
+        SizeMode SizeMode;
 
-                // Else
-                float Width = 0.f;
-                float Height = 0.f;
+        // If size mode is ParentRelative
+        float WidthFraction = 1.f;
+        float HeightFraction = 1.f;
 
-                // Generals
-                float MinWidth = 0.f;
-                float MaxWidth = FLT_MAX;
-                float MinHeight = 0.f;
-                float MaxHeight = FLT_MAX;
-        };
+        // Else
+        float Width = 0.f;
+        float Height = 0.f;
 
-        class IResizeableUIElement {
-        public:
-                virtual ~IResizeableUIElement() = default;
-                virtual void Resize(SizeInfo sizeInfo) = 0;
-                virtual SizeInfo GetSize() const = 0;
-        };
+        // Generals
+        float MinWidth = 0.f;
+        float MaxWidth = FLT_MAX;
+        float MinHeight = 0.f;
+        float MaxHeight = FLT_MAX;
+    };
 
-        enum class AnchorPresetPosition {
-                TopLeft,
-                TopMid,
-                TopRight,
-                CenterLeft,
-                CenterMid,
-                CenterRight,
-                BotLeft,
-                BotMid,
-                BotRight
-        };
+    class IResizeableUIElement
+    {
+    public:
+        virtual ~IResizeableUIElement() = default;
+        virtual void Resize(SizeInfo sizeInfo) = 0;
+        virtual SizeInfo GetSize() const = 0;
+    };
 
-        struct AnchorPositionInfo {
-                AnchorPresetPosition PresetPosition;
-                unsigned int OffsetX = 0;
-                unsigned int OffsetY = 0;
-        };
+    enum class AnchorPresetPosition
+    {
+        TopLeft,
+        TopMid,
+        TopRight,
+        CenterLeft,
+        CenterMid,
+        CenterRight,
+        BotLeft,
+        BotMid,
+        BotRight
+    };
 
-        class IUIElement {
-        public:
-                virtual ~IUIElement() = default;
-                virtual void Render() = 0;
-                virtual void SetAnchor(AnchorPositionInfo anchorPositionInfo) = 0;
-                virtual AnchorPositionInfo GetAnchorInfo(AnchorPositionInfo anchorPositionInfo) const = 0;
-        };
+    struct AnchorPositionInfo
+    {
+        AnchorPresetPosition PresetPosition;
+        unsigned int OffsetX = 0;
+        unsigned int OffsetY = 0;
+    };
 
-        struct PositionInfo {
-                unsigned int OffsetX;
-                unsigned int OffsetY;
-        };
+    class IUIElement
+    {
+    public:
+        virtual ~IUIElement() = default;
+        virtual void Render() = 0;
+        virtual void SetAnchor(AnchorPositionInfo anchorPositionInfo) = 0;
+        virtual AnchorPositionInfo GetAnchorInfo(AnchorPositionInfo anchorPositionInfo) const = 0;
+    };
 
-        class IPositionSetableUIElement {
-        public:
-                virtual ~IPositionSetableUIElement() = default;
-                virtual void SetPosition(PositionInfo position) = 0;
-                virtual PositionInfo GetPosition() = 0;
-        };
+    struct PositionInfo
+    {
+        unsigned int OffsetX;
+        unsigned int OffsetY;
+    };
 
-        struct ContainerOffsetInfo {
-                unsigned int Top = 0;
-                unsigned int Bot = 0;
-                unsigned int Left = 0;
-                unsigned int Right = 0;
-        };
+    class IPositionSetableUIElement
+    {
+    public:
+        virtual ~IPositionSetableUIElement() = default;
+        virtual void SetPosition(PositionInfo position) = 0;
+        virtual PositionInfo GetPosition() = 0;
+    };
 
-        class IContainer : public IUIElement, public IResizeableUIElement {
-        public:
-                virtual void AddChildren(IUIElement* element) = 0;
-                virtual void OffsetContainer(ContainerOffsetInfo offsetInfo) = 0;
-                virtual std::vector<IUIElement*> GetChildrens() const = 0;
-        };
+    struct ContainerOffsetInfo
+    {
+        unsigned int Top = 0;
+        unsigned int Bot = 0;
+        unsigned int Left = 0;
+        unsigned int Right = 0;
+    };
 
-        enum class VboxAlignment {
-                Begin,
-                Center,
-                End
-        };
+    class IContainer : public IUIElement, public IResizeableUIElement
+    {
+    public:
+        virtual void AddChildren(IUIElement* element) = 0;
+        virtual void OffsetContainer(ContainerOffsetInfo offsetInfo) = 0;
+        virtual std::vector<IUIElement*> GetChildrens() const = 0;
+    };
 
-        struct VboxConfiguration {
-                float ElementSpace = 0.f;
-                VboxAlignment Alignment;
-        };
+    enum class VboxAlignment
+    {
+        Begin,
+        Center,
+        End
+    };
 
-        class IVboxContainer : public IContainer {
-        public:
-                virtual void SetConfig(VboxConfiguration config) { }
-                virtual VboxConfiguration GetConfig() const = 0;
-        };
+    struct VboxConfiguration
+    {
+        float ElementSpace = 0.f;
+        VboxAlignment Alignment;
+    };
 
-        enum class HboxAlignment {
-                Begin,
-                Center,
-                End
-        };
+    class IVboxContainer : public IContainer
+    {
+    public:
+        virtual void SetConfig(VboxConfiguration config) { }
+        virtual VboxConfiguration GetConfig() const = 0;
+    };
 
-        struct HboxConfiguration {
-                float ElementSpace = 0.f;
-                VboxAlignment Alignment;
-        };
+    enum class HboxAlignment
+    {
+        Begin,
+        Center,
+        End
+    };
 
-        class IHboxContainer : public IContainer {
-        public:
-                virtual void SetConfig(HboxConfiguration config) { }
-                virtual HboxConfiguration GetConfig() const = 0;
-        };
+    struct HboxConfiguration
+    {
+        float ElementSpace = 0.f;
+        VboxAlignment Alignment;
+    };
 
-        class IButton : public IUIElement, public IPositionSetableUIElement, public IResizeableUIElement {
-        public:
-                virtual void SetCallback(std::function<void()> commandFunction) { }
-                virtual void SetText(const std::string& text) = 0;
-        };
+    class IHboxContainer : public IContainer
+    {
+    public:
+        virtual void SetConfig(HboxConfiguration config) { }
+        virtual HboxConfiguration GetConfig() const = 0;
+    };
+
+    class IButton : public IUIElement, public IPositionSetableUIElement, public IResizeableUIElement
+    {
+    public:
+        virtual void SetCallback(std::function<void()> commandFunction) { }
+        virtual void SetText(const std::string& text) = 0;
+    };
 };

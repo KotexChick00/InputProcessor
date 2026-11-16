@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 namespace Model {
-	AssimpModelImporter::AssimpModelImporter(Renderer::IResourceManager* resourceManager)
+	AssimpModelImporter::AssimpModelImporter(CoreEngine::IResourceManager* resourceManager)
 		: mResourceManager(resourceManager) {}
 
 	std::unique_ptr<RenderModel> AssimpModelImporter::Import(const char* file) {
@@ -119,8 +119,8 @@ namespace Model {
 		return new AdsMaterial(ambientTextures, diffuseTextures, specularTextures, glm::vec4(color.r, color.g, color.b, color.a));
 	}
 
-	std::vector<Renderer::ITexture*> AssimpModelImporter::LoadMaterialTextures(aiMaterial* material, aiTextureType type, const aiScene* scene, const std::string& directory) {
-		std::vector<Renderer::ITexture*> textures;
+	std::vector<CoreEngine::ITexture*> AssimpModelImporter::LoadMaterialTextures(aiMaterial* material, aiTextureType type, const aiScene* scene, const std::string& directory) {
+		std::vector<CoreEngine::ITexture*> textures;
 
 		for (unsigned int i = 0; i < material->GetTextureCount(type); i++) {
 			aiString str;
@@ -128,7 +128,7 @@ namespace Model {
 
 			if (!mResourceManager) throw std::runtime_error("A resource manager is required to load model textures");
 			std::string texturePath = (std::filesystem::path(directory) / str.C_Str()).string();
-			Renderer::ITexture* texture = nullptr;
+			CoreEngine::ITexture* texture = nullptr;
 			if (const aiTexture* embedded = scene->GetEmbeddedTexture(str.C_Str())) {
 				if (embedded->mHeight != 0) throw std::runtime_error("Unsupported uncompressed embedded model texture");
 				auto [entry, inserted] = mEmbeddedTextures.try_emplace(embedded, nullptr);

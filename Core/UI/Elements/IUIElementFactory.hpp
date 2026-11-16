@@ -1,13 +1,15 @@
 #pragma once
 #include <UI/Elements/IUIElement.hpp>
 
-namespace CoreEngine::UI {
-        class IUIElementFactory {
-        public:
-                virtual ~IUIElementFactory() = default;
-                virtual IContainer* CreateContainer() = 0;
-                virtual IVboxContainer* CreateVboxContainer() = 0;
-                virtual IHboxContainer* CreateHboxContainer() = 0;
-                virtual IButton* CreateButton() = 0;
-        };
+namespace CoreEngine
+{
+    class IUIElementFactory
+    {
+    public:
+        virtual ~IUIElementFactory() = default;
+        virtual IContainer* CreateContainer() = 0;
+        virtual IVboxContainer* CreateVboxContainer() = 0;
+        virtual IHboxContainer* CreateHboxContainer() = 0;
+        virtual IButton* CreateButton() = 0;
+    };
 }

@@ -10,7 +10,7 @@ namespace Model {
 		~RenderModel();
 		const std::vector<Mesh>& GetMeshes() const { return mMeshes; }
 
-		void Render(CoreEngine::Renderer::IRenderer* renderer, CoreEngine::Renderer::IShader* shader);
+		void Render(CoreEngine::IRenderer* renderer, CoreEngine::IShader* shader);
 
 	private:
 		struct SubMesh {
@@ -20,12 +20,12 @@ namespace Model {
 	
 		};
 
-		void UploadToGPU(CoreEngine::Renderer::IResourceManager* resourceManager);
+		void UploadToGPU(CoreEngine::IResourceManager* resourceManager);
 
 	private:
 		std::vector<Mesh> mMeshes;
 		std::vector<SubMesh> mSubMeshes;
-		CoreEngine::Renderer::IVertexBuffer* mVertexBuffer = nullptr;
-		CoreEngine::Renderer::IIndexBuffer* mIndexBuffer = nullptr;
+		CoreEngine::IVertexBuffer* mVertexBuffer = nullptr;
+		CoreEngine::IIndexBuffer* mIndexBuffer = nullptr;
 	};
 }

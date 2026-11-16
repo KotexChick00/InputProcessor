@@ -48,7 +48,7 @@ public:
         auto* renderer = GetRenderer();
         auto config = renderer->GetConfig();
         config.DepthOptions.Enabled = true;
-        config.DepthOptions.Operation = CoreEngine::Renderer::DepthOperation::ReadAndWrite;
+        config.DepthOptions.Operation = CoreEngine::DepthOperation::ReadAndWrite;
         config.ClearBufferColor = {0.08f, 0.09f, 0.12f, 1.0f};
         renderer->Config(config);
         mShader = renderer->GetResourceManager()->CreateShaderFromSources(vertexSource, fragmentSource);
@@ -70,11 +70,11 @@ public:
 
     void OnLoopClient() override {
         auto input = GetInput();
-        if (input.KeyboardInput->CheckIsPressed(CoreEngine::Input::KeyboardKey::Escape)) RequestClose();
-        if (input.KeyboardInput->CheckIsJustPressed(CoreEngine::Input::KeyboardKey::R)) FitCamera();
+        if (input.KeyboardInput->CheckIsPressed(CoreEngine::KeyboardKey::Escape)) RequestClose();
+        if (input.KeyboardInput->CheckIsJustPressed(CoreEngine::KeyboardKey::R)) FitCamera();
         mController->Update(GetTime()->GetDeltaTime());
         auto* renderer = GetRenderer();
-        renderer->GetRendererCommand()->ClearBuffers(CoreEngine::Renderer::ClearBufferMasks::Color | CoreEngine::Renderer::ClearBufferMasks::Depth);
+        renderer->GetRendererCommand()->ClearBuffers(CoreEngine::ClearBufferMasks::Color | CoreEngine::ClearBufferMasks::Depth);
         mShader->Use();
         auto viewProjection = mCamera.GetProjectionMatrix() * mCamera.GetViewMatrix();
         mShader->SetUniformMatrix4fv("uViewProjection", glm::value_ptr(viewProjection));
@@ -109,7 +109,7 @@ private:
     Orbit::OrbitCamera mCamera{glm::vec3(0), 5.0f};
     std::unique_ptr<Orbit::OrbitCameraController> mController;
     std::unique_ptr<Model::RenderModel> mModel;
-    CoreEngine::Renderer::IShader* mShader = nullptr;
+    CoreEngine::IShader* mShader = nullptr;
 };
 }
 

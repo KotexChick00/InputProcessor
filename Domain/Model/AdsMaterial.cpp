@@ -3,13 +3,13 @@
 
 namespace Model {
 	AdsMaterial::AdsMaterial(
-		std::vector<CoreEngine::Renderer::ITexture*> ambientTextures,
-		std::vector<CoreEngine::Renderer::ITexture*> diffuseTextures,
-		std::vector<CoreEngine::Renderer::ITexture*> specularTextures,
+		std::vector<CoreEngine::ITexture*> ambientTextures,
+		std::vector<CoreEngine::ITexture*> diffuseTextures,
+		std::vector<CoreEngine::ITexture*> specularTextures,
 		glm::vec4 baseColor
 	) : mBaseColor(baseColor), mAmbientTextures(ambientTextures), mDiffuseTextures(diffuseTextures), mSpecularTextures(specularTextures) {  }
 
-	void AdsMaterial::Apply(CoreEngine::Renderer::IShader* shader) {
+	void AdsMaterial::Apply(CoreEngine::IShader* shader) {
 		shader->SetUniform1i("uHasDiffuseTexture", !mDiffuseTextures.empty());
 		shader->SetUniform4f("uBaseColor", mBaseColor.r, mBaseColor.g, mBaseColor.b, mBaseColor.a);
 		for (size_t i = 0;i < mAmbientTextures.size(); ++i) {

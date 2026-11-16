@@ -2,19 +2,23 @@
 #include <Input/InputState.hpp>
 #include <pch.h>
 
-namespace CoreEngine::Window {
-    struct WindowConfiguration {
+namespace CoreEngine
+{
+    struct WindowConfiguration
+    {
         unsigned int Width;
         unsigned int Height;
         std::string Title;
     };
 
-    struct WindowMouseMoveEventContext {
+    struct WindowMouseMoveEventContext
+    {
         double XPos;
         double YPos;
     };
 
-    enum class WindowMouseButton {
+    enum class WindowMouseButton
+    {
         Button1, // Left
         Button2, // Right
         Button3, // Middle
@@ -29,19 +33,22 @@ namespace CoreEngine::Window {
         ButtonMiddle = Button3
     };
 
-    enum class WindowMouseButtonState {
+    enum class WindowMouseButtonState
+    {
         None,
         Pressed,
         Held,
         Released
     };
 
-    struct WindowMouseButtonEventContext {
+    struct WindowMouseButtonEventContext
+    {
         WindowMouseButton Button;
         WindowMouseButtonState State;
     };
 
-    enum class WindowKeyboardKey {
+    enum class WindowKeyboardKey
+    {
         // Special Keys and notations
         Unknow,
         Space,
@@ -174,51 +181,56 @@ namespace CoreEngine::Window {
         Menu
     };
 
-    enum class WindowKeyboardKeyState {
+    enum class WindowKeyboardKeyState
+    {
         None,
         Pressed,
         Held,
         Released
     };
 
-    struct WindowKeyboardKeyEventContext {
+    struct WindowKeyboardKeyEventContext
+    {
         WindowKeyboardKey Key;
         WindowKeyboardKeyState State;
     };
 
-    struct WindowMouseScrollEventContext {
+    struct WindowMouseScrollEventContext
+    {
         // If touchpads, Trackball...
         double OffsetX;
         double OffsetY;
     };
 
-    struct WindowResizeEventContext {
+    struct WindowSizeEventContext
+    {
         unsigned int Width;
         unsigned int Height;
     };
 
-	class CORE_API IWindowVisitor;
+    class CORE_API IWindowVisitor;
 
-	class CORE_API IWindow {
-	public:
-		virtual ~IWindow() = default;
-		virtual void Init(const WindowConfiguration& config) = 0;
-		virtual void PollEvents() = 0;
-		virtual void SwapBuffers() = 0;
-		virtual bool CheckShouldClose() = 0;
-		virtual void Close() = 0;
+    class CORE_API IWindow
+    {
+    public:
+        virtual ~IWindow() = default;
+        virtual void Init(const WindowConfiguration& config) = 0;
+        virtual void PollEvents() = 0;
+        virtual void SwapBuffers() = 0;
+        virtual bool CheckShouldClose() = 0;
+        virtual void Close() = 0;
 
-		virtual void OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) = 0;
-		virtual void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) = 0;
-		virtual void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) = 0;
+        virtual void OnMouseMoveEventCallback(std::function<void(const WindowMouseMoveEventContext&)> callback) = 0;
+        virtual void OnMouseButtonEventCallback(std::function<void(const WindowMouseButtonEventContext&)> callback) = 0;
+        virtual void OnKeyboardEventCallback(std::function<void(const WindowKeyboardKeyEventContext&)> callback) = 0;
         virtual void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) = 0;
-        virtual void OnWindowReiszeEventCallback(std::function<void(const WindowResizeEventContext&)> callback) = 0;
+        virtual void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) = 0;
 
-        virtual Input::InputState GetInput() const = 0;
+        virtual InputState GetInput() const = 0;
 
         virtual float GetCurrentSeconds() = 0;
-		virtual void Accept(IWindowVisitor* visitor) = 0;
+        virtual void Accept(IWindowVisitor* visitor) = 0;
 
-		virtual void EndFrame() = 0;
-	};
+        virtual void EndFrame() = 0;
+    };
 }

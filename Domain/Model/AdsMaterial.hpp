@@ -6,18 +6,18 @@ namespace Model {
 	class AdsMaterial : public IMaterial {
 	public:
 		AdsMaterial(
-			std::vector<CoreEngine::Renderer::ITexture*> ambientTextures,
-			std::vector<CoreEngine::Renderer::ITexture*> diffuseTextures,
-			std::vector<CoreEngine::Renderer::ITexture*> specularTextures,
+			std::vector<CoreEngine::ITexture*> ambientTextures,
+			std::vector<CoreEngine::ITexture*> diffuseTextures,
+			std::vector<CoreEngine::ITexture*> specularTextures,
 			glm::vec4 baseColor = glm::vec4(1.0f)
 		);
 
-		void Apply(CoreEngine::Renderer::IShader* shader) override;
+		void Apply(CoreEngine::IShader* shader) override;
 
 	private:
 		glm::vec4 mBaseColor;
-		std::vector<CoreEngine::Renderer::ITexture*> mAmbientTextures;
-		std::vector<CoreEngine::Renderer::ITexture*> mDiffuseTextures;
-		std::vector<CoreEngine::Renderer::ITexture*> mSpecularTextures;
+		std::vector<CoreEngine::ITexture*> mAmbientTextures;
+		std::vector<CoreEngine::ITexture*> mDiffuseTextures;
+		std::vector<CoreEngine::ITexture*> mSpecularTextures;
 	};
 }

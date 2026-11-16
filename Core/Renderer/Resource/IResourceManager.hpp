@@ -9,39 +9,41 @@
 #include <Renderer/Resource/IUniformBuffer.hpp>
 #include <Renderer/Resource/IFrameBuffer.hpp>
 
-namespace CoreEngine::Renderer {
-	using namespace CoreEngine::Logger;
+namespace CoreEngine
+{
 
-	struct CubemapTextureFiles {
-		std::string Front;
-		std::string Back;
-		std::string Bot;
-		std::string Top;
-		std::string Left;
-		std::string Right;
-	};
+    struct CubemapTextureFiles
+    {
+        std::string Front;
+        std::string Back;
+        std::string Bot;
+        std::string Top;
+        std::string Left;
+        std::string Right;
+    };
 
-	class CORE_API IResourceManager {
-	public:
-		virtual ~IResourceManager() = default;
+    class CORE_API IResourceManager
+    {
+    public:
+        virtual ~IResourceManager() = default;
 
-		virtual IVertexBuffer* GetVertexBuffer(VertexBufferID vertexBufferId) = 0;
-		virtual IIndexBuffer* GetIndexBuffer(IndexBufferID indexBufferId) = 0;
-		virtual IShader* GetShader(ShaderID shaderId) = 0;
-		virtual ITexture* GetTexture(TextureID textureId) = 0;
-		virtual ICubeMap* GetCubeMap(CubeMapID cubeMap) = 0;
-		virtual IUniformBuffer* GetUniformBuffer(UniformBufferID uniformBufferId) = 0;
+        virtual IVertexBuffer* GetVertexBuffer(VertexBufferID vertexBufferId) = 0;
+        virtual IIndexBuffer* GetIndexBuffer(IndexBufferID indexBufferId) = 0;
+        virtual IShader* GetShader(ShaderID shaderId) = 0;
+        virtual ITexture* GetTexture(TextureID textureId) = 0;
+        virtual ICubeMap* GetCubeMap(CubeMapID cubeMap) = 0;
+        virtual IUniformBuffer* GetUniformBuffer(UniformBufferID uniformBufferId) = 0;
 
-		virtual IVertexBuffer* CreateVertexBuffer() = 0;
-		virtual IIndexBuffer* CreateIndexBuffer() = 0;
-		virtual IShader* CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource) = 0;
-		virtual IShader* CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile) = 0;
-		virtual ITexture* CreateTexture(const std::string& file) = 0;
-		virtual ITexture* CreateTextureFromMemory(const unsigned char* data, unsigned int size) = 0;
-		virtual ICubeMap* CreateCubeMap(const CubemapTextureFiles& textureFiles) = 0;
-		virtual IUniformBuffer * CreateUniformBuffer() = 0;
-		// MỚI — framebuffer màu (kèm depth/stencil renderbuffer), dùng làm render target
-// cho scene (Forward pass) hoặc buffer trung gian cho Post-Process Pass.
-		virtual IFrameBuffer* CreateColorFrameBuffer(unsigned int width, unsigned int height) = 0;
-	};
+        virtual IVertexBuffer* CreateVertexBuffer() = 0;
+        virtual IIndexBuffer* CreateIndexBuffer() = 0;
+        virtual IShader* CreateShaderFromSources(const std::string& vertexSource, const std::string& fragmentSource) = 0;
+        virtual IShader* CreateShaderFromFiles(const std::string& vertexFile, const std::string& fragmentFile) = 0;
+        virtual ITexture* CreateTexture(const std::string& file) = 0;
+        virtual ITexture* CreateTextureFromMemory(const unsigned char* data, unsigned int size) = 0;
+        virtual ICubeMap* CreateCubeMap(const CubemapTextureFiles& textureFiles) = 0;
+        virtual IUniformBuffer* CreateUniformBuffer() = 0;
+        // MỚI — framebuffer màu (kèm depth/stencil renderbuffer), dùng làm render target
+        // cho scene (Forward pass) hoặc buffer trung gian cho Post-Process Pass.
+        virtual IFrameBuffer* CreateColorFrameBuffer(unsigned int width, unsigned int height) = 0;
+    };
 }

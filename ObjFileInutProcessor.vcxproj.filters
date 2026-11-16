@@ -109,7 +109,6 @@
     <ClInclude Include="Core\Time\Time.hpp" />
     <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
     <ClInclude Include="Core\Memory\MemoryAllocator.hpp" />
-    <ClInclude Include="Core\Application\ApplicationEventContext.hpp" />
     <ClInclude Include="Core\Memory\LinearMemoryAllocator.hpp" />
     <ClInclude Include="Core\Memory\StackMemoryAllocator.hpp" />
     <ClInclude Include="Domain\Model\AdsMaterial.hpp" />

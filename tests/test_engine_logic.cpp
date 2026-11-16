@@ -36,8 +36,7 @@
 
 using OrbitCamera = Domain::Camera::OrbitCamera::OrbitCamera;
 using OrbitCameraController = Domain::Camera::OrbitCamera::OrbitCameraController;
-using namespace CoreEngine::Input;
-using namespace CoreEngine::Input::Wx;
+using namespace CoreEngine;
 using namespace Model;
 
 // Helper: check float equality with epsilon
@@ -224,36 +223,36 @@ void TestWxInputStateMachine() {
 #define TEST_ASSET_DIR "tests/assets"
 #endif
 
-class TestTexture : public CoreEngine::Renderer::ITexture {
+class TestTexture : public CoreEngine::ITexture {
 public:
-    void Config(const CoreEngine::Renderer::TextureConfiguration&) override {}
-    CoreEngine::Renderer::TextureID GetTextureId() const override { return 1; }
+    void Config(const CoreEngine::TextureConfiguration&) override {}
+    CoreEngine::TextureID GetTextureId() const override { return 1; }
 };
 
-class TestResources : public CoreEngine::Renderer::IResourceManager {
+class TestResources : public CoreEngine::IResourceManager {
 public:
     int externalCount = 0, embeddedCount = 0;
     TestTexture texture;
-    CoreEngine::Renderer::IVertexBuffer* GetVertexBuffer(unsigned int) override { return nullptr; }
-    CoreEngine::Renderer::IIndexBuffer* GetIndexBuffer(unsigned int) override { return nullptr; }
-    CoreEngine::Renderer::IShader* GetShader(unsigned int) override { return nullptr; }
-    CoreEngine::Renderer::ITexture* GetTexture(unsigned int) override { return nullptr; }
-    CoreEngine::Renderer::ICubeMap* GetCubeMap(unsigned int) override { return nullptr; }
-    CoreEngine::Renderer::IUniformBuffer* GetUniformBuffer(unsigned int) override { return nullptr; }
-    CoreEngine::Renderer::IVertexBuffer* CreateVertexBuffer() override { return nullptr; }
-    CoreEngine::Renderer::IIndexBuffer* CreateIndexBuffer() override { return nullptr; }
-    CoreEngine::Renderer::IShader* CreateShaderFromSources(const std::string&, const std::string&) override { return nullptr; }
-    CoreEngine::Renderer::IShader* CreateShaderFromFiles(const std::string&, const std::string&) override { return nullptr; }
-    CoreEngine::Renderer::ICubeMap* CreateCubeMap(const CoreEngine::Renderer::CubemapTextureFiles&) override { return nullptr; }
-    CoreEngine::Renderer::IUniformBuffer* CreateUniformBuffer() override { return nullptr; }
-    CoreEngine::Renderer::IFrameBuffer* CreateColorFrameBuffer(unsigned int, unsigned int) override { return nullptr; }
-    CoreEngine::Renderer::ITexture* CreateTexture(const std::string& path) override {
+    CoreEngine::IVertexBuffer* GetVertexBuffer(unsigned int) override { return nullptr; }
+    CoreEngine::IIndexBuffer* GetIndexBuffer(unsigned int) override { return nullptr; }
+    CoreEngine::IShader* GetShader(unsigned int) override { return nullptr; }
+    CoreEngine::ITexture* GetTexture(unsigned int) override { return nullptr; }
+    CoreEngine::ICubeMap* GetCubeMap(unsigned int) override { return nullptr; }
+    CoreEngine::IUniformBuffer* GetUniformBuffer(unsigned int) override { return nullptr; }
+    CoreEngine::IVertexBuffer* CreateVertexBuffer() override { return nullptr; }
+    CoreEngine::IIndexBuffer* CreateIndexBuffer() override { return nullptr; }
+    CoreEngine::IShader* CreateShaderFromSources(const std::string&, const std::string&) override { return nullptr; }
+    CoreEngine::IShader* CreateShaderFromFiles(const std::string&, const std::string&) override { return nullptr; }
+    CoreEngine::ICubeMap* CreateCubeMap(const CoreEngine::CubemapTextureFiles&) override { return nullptr; }
+    CoreEngine::IUniformBuffer* CreateUniformBuffer() override { return nullptr; }
+    CoreEngine::IFrameBuffer* CreateColorFrameBuffer(unsigned int, unsigned int) override { return nullptr; }
+    CoreEngine::ITexture* CreateTexture(const std::string& path) override {
         assert(std::filesystem::exists(path));
         assert(std::filesystem::path(path).filename() == "texture.png");
         ++externalCount;
         return &texture;
     }
-    CoreEngine::Renderer::ITexture* CreateTextureFromMemory(const unsigned char* data, unsigned int size) override {
+    CoreEngine::ITexture* CreateTextureFromMemory(const unsigned char* data, unsigned int size) override {
         assert(size > 8 && data[0] == 0x89 && data[1] == 'P' && data[2] == 'N' && data[3] == 'G');
         ++embeddedCount;
         return &texture;

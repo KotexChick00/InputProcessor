@@ -11,5 +11,5 @@ namespace Domain::Camera
 		Up, // Should be Y+
 		Down // Should be Y-
 	};
-	using InputBinding = std::variant<CoreEngine::Input::KeyboardKey, CoreEngine::Input::MouseButton, MouseScrollDirection>;
+	using InputBinding = std::variant<CoreEngine::KeyboardKey, CoreEngine::MouseButton, MouseScrollDirection>;
 }

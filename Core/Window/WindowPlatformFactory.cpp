@@ -3,17 +3,23 @@
 
 #include <Window/Wx/WxWindow.hpp>
 
-namespace CoreEngine::Window {
-        IWindow* WindowPlatformFactory::Create(WindowPlatformSpec spec) {
-                switch (spec) {
-                case WindowPlatformSpec::Wx:   return new Wx::WxWindow();
-                case WindowPlatformSpec::SDL:
-                        CORE_ASSERT(false && "SDL Platform currently doesn't support");
-                        break;
-                default:
-                        CORE_ASSERT(false && "Didn't found the platform");
-                        break;
-                }
-                return nullptr;
+namespace CoreEngine
+{
+    IWindow* WindowPlatformFactory::Create(WindowPlatformSpec spec)
+    {
+        switch (spec)
+        {
+        case WindowPlatformSpec::Wx: return new WxWindow();
+        case WindowPlatformSpec::SDL:
+            CORE_ASSERT(false && "SDL Platform currently doesn't support");
+            break;
+        case WindowPlatformSpec::Injection:
+            CORE_ASSERT(false && "Injected windows are supplied by the caller, not the factory");
+            break;
+        default:
+            CORE_ASSERT(false && "Didn't found the platform");
+            break;
         }
+        return nullptr;
+    }
 }

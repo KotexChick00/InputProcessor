@@ -14,7 +14,7 @@ namespace
 
 namespace Domain::Camera::OrbitCamera
 {
-	OrbitCameraController::OrbitCameraController(OrbitCamera& camera, const CoreEngine::Input::InputState& inputState)
+	OrbitCameraController::OrbitCameraController(OrbitCamera& camera, const CoreEngine::InputState& inputState)
 		: m_camera(camera)
 		, m_inputState(inputState)
 		, m_inputMap(CreateDefaultOrbitCameraInputMap())

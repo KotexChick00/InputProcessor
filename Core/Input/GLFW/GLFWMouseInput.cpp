@@ -1,60 +1,72 @@
 #include <Input/GLFW/GLFWMouseInput.hpp>
 
-namespace CoreEngine::Input::GLFW {
+namespace CoreEngine
+{
 
-	GLFWMouseInput::GLFWMouseInput(GLFWwindow* window) : mWindow(window) {
-		for (auto button : MouseInput::sMouseButtons) {
-			sMouseButtons[button] = false;
-		}
-	}
+    GLFWMouseInput::GLFWMouseInput(GLFWwindow* window)
+        : mWindow(window)
+    {
+        for (auto button : MouseInput::sMouseButtons)
+        {
+            sMouseButtons[button] = false;
+        }
+    }
 
-	bool GLFWMouseInput::CheckIsPressed(MouseButton mouseButton) {
-		if (mWindow == nullptr) return false;
-		int glfwBtn = ToGLFWMouseButton(mouseButton);
-		int state = glfwGetMouseButton(mWindow, glfwBtn);
-		return state == GLFW_PRESS;
-	}
+    bool GLFWMouseInput::CheckIsPressed(MouseButton mouseButton)
+    {
+        if (mWindow == nullptr) return false;
+        int glfwBtn = ToGLFWMouseButton(mouseButton);
+        int state = glfwGetMouseButton(mWindow, glfwBtn);
+        return state == GLFW_PRESS;
+    }
 
-	bool GLFWMouseInput::CheckIsReleased(MouseButton mouseButton) {
-		if (mWindow == nullptr) return false;
-		int glfwBtn = ToGLFWMouseButton(mouseButton);
-		int state = glfwGetMouseButton(mWindow, glfwBtn);
-		return state == GLFW_RELEASE;
-	}
+    bool GLFWMouseInput::CheckIsReleased(MouseButton mouseButton)
+    {
+        if (mWindow == nullptr) return false;
+        int glfwBtn = ToGLFWMouseButton(mouseButton);
+        int state = glfwGetMouseButton(mWindow, glfwBtn);
+        return state == GLFW_RELEASE;
+    }
 
-	bool GLFWMouseInput::CheckIsJustPressed(MouseButton mouseButton) {
-		return CheckIsPressed(mouseButton) && !sMouseButtons[mouseButton];
-	}
+    bool GLFWMouseInput::CheckIsJustPressed(MouseButton mouseButton)
+    {
+        return CheckIsPressed(mouseButton) && !sMouseButtons[mouseButton];
+    }
 
-	MouseButtonState GLFWMouseInput::GetMouseButtonState(MouseButton mouseButton) {
-		if (CheckIsPressed(mouseButton)) return MouseButtonState::Pressed;
-		if (CheckIsReleased(mouseButton)) return MouseButtonState::Released;
-		return MouseButtonState::None;
-	}
+    MouseButtonState GLFWMouseInput::GetMouseButtonState(MouseButton mouseButton)
+    {
+        if (CheckIsPressed(mouseButton)) return MouseButtonState::Pressed;
+        if (CheckIsReleased(mouseButton)) return MouseButtonState::Released;
+        return MouseButtonState::None;
+    }
 
-	void GLFWMouseInput::Update() {
-		for (auto button : MouseInput::sMouseButtons) {
-			sMouseButtons[button] = CheckIsPressed(button);
-		}
-		SetScroll(0, 0);
-		SetDelta(0, 0);
-	}
+    void GLFWMouseInput::Update()
+    {
+        for (auto button : MouseInput::sMouseButtons)
+        {
+            sMouseButtons[button] = CheckIsPressed(button);
+        }
+        SetScroll(0, 0);
+        SetDelta(0, 0);
+    }
 
-	int GLFWMouseInput::ToGLFWMouseButton(MouseButton mouseButton) {
-		switch (mouseButton) {
-		case MouseButton::Button1: return GLFW_MOUSE_BUTTON_1;
-		case MouseButton::Button2: return GLFW_MOUSE_BUTTON_2;
-		case MouseButton::Button3: return GLFW_MOUSE_BUTTON_3;
-		case MouseButton::Button4: return GLFW_MOUSE_BUTTON_4;
-		case MouseButton::Button5: return GLFW_MOUSE_BUTTON_5;
-		case MouseButton::Button6: return GLFW_MOUSE_BUTTON_6;
-		case MouseButton::Button7: return GLFW_MOUSE_BUTTON_7;
-		case MouseButton::Button8: return GLFW_MOUSE_BUTTON_8;
-		//case MouseButton::ButtonLeft: return GLFW_MOUSE_BUTTON_LEFT;
-		//case MouseButton::ButtonRight: return GLFW_MOUSE_BUTTON_RIGHT;
-		//case MouseButton::ButtonMiddle: return GLFW_MOUSE_BUTTON_MIDDLE;
-		//case MouseButton::ButtonLast: return GLFW_MOUSE_BUTTON_LAST;
-		default: return GLFW_MOUSE_BUTTON_LAST;
-		}
-	}
+    int GLFWMouseInput::ToGLFWMouseButton(MouseButton mouseButton)
+    {
+        switch (mouseButton)
+        {
+        case MouseButton::Button1: return GLFW_MOUSE_BUTTON_1;
+        case MouseButton::Button2: return GLFW_MOUSE_BUTTON_2;
+        case MouseButton::Button3: return GLFW_MOUSE_BUTTON_3;
+        case MouseButton::Button4: return GLFW_MOUSE_BUTTON_4;
+        case MouseButton::Button5: return GLFW_MOUSE_BUTTON_5;
+        case MouseButton::Button6: return GLFW_MOUSE_BUTTON_6;
+        case MouseButton::Button7: return GLFW_MOUSE_BUTTON_7;
+        case MouseButton::Button8: return GLFW_MOUSE_BUTTON_8;
+        //case MouseButton::ButtonLeft: return GLFW_MOUSE_BUTTON_LEFT;
+        //case MouseButton::ButtonRight: return GLFW_MOUSE_BUTTON_RIGHT;
+        //case MouseButton::ButtonMiddle: return GLFW_MOUSE_BUTTON_MIDDLE;
+        //case MouseButton::ButtonLast: return GLFW_MOUSE_BUTTON_LAST;
+        default:                   return GLFW_MOUSE_BUTTON_LAST;
+        }
+    }
 }
