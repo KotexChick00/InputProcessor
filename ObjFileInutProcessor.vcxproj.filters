@@ -30,8 +30,10 @@
     <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
     <ClCompile Include="Core\Renderer\RendererFactory.cpp" />
     <ClCompile Include="Core\Memory\MemoryAllocator.cpp" />
-    <ClCompile Include="Core\Memory\LinearMemoryAllocator.cpp" />
-    <ClCompile Include="Core\Memory\StackMemoryAllocator.cpp" />
+    <ClCompile Include="Core\Memory\LinearAllocator.cpp" />
+    <ClCompile Include="Core\Memory\StackAllocator.cpp" />
+    <ClCompile Include="Core\Memory\PoolAllocator.cpp" />
+    <ClCompile Include="Core\Memory\MemoryManager.cpp" />
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
     <ClCompile Include="Domain\Model\RenderModel.cpp" />
@@ -109,8 +111,10 @@
     <ClInclude Include="Core\Time\Time.hpp" />
     <ClInclude Include="Core\Renderer\RendererFactory.hpp" />
     <ClInclude Include="Core\Memory\MemoryAllocator.hpp" />
-    <ClInclude Include="Core\Memory\LinearMemoryAllocator.hpp" />
-    <ClInclude Include="Core\Memory\StackMemoryAllocator.hpp" />
+    <ClInclude Include="Core\Memory\LinearAllocator.hpp" />
+    <ClInclude Include="Core\Memory\StackAllocator.hpp" />
+    <ClInclude Include="Core\Memory\PoolAllocator.hpp" />
+    <ClInclude Include="Core\Memory\MemoryManager.hpp" />
     <ClInclude Include="Domain\Model\AdsMaterial.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpBoundingBox.h" />

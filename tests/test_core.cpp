@@ -17,8 +17,10 @@
 #include <Input/Wx/WxKeyboardInput.hpp>
 #include <Input/Wx/WxMouseInput.hpp>
 #include <Logger/Logger.hpp>
-#include <Memory/LinearMemoryAllocator.hpp>
-#include <Memory/StackMemoryAllocator.hpp>
+#include <Memory/LinearAllocator.hpp>
+#include <Memory/StackAllocator.hpp>
+#include <Memory/PoolAllocator.hpp>
+#include <Memory/MemoryManager.hpp>
 #include <Time/Time.hpp>
 #include <cmath>
 #include <cstdint>
@@ -223,9 +225,9 @@ static void TestTime()
 // Memory allocators
 // -----------------------------------------------------------------------------
 
-static void TestLinearMemoryAllocator()
+static void TestLinearAllocator()
 {
-    LinearMemoryAllocator allocator(256);
+    LinearAllocator allocator(256);
 
     void* first = allocator.Allocate(10, 16);
     void* second = allocator.Allocate(32, 16);
@@ -255,9 +257,9 @@ static void TestLinearMemoryAllocator()
     CHECK(allocator.Allocate(10, 16) == first);
 }
 
-static void TestStackMemoryAllocator()
+static void TestStackAllocator()
 {
-    StackMemoryAllocator allocator(512);
+    StackAllocator allocator(512);
 
     void* bottom = allocator.Allocate(32, 8);
     void* top = allocator.Allocate(16, 16);
@@ -281,6 +283,118 @@ static void TestStackMemoryAllocator()
 
     allocator.Clear();
     CHECK(allocator.Allocate(32, 8) == bottom);
+}
+
+static void TestMemoryManager()
+{
+    MemoryConfiguration config;
+    config.LinearAllocateSize = 256;
+    config.StackAllocateSize = 512;
+    MemoryManager manager(config);
+
+    // Per-frame memory is reset by Update().
+    void* frameMemory = manager.AllocateOnPerframe(32, 16);
+    CHECK(frameMemory && IsAligned(frameMemory, 16));
+    manager.Update();
+    CHECK(manager.AllocateOnPerframe(32, 16) == frameMemory);
+
+    // LIFO frees unwind the stack completely.
+    void* a = manager.AllocateOnStack(32, 8);
+    void* b = manager.AllocateOnStack(16, 16);
+    CHECK(a && b);
+    manager.FreeOnStack(b);
+    manager.FreeOnStack(a);
+    manager.DetectMemoryLeak(); // no warning
+    CHECK(manager.AllocateOnStack(32, 8) == a);
+    manager.FreeOnStack(a);
+
+    // Out-of-order free is deferred until everything above it is freed.
+    a = manager.AllocateOnStack(32, 8);
+    b = manager.AllocateOnStack(16, 16);
+    void* c = manager.AllocateOnStack(24, 8);
+    CHECK(a && b && c);
+    manager.FreeOnStack(b);                       // deferred: c is still alive
+    manager.DetectMemoryLeak(); // warns: a and c (b is pending)
+    void* d = manager.AllocateOnStack(8, 8);
+    CHECK(reinterpret_cast<uintptr_t>(d) >= reinterpret_cast<uintptr_t>(c) + 24);
+    manager.FreeOnStack(d);
+    manager.FreeOnStack(c);                       // releases c, then pending b
+    manager.DetectMemoryLeak(); // warns: a
+    CHECK(manager.AllocateOnStack(16, 16) == b);  // b's slot is free again
+    manager.FreeOnStack(b);
+    manager.FreeOnStack(a);
+    manager.DetectMemoryLeak(); // no warning
+
+    // Unfreed allocation is reported, ClearOnStack drops it.
+    CHECK(manager.AllocateOnStack(64, 8) == a);
+    manager.DetectMemoryLeak(); // warns: a
+    manager.ClearOnStack();
+    manager.DetectMemoryLeak(); // no warning
+
+    // Clear resets both allocators.
+    manager.AllocateOnPerframe(16, 8);
+    manager.AllocateOnStack(16, 8);
+    manager.Clear();
+    manager.DetectMemoryLeak(); // no warning
+    CHECK(manager.AllocateOnPerframe(32, 16) == frameMemory);
+    CHECK(manager.AllocateOnStack(32, 8) == a);
+    manager.FreeOnStack(a);
+}
+
+static void TestPoolAllocator()
+{
+    constexpr size_t BlockCount = 4;
+    PoolAllocator pool(24, BlockCount, 16);
+    CHECK(pool.GetBlockSize() == 24);
+    CHECK(pool.GetBlockCount() == BlockCount);
+    CHECK(pool.GetFreeBlockCount() == BlockCount);
+
+    // Every block is distinct, aligned, ascending and at least one stride (32 bytes) apart.
+    void* blocks[BlockCount] = {};
+    for (size_t i = 0; i < BlockCount; ++i)
+    {
+        blocks[i] = pool.Allocate(24, 16);
+        CHECK(blocks[i] != nullptr);
+        CHECK(IsAligned(blocks[i], 16));
+        if (i > 0) CHECK(reinterpret_cast<uintptr_t>(blocks[i]) >= reinterpret_cast<uintptr_t>(blocks[i - 1]) + 32);
+    }
+    CHECK(pool.GetFreeBlockCount() == 0);
+
+    // Blocks are fully writable without touching their neighbours.
+    for (size_t i = 0; i < BlockCount; ++i) std::memset(blocks[i], static_cast<int>(0x10 + i), 24);
+    for (size_t i = 0; i < BlockCount; ++i)
+    {
+        CHECK(static_cast<unsigned char*>(blocks[i])[0] == 0x10 + i);
+        CHECK(static_cast<unsigned char*>(blocks[i])[23] == 0x10 + i);
+    }
+
+    // Exhausted pool returns nullptr; smaller requests and weaker alignments still fit a block.
+    CHECK(pool.Allocate(8, 8) == nullptr);
+
+    // Blocks can be freed in any order; the most recently freed block is reused first.
+    pool.Free(blocks[1]);
+    pool.Free(blocks[3]);
+    CHECK(pool.GetFreeBlockCount() == 2);
+    CHECK(pool.Allocate(8, 4) == blocks[3]);
+    CHECK(pool.Allocate(24, 16) == blocks[1]);
+    CHECK(pool.GetFreeBlockCount() == 0);
+
+    // Freeing nullptr is a no-op.
+    pool.Free(nullptr);
+    CHECK(pool.GetFreeBlockCount() == 0);
+
+    // Clear returns every block, handed out again from the first one.
+    pool.Clear();
+    CHECK(pool.GetFreeBlockCount() == BlockCount);
+    CHECK(pool.Allocate(1, 1) == blocks[0]);
+
+    // Tiny blocks still hold the free-list pointer, and the default alignment is respected.
+    PoolAllocator tinyPool(1, 3);
+    void* a = tinyPool.Allocate(1, 1);
+    void* b = tinyPool.Allocate(1, 1);
+    CHECK(a && b && a != b);
+    CHECK(IsAligned(a, alignof(std::max_align_t)) && IsAligned(b, alignof(std::max_align_t)));
+    CHECK(reinterpret_cast<uintptr_t>(b) - reinterpret_cast<uintptr_t>(a) >= sizeof(void*));
 }
 
 // -----------------------------------------------------------------------------
@@ -655,8 +769,10 @@ int main(int argc, char** argv)
         {"EventDispatcher", TestEventDispatcher},
         {"Logger", TestLogger},
         {"Time", TestTime},
-        {"LinearMemoryAllocator", TestLinearMemoryAllocator},
-        {"StackMemoryAllocator", TestStackMemoryAllocator},
+        {"LinearAllocator", TestLinearAllocator},
+        {"StackAllocator", TestStackAllocator},
+        {"PoolAllocator", TestPoolAllocator},
+        {"MemoryManager", TestMemoryManager},
         {"WxKeyboardInput", TestWxKeyboardInput},
         {"WxMouseInput", TestWxMouseInput},
         {"ApplicationLoop", TestApplicationLoop},

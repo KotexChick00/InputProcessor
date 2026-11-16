@@ -4,14 +4,14 @@
 
 namespace CoreEngine
 {
-    class CORE_API LinearMemoryAllocator : public MemoryAllocator
+    class CORE_API LinearAllocator : public MemoryAllocator
     {
     public:
-        LinearMemoryAllocator(size_t memorySize)
+        LinearAllocator(size_t memorySize)
             : MemoryAllocator(memorySize)
         {
         }
-        ~LinearMemoryAllocator() = default;
+        ~LinearAllocator() = default;
 
         void* Allocate(size_t memorySize, uint8_t alignment) override;
         void Free(void* memory) override;

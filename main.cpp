@@ -7,12 +7,12 @@
 //   Input        - per-frame polling of keyboard and mouse state (pressed, just pressed, deltas)
 //   Time         - delta time for frame-rate independent motion, FPS counter
 //   Logger       - IP_CLIENT_* log macros
-//   Memory       - LinearMemoryAllocator used as a per-frame scratch allocator
+//   Memory       - LinearAllocator used as a per-frame scratch allocator
 //
 // Frame pacing is done by Application (ApplicationConfiguration::MaxFPS, 60 by default).
 
 #include <Application/Application.hpp>
-#include <Memory/LinearMemoryAllocator.hpp>
+#include <Memory/LinearAllocator.hpp>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -269,7 +269,7 @@ void main()
         }
 
     private:
-        CoreEngine::LinearMemoryAllocator mFrameAllocator;
+        CoreEngine::LinearAllocator mFrameAllocator;
 
         CoreEngine::IShader* mShader = nullptr;
         CoreEngine::IVertexBuffer* mTriangle = nullptr;

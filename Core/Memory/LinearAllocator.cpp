@@ -1,9 +1,9 @@
-#include <Memory/LinearMemoryAllocator.hpp>
+#include <Memory/LinearAllocator.hpp>
 #include <Logger/Logger.hpp>
 
 namespace CoreEngine
 {
-    void* LinearMemoryAllocator::Allocate(size_t memorySize, uint8_t alignment)
+    void* LinearAllocator::Allocate(size_t memorySize, uint8_t alignment)
     {
         CORE_ASSERT(memorySize > INVALID_MEMORY_SIZE && "Allocated invalid memory size!");
         CORE_ASSERT(alignment < MAX_ALLOWED_ALIGNMENT && "Allcated invalid alignment");
@@ -31,12 +31,12 @@ namespace CoreEngine
         return pVoidAddress;
     }
 
-    void LinearMemoryAllocator::Free(void* memory)
+    void LinearAllocator::Free(void* memory)
     {
-        CORE_ASSERT(false && "LinearMemoryAllocator doesn't support method free!");
+        CORE_ASSERT(false && "LinearAllocator doesn't support method free!");
     }
 
-    void LinearMemoryAllocator::Clear()
+    void LinearAllocator::Clear()
     {
         mUsedMemory = 0;
         mAllocatedCount = 0;

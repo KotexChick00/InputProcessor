@@ -175,9 +175,11 @@
     <ClCompile Include="Core\Application\Application.cpp" />
     <ClCompile Include="Core\Logger\LoggerFactory.cpp" />
     <ClCompile Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.cpp" />
-    <ClCompile Include="Core\Memory\LinearMemoryAllocator.cpp" />
+    <ClCompile Include="Core\Memory\LinearAllocator.cpp" />
     <ClCompile Include="Core\Memory\MemoryAllocator.cpp" />
-    <ClCompile Include="Core\Memory\StackMemoryAllocator.cpp" />
+    <ClCompile Include="Core\Memory\StackAllocator.cpp" />
+    <ClCompile Include="Core\Memory\PoolAllocator.cpp" />
+    <ClCompile Include="Core\Memory\MemoryManager.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBuffer.cpp" />
@@ -230,9 +232,11 @@
     <ClInclude Include="Core\Logger\Logger.hpp" />
     <ClInclude Include="Core\Logger\LoggerFactory.hpp" />
     <ClInclude Include="Core\Logger\SpdLog\SpdLogLoggerAdapter.hpp" />
-    <ClInclude Include="Core\Memory\LinearMemoryAllocator.hpp" />
+    <ClInclude Include="Core\Memory\LinearAllocator.hpp" />
     <ClInclude Include="Core\Memory\MemoryAllocator.hpp" />
-    <ClInclude Include="Core\Memory\StackMemoryAllocator.hpp" />
+    <ClInclude Include="Core\Memory\StackAllocator.hpp" />
+    <ClInclude Include="Core\Memory\PoolAllocator.hpp" />
+    <ClInclude Include="Core\Memory\MemoryManager.hpp" />
     <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />
     <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />

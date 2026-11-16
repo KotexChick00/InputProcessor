@@ -4,7 +4,7 @@
 
 namespace CoreEngine
 {
-    class CORE_API StackMemoryAllocator : public MemoryAllocator
+    class CORE_API StackAllocator : public MemoryAllocator
     {
     private:
         struct Header
@@ -13,11 +13,11 @@ namespace CoreEngine
         };
 
     public:
-        StackMemoryAllocator(size_t memorySize)
+        StackAllocator(size_t memorySize)
             : MemoryAllocator(memorySize)
         {
         }
-        ~StackMemoryAllocator() = default;
+        ~StackAllocator() = default;
 
         void* Allocate(size_t memorySize, uint8_t alignment) override;
         void Free(void* memory) override;

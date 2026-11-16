@@ -1,9 +1,9 @@
-#include <Memory/StackMemoryAllocator.hpp>
+#include <Memory/StackAllocator.hpp>
 #include <Logger/Logger.hpp>
 
 namespace CoreEngine
 {
-    void* StackMemoryAllocator::Allocate(size_t memorySize, uint8_t alignment)
+    void* StackAllocator::Allocate(size_t memorySize, uint8_t alignment)
     {
         CORE_ASSERT(memorySize > INVALID_MEMORY_SIZE && "Allocated invalid memory size!");
         CORE_ASSERT(alignment < MAX_ALLOWED_ALIGNMENT && "Allcated invalid alignment");
@@ -22,7 +22,7 @@ namespace CoreEngine
 
         if (mUsedMemory + padding + memorySize > mMemorySize)
         {
-            IP_ENGINE_WARN("StackMemoryAllocator can't allocate with memory size {} due to not enough space!", mMemorySize);
+            IP_ENGINE_WARN("StackAllocator can't allocate with memory size {} due to not enough space!", mMemorySize);
             return nullptr;
         }
 
@@ -37,7 +37,7 @@ namespace CoreEngine
         return asVoidAddress;
     }
 
-    void StackMemoryAllocator::Free(void* memory)
+    void StackAllocator::Free(void* memory)
     {
         CORE_ASSERT(CheckAddressInBound(memory) && "Memory is not in bound");
 
@@ -54,13 +54,13 @@ namespace CoreEngine
         --mAllocatedCount;
     }
 
-    void StackMemoryAllocator::Clear()
+    void StackAllocator::Clear()
     {
         mUsedMemory = 0;
         mAllocatedCount = 0;
     }
 
-    uint8_t StackMemoryAllocator::CalculatePadding(void* address, uint8_t alignment, uint8_t extraSize)
+    uint8_t StackAllocator::CalculatePadding(void* address, uint8_t alignment, uint8_t extraSize)
     {
         CORE_ASSERT(CheckIsPowerOfTwo(alignment) && "Alignment is not power of 2");
 
@@ -70,7 +70,7 @@ namespace CoreEngine
         return adjustment + alignment * ((remainSize + alignment - 1) / alignment);
     }
 
-    bool StackMemoryAllocator::CheckAddressInBound(void* address)
+    bool StackAllocator::CheckAddressInBound(void* address)
     {
         uintptr_t ipAddress = reinterpret_cast<uintptr_t>(address);
         uintptr_t ipStartAddress = reinterpret_cast<uintptr_t>(mStartAddress);
