@@ -18,8 +18,8 @@ namespace Domain::Scene {
 		float CosOuterCone = 0.0f;
 	};
 
-	// Gom các LightComponent đang bật thành danh sách cho shader (tối đa MAX_SHADER_LIGHTS).
-	// Bản A: LightComponent đã giữ toạ độ thế giới nên dùng trực tiếp.
+	// Gom các LightComponent đang bật thành danh sách cho shader (tối đa MAX_SHADER_LIGHTS),
+	// đổi vị trí/hướng sang toạ độ thế giới bằng TransformComponent::World (chạy sau TransformSystem).
 	class LightingSystem : public CoreEngine::ECS::ISystem {
 	public:
 		LightingSystem() : ISystem(CoreEngine::ECS::ESystemPriority::Medium) {}

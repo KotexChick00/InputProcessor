@@ -216,9 +216,12 @@ void TestLoadModelWithoutLights() {
 		assert(renderer && renderer->Model && renderer->Visible);
 		assert(renderer->Model->GetMeshes().size() == 1);
 
-		// Bản A: đỉnh đã áp node transform, entity giữ transform đơn vị.
+		// Bản B: entity giữ transform cục bộ của node (dời (2,3,4), scale 2), đỉnh để nguyên toạ độ cục bộ.
 		auto* transform = model.GetComponent<TransformComponent>();
-		assert(Vec3Equal(transform->Position, glm::vec3(0)) && Vec3Equal(transform->Scale, glm::vec3(1)));
+		assert(Vec3Equal(transform->Position, { 2, 3, 4 }) && Vec3Equal(transform->Scale, glm::vec3(2)));
+		assert(!transform->Matrix);
+		const auto& vertices = renderer->Model->GetMeshes().front().Vertices;
+		assert(Vec3Equal(vertices[0].Position, { 0, 0, 0 }) && Vec3Equal(vertices[1].Position, { 1, 0, 0 }));
 
 		// Bounding box giống kết quả test importer cũ (node dời (2,3,4), scale 2).
 		auto* bounds = model.GetComponent<BoundsComponent>();
@@ -226,15 +229,15 @@ void TestLoadModelWithoutLights() {
 		assert(Vec3Equal(bounds->Box.getMin(), { 2, 3, 4 }));
 		assert(Vec3Equal(bounds->Box.getMax(), { 4, 5, 4 }));
 
-		// File không có đèn -> 1 đèn mặc định, là con của model.
+		// File không có đèn -> 1 đèn mặc định, là entity gốc riêng (không kế thừa transform của model).
 		assert(scene.GetEntities().size() == 2);
 		Actor light = scene.FindByName("Default Light");
 		auto* lightComponent = light.GetComponent<LightComponent>();
 		assert(lightComponent && !lightComponent->FromFile && lightComponent->Enabled);
 		assert(lightComponent->Light.Type == Model::LightType::Directional);
 		assert(Vec3Equal(lightComponent->Light.Direction, DEFAULT_LIGHT_DIRECTION));
-		assert(light.GetComponent<HierarchyComponent>()->Parent == model.GetID());
-		assert(scene.GetRoots().size() == 1);
+		assert(light.GetComponent<HierarchyComponent>()->Parent == INVALID_ENTITY_ID);
+		assert(scene.GetRoots().size() == 2);
 	}
 	assert(AliveEntities() == 0);
 	std::cout << "  -> PASS\n";
@@ -248,30 +251,55 @@ void TestLoadModelWithLights() {
 	Scene scene;
 	Actor model = loader.LoadModel(scene, Asset("lights.gltf"));
 	assert(model.IsValid());
-	assert(scene.GetEntities().size() == 4); // model + 3 đèn, không có đèn mặc định
+	// Mỗi node 1 entity: gốc "lights" + Triangle, Sun, Bulb, Rig, Spot. Không có đèn mặc định.
+	assert(scene.GetEntities().size() == 6);
 	assert(!scene.FindByName("Default Light").IsValid());
+	assert(model.GetComponent<HierarchyComponent>()->Children.size() == 4);
+	Actor rig = scene.FindByName("Rig");
+	Actor spotEntity = scene.FindByName("Spot");
+	assert(spotEntity.GetComponent<HierarchyComponent>()->Parent == rig.GetID());
+	assert(scene.FindByName("Triangle").HasComponent<MeshRendererComponent>());
+	assert(!model.HasComponent<MeshRendererComponent>());
 
-	// Sun: node xoay -90° quanh X -> ánh sáng chiếu thẳng xuống. Màu = color * intensity (3).
+	// Đèn gắn trên entity của node, lưu theo toạ độ cục bộ của node.
 	auto* sun = scene.FindByName("Sun").GetComponent<LightComponent>();
 	assert(sun && sun->FromFile && sun->Light.Type == Model::LightType::Directional);
-	assert(Vec3Equal(sun->Light.Direction, { 0, -1, 0 }));
-	assert(Vec3Equal(sun->Light.Color, { 3, 3, 2.7f }));
-
-	// Bulb: point light tại node dời (1,2,3), màu (1,0.5,0.25) * 2.
-	Actor bulbEntity = scene.FindByName("Bulb");
-	auto* bulb = bulbEntity.GetComponent<LightComponent>();
-	assert(bulb && bulb->Light.Type == Model::LightType::Point);
-	assert(Vec3Equal(bulb->Light.Position, { 1, 2, 3 }));
-	assert(Vec3Equal(bulb->Light.Color, { 2, 1, 0.5f }));
-	assert(Vec3Equal(bulbEntity.GetComponent<TransformComponent>()->Position, { 1, 2, 3 }));
-
-	// Spot: node con (0,0,5) của node cha (0,10,0) -> vị trí thế giới (0,10,5).
-	auto* spot = scene.FindByName("Spot").GetComponent<LightComponent>();
+	assert(Vec3Equal(sun->Light.Direction, { 0, 0, -1 }));
+	assert(Vec3Equal(sun->Light.Color, { 3, 3, 2.7f })); // color * intensity (3)
+	auto* spot = spotEntity.GetComponent<LightComponent>();
 	assert(spot && spot->Light.Type == Model::LightType::Spot);
-	assert(Vec3Equal(spot->Light.Position, { 0, 10, 5 }));
-	assert(Vec3Equal(spot->Light.Direction, { 0, 0, -1 }));
+	assert(Vec3Equal(spot->Light.Position, { 0, 0, 0 }));
 	assert(std::fabs(spot->Light.InnerConeAngle - 0.2f) < 1e-4f);
 	assert(std::fabs(spot->Light.OuterConeAngle - 0.5f) < 1e-4f);
+	Actor bulbEntity = scene.FindByName("Bulb");
+	assert(Vec3Equal(bulbEntity.GetComponent<TransformComponent>()->Position, { 1, 2, 3 }));
+
+	// Sau TransformSystem + LightingSystem: toạ độ thế giới giống bản A.
+	TransformSystem transforms;
+	LightingSystem lighting;
+	transforms.OnUpdate(0.0f);
+	lighting.OnUpdate(0.0f);
+	auto findLight = [&](Model::LightType type) -> const ShaderLight& {
+		for (const auto& light : lighting.GetLights()) if (light.Type == type) return light;
+		assert(false && "light not found");
+		return lighting.GetLights().front();
+	};
+	// Sun: node xoay -90° quanh X -> ánh sáng chiếu thẳng xuống.
+	assert(Vec3Equal(findLight(Model::LightType::Directional).Direction, { 0, -1, 0 }));
+	// Bulb: point light tại node dời (1,2,3), màu (1,0.5,0.25) * 2.
+	assert(Vec3Equal(findLight(Model::LightType::Point).Position, { 1, 2, 3 }));
+	assert(Vec3Equal(findLight(Model::LightType::Point).Color, { 2, 1, 0.5f }));
+	// Spot: node con (0,0,5) của node cha (0,10,0) -> vị trí thế giới (0,10,5), chiếu theo -Z.
+	assert(Vec3Equal(findLight(Model::LightType::Spot).Position, { 0, 10, 5 }));
+	assert(Vec3Equal(findLight(Model::LightType::Spot).Direction, { 0, 0, -1 }));
+
+	// Bản A (RenderModel::GetLights) cho cùng kết quả thế giới.
+	auto flat = importer.Import(Asset("lights.gltf").c_str());
+	for (const auto& light : flat->GetLights()) {
+		const ShaderLight& ecs = findLight(light.Type);
+		assert(Vec3Equal(ecs.Position, light.Position));
+		if (light.Type != Model::LightType::Point) assert(Vec3Equal(ecs.Direction, light.Direction)); // đèn point không có hướng
+	}
 	std::cout << "  -> PASS\n";
 }
 
@@ -294,8 +322,107 @@ void TestLoadFailureKeepsScene() {
 	Actor next = loader.LoadModel(scene, Asset("lights.gltf"));
 	// ECS tái dùng id đã huỷ, nên kiểm tra theo tên thay vì handle cũ `model`.
 	assert(next.IsValid() && !scene.FindByName("textured").IsValid());
-	assert(scene.GetEntities().size() == 4);
+	assert(scene.GetEntities().size() == 6);
 	assert(!scene.GetRenderSettings().Lighting);
+	std::cout << "  -> PASS\n";
+}
+
+// Bounding box thế giới của bản B (theo cây node) phải trùng bản A (đỉnh đã áp transform) trên mọi file mẫu.
+void TestNodeHierarchyMatchesFlattened() {
+	std::cout << "[RUN] Node hierarchy (B) matches flattened import (A)...\n";
+	TestResources resources;
+	Model::AssimpModelImporter importer(&resources);
+	SceneLoader loader(importer);
+	const std::string cube = (std::filesystem::path(TEST_ASSET_DIR) / "../../assets/models/Cube/Cube.fbx").string();
+	for (const std::string& path : { Asset("textured.gltf"), Asset("embedded.glb"), Asset("shared-image.glb"),
+		Asset("lights.gltf"), Asset("shear.gltf"), cube }) {
+		auto flat = importer.Import(path.c_str());
+		assert(flat);
+		Model::AssimpBoundingBox expected;
+		size_t expectedVertices = 0;
+		for (const auto& mesh : flat->GetMeshes()) {
+			expectedVertices += mesh.Vertices.size();
+			for (const auto& vertex : mesh.Vertices) expected.expand(vertex.Position);
+		}
+
+		Scene scene;
+		Actor root = loader.LoadModel(scene, path);
+		assert(root.IsValid());
+		const auto& box = root.GetComponent<BoundsComponent>()->Box;
+		assert(Vec3Equal(box.getMin(), expected.getMin(), 1e-3f * std::max(1.0f, expected.radius())));
+		assert(Vec3Equal(box.getMax(), expected.getMax(), 1e-3f * std::max(1.0f, expected.radius())));
+
+		// Đỉnh nhân World của entity (sau TransformSystem) trùng đỉnh đã áp transform của bản A.
+		TransformSystem transforms;
+		transforms.OnUpdate(0.0f);
+		Model::AssimpBoundingBox fromEntities;
+		size_t vertices = 0;
+		for (const Actor& entity : scene.GetEntities()) {
+			auto* renderer = entity.GetComponent<MeshRendererComponent>();
+			if (!renderer) continue;
+			const glm::mat4& world = entity.GetComponent<TransformComponent>()->World;
+			for (const auto& mesh : renderer->Model->GetMeshes()) {
+				vertices += mesh.Vertices.size();
+				for (const auto& vertex : mesh.Vertices) fromEntities.expand(glm::vec3(world * glm::vec4(vertex.Position, 1.0f)));
+			}
+		}
+		assert(vertices == expectedVertices);
+		assert(Vec3Equal(fromEntities.getMin(), expected.getMin(), 1e-3f * std::max(1.0f, expected.radius())));
+		assert(Vec3Equal(fromEntities.getMax(), expected.getMax(), 1e-3f * std::max(1.0f, expected.radius())));
+	}
+	std::cout << "  -> PASS\n";
+}
+
+void TestShearedNodeKeepsMatrix() {
+	std::cout << "[RUN] Node with shear keeps its raw matrix...\n";
+	TestResources resources;
+	Model::AssimpModelImporter importer(&resources);
+	SceneLoader loader(importer);
+	Scene scene;
+	Actor root = loader.LoadModel(scene, Asset("shear.gltf"));
+	assert(root.IsValid());
+	auto* transform = root.GetComponent<TransformComponent>();
+	assert(transform->Matrix); // không tách được TRS
+	assert(std::fabs((*transform->Matrix)[1][0] - 0.5f) < 1e-6f);
+	assert(!scene.FindByName("Child").GetComponent<TransformComponent>()->Matrix);
+	// Đỉnh (0,1,0) của tam giác ở node con: dời (1,0,0) rồi shear x += 0.5*y -> (1.5, 1, 0).
+	TransformSystem transforms;
+	transforms.OnUpdate(0.0f);
+	const glm::mat4& world = scene.FindByName("Child").GetComponent<TransformComponent>()->World;
+	assert(Vec3Equal(glm::vec3(world * glm::vec4(0, 1, 0, 1)), { 1.5f, 1, 0 }));
+
+	// Hồi quy: đèn mặc định không được kế thừa shear của node gốc (từng làm lệch hướng sáng).
+	LightingSystem lighting;
+	lighting.OnUpdate(0.0f);
+	assert(lighting.GetLights().size() == 1);
+	assert(Vec3Equal(lighting.GetLights().front().Direction, DEFAULT_LIGHT_DIRECTION));
+	std::cout << "  -> PASS\n";
+}
+
+void TestTooManyNodesFlattens() {
+	std::cout << "[RUN] Too many nodes -> flattened into one entity...\n";
+	TestResources resources;
+	Model::AssimpModelImporter importer(&resources);
+	SceneLoader loader(importer, 2); // lights.gltf có 6 node > 2
+	Scene scene;
+	Actor root = loader.LoadModel(scene, Asset("lights.gltf"));
+	assert(root.IsValid() && root.HasComponent<MeshRendererComponent>());
+	// Gốc giữ đèn đầu tiên, 2 đèn còn lại thành entity con; không có entity cho từng node.
+	assert(scene.GetEntities().size() == 3);
+	assert(!scene.FindByName("Rig").IsValid());
+
+	TransformSystem transforms;
+	LightingSystem lighting;
+	transforms.OnUpdate(0.0f);
+	lighting.OnUpdate(0.0f);
+	assert(lighting.GetLights().size() == 3);
+	bool foundSpot = false;
+	for (const auto& light : lighting.GetLights()) {
+		if (light.Type != Model::LightType::Spot) continue;
+		foundSpot = true;
+		assert(Vec3Equal(light.Position, { 0, 10, 5 })); // đèn đã ở toạ độ thế giới
+	}
+	assert(foundSpot);
 	std::cout << "  -> PASS\n";
 }
 
@@ -386,8 +513,9 @@ void TestCameraSystem() {
 		assert(std::fabs(camera->Camera.GetAspect() - 800.0f / 600.0f) < 1e-4f);
 		// Mọi góc của model nằm trong khung hình.
 		const glm::mat4 viewProjection = camera->Camera.GetProjectionMatrix() * camera->Camera.GetViewMatrix();
+		const glm::mat4 world = model.GetComponent<TransformComponent>()->GetLocalMatrix(); // node gốc: world = local
 		for (const auto& vertex : model.GetComponent<MeshRendererComponent>()->Model->GetMeshes().front().Vertices) {
-			glm::vec4 clip = viewProjection * glm::vec4(vertex.Position, 1.0f);
+			glm::vec4 clip = viewProjection * world * glm::vec4(vertex.Position, 1.0f);
 			glm::vec3 ndc = glm::vec3(clip) / clip.w;
 			assert(std::fabs(ndc.x) < 1 && std::fabs(ndc.y) < 1 && std::fabs(ndc.z) < 1);
 		}
@@ -452,8 +580,10 @@ void TestRenderSystem() {
 		FakeShader& shader = renderer.Resources.Shader;
 		assert(shader.Get("uEnableTextures") == 1 && shader.Get("uEnableLighting") == 1);
 		assert(shader.Get("uLightCount") == 1 && shader.Get("uLights[0].type") == 0); // đèn mặc định
-		const glm::mat4 identity(1.0f);
-		assert(shader.Uniforms["uModel"] == std::vector<float>(glm::value_ptr(identity), glm::value_ptr(identity) + 16));
+		// uModel = world của node (dời (2,3,4), scale 2).
+		const glm::mat4 nodeWorld = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(2, 3, 4)), glm::vec3(2));
+		const auto& uploaded = shader.Uniforms["uModel"];
+		for (int i = 0; i < 16; ++i) assert(std::fabs(uploaded[i] - glm::value_ptr(nodeWorld)[i]) < 1e-5f);
 		assert(renderer.Command.PolygonModes.back() == CoreEngine::PolygonMode::Fill);
 
 		// Bật wireframe, tắt texture + lighting.
@@ -482,6 +612,9 @@ int main() {
 	TestLoadModelWithoutLights();
 	TestLoadModelWithLights();
 	TestLoadFailureKeepsScene();
+	TestNodeHierarchyMatchesFlattened();
+	TestShearedNodeKeepsMatrix();
+	TestTooManyNodesFlattens();
 	TestTransformSystem();
 	TestLightingSystem();
 	TestCameraSystem();

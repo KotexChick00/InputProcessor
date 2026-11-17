@@ -9,7 +9,9 @@ namespace Model {
 		Spot
 	};
 
-	// Nguồn sáng đọc từ file model, đã đổi sang hệ toạ độ thế giới (đã áp node transform).
+	// Nguồn sáng đọc từ file model.
+	// RenderModel::GetLights(): toạ độ thế giới (đã áp node transform).
+	// ImportedNode::Lights: toạ độ cục bộ của node chứa đèn.
 	struct ImportedLight {
 		std::string Name;
 		LightType Type = LightType::Directional;

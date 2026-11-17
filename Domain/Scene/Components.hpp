@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -31,11 +32,14 @@ namespace Domain::Scene {
 		glm::vec3 Position{ 0.0f };
 		glm::quat Rotation{ 1.0f, 0.0f, 0.0f, 0.0f };
 		glm::vec3 Scale{ 1.0f };
+		// Ma trận cục bộ lấy thẳng từ file khi không tách được thành TRS (có shear); ưu tiên hơn TRS.
+		std::optional<glm::mat4> Matrix;
 
 		glm::mat4 World{ 1.0f };
 		bool Dirty = true;
 
 		glm::mat4 GetLocalMatrix() const {
+			if (Matrix) return *Matrix;
 			return glm::translate(glm::mat4(1.0f), Position)
 				* glm::mat4_cast(Rotation)
 				* glm::scale(glm::mat4(1.0f), Scale);
@@ -69,7 +73,8 @@ namespace Domain::Scene {
 		explicit ModelSourceComponent(std::string path = {}) : Path(std::move(path)) {}
 	};
 
-	// Nguồn sáng (toạ độ thế giới). Direction là hướng ánh sáng đi tới.
+	// Nguồn sáng theo toạ độ cục bộ của entity chứa nó; LightingSystem áp TransformComponent::World.
+	// Direction là hướng ánh sáng đi tới.
 	struct LightComponent : CoreEngine::ECS::IComponent {
 		Model::ImportedLight Light;
 		// true: lấy từ file; false: đèn mặc định do viewer tạo khi file không có đèn.

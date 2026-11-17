@@ -102,10 +102,6 @@ void main() {
 
 			mImporter = std::make_unique<Model::AssimpModelImporter>(renderer->GetResourceManager());
 			mScene = std::make_unique<Scene>();
-			SceneLoader loader(*mImporter);
-			mModel = loader.LoadModel(*mScene, TEST_ASSET_DIR "/textured.gltf");
-			assert(mModel.IsValid());
-			mCameras->CreateCamera(*mScene, &mModel.GetComponent<BoundsComponent>()->Box);
 
 			mOldShader = renderer->GetResourceManager()->CreateShaderFromSources(OLD_VERTEX, OLD_FRAGMENT);
 			assert(mOldShader && mOldShader->GetShaderId());
@@ -120,16 +116,25 @@ void main() {
 
 			switch (mFrame) {
 			case 0: {
-				assert(mRender->GetLastDrawCount() == 1);
-				mNormal = frame;
-				Pixels clear = ClearOnly();
-				assert(CountDifferent(mNormal, clear) > 100); // model thực sự được vẽ
-
-				// Vẽ lại bằng shader cũ với cùng camera: phải giống ECS (sai số làm tròn ≤ 2/255).
-				Pixels old = RenderWithOldShader();
-				const int difference = MaxDifference(mNormal, old);
-				std::cout << "  max pixel difference ECS vs old shader: " << difference << "\n";
-				assert(difference <= 2);
+				// Bản B (mỗi node 1 entity, uModel) phải ra cùng ảnh với bản A + shader cũ.
+				// Sai số làm tròn số thực cho phép ≤ 2/255 trên từng kênh màu.
+				for (const char* path : { TEST_ASSET_DIR "/shear.gltf", TEST_ASSET_DIR "/../../assets/models/Cube/Cube.fbx",
+					TEST_ASSET_DIR "/textured.gltf" }) {
+					LoadModel(path);
+					ECS::Update(0.0f);
+					assert(mRender->GetLastDrawCount() >= 1);
+					Pixels ecs = ReadPixels();
+					assert(CountDifferent(ecs, ClearOnly()) > 100); // model thực sự được vẽ
+					Pixels old = RenderWithOldShader(path);
+					const int difference = MaxDifference(ecs, old);
+					const size_t differentPixels = CountDifferent(ecs, old);
+					std::cout << "  " << path << ": max pixel difference ECS vs old = " << difference
+						<< " (" << differentPixels << " pixels differ)" << std::endl;
+					assert(difference <= 2);
+				}
+				// textured.gltf được nạp cuối, dùng làm ảnh gốc cho các bước bật/tắt bên dưới.
+				ECS::Update(0.0f);
+				mNormal = ReadPixels();
 				settings.Wireframe = true;
 				break;
 			}
@@ -172,14 +177,25 @@ void main() {
 			return ReadPixels();
 		}
 
-		Pixels RenderWithOldShader() {
+		void LoadModel(const char* path) {
+			SceneLoader loader(*mImporter);
+			Actor root = loader.LoadModel(*mScene, path);
+			assert(root.IsValid());
+			mCameras->CreateCamera(*mScene, &root.GetComponent<BoundsComponent>()->Box);
+		}
+
+		// Bản A: đỉnh đã áp node transform, vẽ bằng shader trước khi có ECS.
+		Pixels RenderWithOldShader(const char* path) {
 			auto* renderer = GetRenderer();
+			auto flat = mImporter->Import(path);
+			assert(flat);
 			renderer->GetRendererCommand()->ClearBuffers(CoreEngine::ClearBufferMasks::Color | CoreEngine::ClearBufferMasks::Depth);
 			CameraComponent* camera = CameraSystem::GetActiveCamera();
 			const glm::mat4 viewProjection = camera->Camera.GetProjectionMatrix() * camera->Camera.GetViewMatrix();
 			mOldShader->Use();
 			mOldShader->SetUniformMatrix4fv("uViewProjection", glm::value_ptr(viewProjection));
-			mModel.GetComponent<MeshRendererComponent>()->Model->Render(renderer, mOldShader);
+			renderer->GetRendererCommand()->SetPolygonMode(CoreEngine::PolygonMode::Fill);
+			flat->Render(renderer, mOldShader);
 			return ReadPixels();
 		}
 
@@ -188,7 +204,6 @@ void main() {
 		CameraSystem* mCameras = nullptr;
 		std::unique_ptr<Model::AssimpModelImporter> mImporter;
 		std::unique_ptr<Scene> mScene;
-		Actor mModel;
 		CoreEngine::IShader* mOldShader = nullptr;
 		Pixels mNormal;
 		int mFrame = 0;

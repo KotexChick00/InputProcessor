@@ -3,15 +3,57 @@
 #include <Model/AdsMaterial.hpp>
 #include <filesystem>
 #include <stdexcept>
+#include <algorithm>
+#include <cmath>
 
 namespace Model {
 	AssimpModelImporter::AssimpModelImporter(CoreEngine::IResourceManager* resourceManager)
 		: mResourceManager(resourceManager) {}
 
-	std::unique_ptr<RenderModel> AssimpModelImporter::Import(const char* file) {
+	namespace {
+		glm::mat4 ToGlm(const aiMatrix4x4& m) {
+			// Assimp lưu row-major, GLM column-major.
+			return glm::mat4(
+				m.a1, m.b1, m.c1, m.d1,
+				m.a2, m.b2, m.c2, m.d2,
+				m.a3, m.b3, m.c3, m.d3,
+				m.a4, m.b4, m.c4, m.d4);
+		}
+
+		size_t CountNodes(const aiNode* node) {
+			size_t count = 1;
+			for (unsigned int i = 0; i < node->mNumChildren; i++) count += CountNodes(node->mChildren[i]);
+			return count;
+		}
+
+		// Đổi aiLight sang ImportedLight, áp `transform` lên vị trí/hướng. false nếu loại đèn không hỗ trợ.
+		bool ConvertLight(const aiLight* light, const aiMatrix4x4& transform, ImportedLight& result) {
+			result.Name = light->mName.C_Str();
+			switch (light->mType) {
+			case aiLightSource_DIRECTIONAL: result.Type = LightType::Directional; break;
+			case aiLightSource_POINT:       result.Type = LightType::Point; break;
+			case aiLightSource_SPOT:        result.Type = LightType::Spot; break;
+			default:
+				IP_ENGINE_WARN("AssimpModelImporter: Unsupported light type {} for '{}', skip", static_cast<int>(light->mType), result.Name);
+				return false;
+			}
+
+			aiVector3D position = transform * light->mPosition;
+			aiVector3D direction = aiMatrix3x3(transform) * light->mDirection;
+			if (direction.SquareLength() > 0.0f) direction.Normalize();
+
+			result.Position = glm::vec3(position.x, position.y, position.z);
+			result.Direction = glm::vec3(direction.x, direction.y, direction.z);
+			result.Color = glm::vec3(light->mColorDiffuse.r, light->mColorDiffuse.g, light->mColorDiffuse.b);
+			result.InnerConeAngle = light->mAngleInnerCone;
+			result.OuterConeAngle = light->mAngleOuterCone;
+			return true;
+		}
+	}
+
+	const aiScene* AssimpModelImporter::ReadScene(Assimp::Importer& importer, const char* file) {
 		mEmbeddedTextures.clear(); // Assimp texture pointers belong to this import's scene.
 		if (!file || !*file) return nullptr;
-		Assimp::Importer importer;
 
 		const aiScene* scene = importer.ReadFile(
 			file,
@@ -25,12 +67,19 @@ namespace Model {
 			|| !scene->mRootNode
 			) {
 			IP_ENGINE_ERROR(
-				"AssimpModelImporter::Import: Failed to load model '{}': {}",
+				"AssimpModelImporter: Failed to load model '{}': {}",
 				file,
 				importer.GetErrorString()
 			);
 			return nullptr;
 		}
+		return scene;
+	}
+
+	std::unique_ptr<RenderModel> AssimpModelImporter::Import(const char* file) {
+		Assimp::Importer importer;
+		const aiScene* scene = ReadScene(importer, file);
+		if (!scene) return nullptr;
 
 		IP_ENGINE_TRACE("AssimpModelImporter::Import: Successfully loaded model '{}'", file);
 
@@ -51,36 +100,89 @@ namespace Model {
 		std::vector<ImportedLight> lights;
 		for (unsigned int i = 0; i < scene->mNumLights; i++) {
 			const aiLight* light = scene->mLights[i];
-
-			ImportedLight result;
-			result.Name = light->mName.C_Str();
-			switch (light->mType) {
-			case aiLightSource_DIRECTIONAL: result.Type = LightType::Directional; break;
-			case aiLightSource_POINT:       result.Type = LightType::Point; break;
-			case aiLightSource_SPOT:        result.Type = LightType::Spot; break;
-			default:
-				IP_ENGINE_WARN("AssimpModelImporter::ProcessLights: Unsupported light type {} for '{}', skip", static_cast<int>(light->mType), result.Name);
-				continue;
-			}
-
 			// Vị trí/hướng của aiLight nằm trong hệ toạ độ của node cùng tên -> cộng dồn transform lên tới gốc.
 			aiMatrix4x4 world;
 			for (const aiNode* node = scene->mRootNode->FindNode(light->mName); node; node = node->mParent) {
 				world = node->mTransformation * world;
 			}
-
-			aiVector3D position = world * light->mPosition;
-			aiVector3D direction = aiMatrix3x3(world) * light->mDirection;
-			if (direction.SquareLength() > 0.0f) direction.Normalize();
-
-			result.Position = glm::vec3(position.x, position.y, position.z);
-			result.Direction = glm::vec3(direction.x, direction.y, direction.z);
-			result.Color = glm::vec3(light->mColorDiffuse.r, light->mColorDiffuse.g, light->mColorDiffuse.b);
-			result.InnerConeAngle = light->mAngleInnerCone;
-			result.OuterConeAngle = light->mAngleOuterCone;
-			lights.push_back(std::move(result));
+			ImportedLight result;
+			if (ConvertLight(light, world, result)) lights.push_back(std::move(result));
 		}
 		return lights;
+	}
+
+	std::unique_ptr<ImportedScene> AssimpModelImporter::ImportScene(const char* file, size_t maxNodes) {
+		Assimp::Importer importer;
+		const aiScene* scene = ReadScene(importer, file);
+		if (!scene) return nullptr;
+
+		std::string directory = std::filesystem::path(file).parent_path().string();
+		auto result = std::make_unique<ImportedScene>();
+
+		const size_t nodeCount = CountNodes(scene->mRootNode);
+		if (nodeCount > maxNodes) {
+			// Quá nhiều node cho ECS: gộp như bản A (đỉnh và đèn theo toạ độ thế giới).
+			IP_ENGINE_WARN("AssimpModelImporter::ImportScene: '{}' has {} nodes (limit {}), flattening into one node", file, nodeCount, maxNodes);
+			std::vector<Mesh> meshes;
+			ProcessNode(scene->mRootNode, scene, meshes, aiMatrix4x4(), directory);
+			ImportedNode node;
+			node.Name = scene->mRootNode->mName.C_Str();
+			if (!meshes.empty()) node.Model = std::make_unique<RenderModel>(std::move(meshes));
+			node.Lights = ProcessLights(scene);
+			result->Nodes.push_back(std::move(node));
+			result->Flattened = true;
+			return result;
+		}
+
+		result->Nodes.reserve(nodeCount);
+		ProcessSceneNode(scene->mRootNode, -1, scene, directory, *result);
+		IP_ENGINE_DEBUG("AssimpModelImporter::ImportScene: Read {} nodes from '{}'", result->Nodes.size(), file);
+		return result;
+	}
+
+	void AssimpModelImporter::ProcessSceneNode(const aiNode* node, int parent, const aiScene* scene, const std::string& directory, ImportedScene& result) {
+		ImportedNode imported;
+		imported.Name = node->mName.C_Str();
+		imported.Parent = parent;
+		imported.Local = ToGlm(node->mTransformation);
+
+		// Tách TRS; nếu ghép lại không khớp (có shear) thì dùng thẳng ma trận.
+		aiVector3D scaling, position;
+		aiQuaternion rotation;
+		node->mTransformation.Decompose(scaling, rotation, position);
+		imported.Position = glm::vec3(position.x, position.y, position.z);
+		imported.Rotation = glm::quat(rotation.w, rotation.x, rotation.y, rotation.z);
+		imported.Scale = glm::vec3(scaling.x, scaling.y, scaling.z);
+		const aiMatrix4x4 recomposed(scaling, rotation, position);
+		for (unsigned int row = 0; row < 4 && imported.IsTrs; row++) {
+			for (unsigned int column = 0; column < 4; column++) {
+				const float expected = node->mTransformation[row][column];
+				if (std::fabs(recomposed[row][column] - expected) > 1e-4f * std::max(1.0f, std::fabs(expected))) {
+					imported.IsTrs = false;
+					break;
+				}
+			}
+		}
+
+		std::vector<Mesh> meshes;
+		for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+			meshes.push_back(ProcessMesh(scene->mMeshes[node->mMeshes[i]], scene, aiMatrix4x4(), directory));
+		}
+		if (!meshes.empty()) imported.Model = std::make_unique<RenderModel>(std::move(meshes));
+
+		// Đèn thuộc node đầu tiên trùng tên (giống cách Assimp và bản A tra cứu).
+		for (unsigned int i = 0; i < scene->mNumLights; i++) {
+			const aiLight* light = scene->mLights[i];
+			if (scene->mRootNode->FindNode(light->mName) != node) continue;
+			ImportedLight converted;
+			if (ConvertLight(light, aiMatrix4x4(), converted)) imported.Lights.push_back(std::move(converted));
+		}
+
+		const int index = static_cast<int>(result.Nodes.size());
+		result.Nodes.push_back(std::move(imported));
+		for (unsigned int i = 0; i < node->mNumChildren; i++) {
+			ProcessSceneNode(node->mChildren[i], index, scene, directory, result);
+		}
 	}
 
 	void AssimpModelImporter::ProcessNode(aiNode* node, const aiScene* scene, std::vector<Mesh>& meshes, const aiMatrix4x4& parentTransform, const std::string& directory) {
