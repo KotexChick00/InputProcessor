@@ -5,6 +5,7 @@
     "spdlog",
     "stb",
     "wxwidgets",
-    "glad"
+    "glad",
+    "nlohmann-json"
   ]
 }

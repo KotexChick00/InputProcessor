@@ -52,12 +52,8 @@ using Unique = std::unique_ptr<T>;
 // Runtime assert
 #define CORE_ASSERT assert
 
-// Static assert
-#if defined(__clang__) || defined(__GNUC__)
-    #define CORE_STATIC_ASSERT _Static_assert
-#else
-    #define CORE_STATIC_ASSERT static_assert
-#endif
+// Static assert (C++ keyword; _Static_assert is C-only and fails at class scope in GCC)
+#define CORE_STATIC_ASSERT static_assert
 
 // Inline
 #if defined(__clang__) || defined(__GNUC__)
