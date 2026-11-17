@@ -13,6 +13,7 @@
 #include <Scene/Systems/RenderSystem.hpp>
 #include <Scene/Systems/ViewerSystems.hpp>
 #include <Scene/ViewState.hpp>
+#include <Scene/ViewerController.hpp>
 #include <Input/Wx/WxKeyboardInput.hpp>
 #include <Input/Wx/WxMouseInput.hpp>
 
@@ -580,6 +581,82 @@ void TestViewStateRoundTrip() {
 	std::cout << "  -> PASS\n";
 }
 
+void TestViewerController() {
+	std::cout << "[RUN] ViewerController (API for the GUI)...\n";
+	TestResources resources;
+	CoreEngine::ECS::Shutdown();
+	auto* cameras = ECS::SystemManager::GetInstance().AddSystem<CameraSystem>(nullptr);
+	{
+		ViewerController viewer(&resources, cameras);
+		std::string error;
+		assert(!viewer.HasModel() && viewer.GetEntityTree().empty() && viewer.GetModelStats().NodeCount == 0);
+		assert(!viewer.SaveView("unused.json", error) && !error.empty()); // chưa mở model
+
+		assert(viewer.OpenModel(Asset("lights.gltf"), error));
+		assert(viewer.HasModel() && viewer.GetModelGeneration() == 1);
+		assert(CameraSystem::GetActiveCamera()); // mở model tạo camera
+
+		// Cây node theo thứ tự duyệt sâu, cha trước con.
+		const auto tree = viewer.GetEntityTree();
+		assert(tree.size() == 6);
+		assert(tree[0].Name == "lights" && tree[0].Depth == 0 && tree[0].Path.empty() && tree[0].Parent == INVALID_ENTITY_ID);
+		std::map<std::string, EntityInfo> byPath;
+		for (const auto& info : tree) byPath[info.Path] = info;
+		assert(byPath["Rig/Spot"].Depth == 2 && byPath["Rig/Spot"].Parent == byPath["Rig"].Id);
+		assert(byPath["Triangle"].MeshCount == 1 && byPath["Triangle"].VertexCount == 3 && byPath["Triangle"].TriangleCount == 1);
+		assert(byPath["Bulb"].HasLight && byPath["Bulb"].LightType == Model::LightType::Point && byPath["Bulb"].LightEnabled);
+		for (size_t i = 1; i < tree.size(); ++i) {
+			bool parentBefore = false;
+			for (size_t j = 0; j < i; ++j) parentBefore = parentBefore || tree[j].Id == tree[i].Parent;
+			assert(parentBefore);
+		}
+
+		const ModelStats stats = viewer.GetModelStats();
+		assert(stats.NodeCount == 6 && stats.MeshCount == 1 && stats.VertexCount == 3 && stats.TriangleCount == 1 && stats.LightCount == 3);
+		assert(stats.HasBounds && stats.Path == Asset("lights.gltf"));
+
+		// Ẩn cả nhánh từ gốc, rồi hiện riêng một node.
+		assert(viewer.SetVisible(tree[0].Id, false));
+		auto triangle = byPath["Triangle"].Id;
+		assert(!ECS::GetActor(triangle).GetComponent<MeshRendererComponent>()->Visible);
+		assert(viewer.SetVisible(triangle, true, false));
+		assert(ECS::GetActor(triangle).GetComponent<MeshRendererComponent>()->Visible);
+
+		// Bật/tắt đèn; node không phải đèn hoặc ngoài model -> false.
+		assert(viewer.SetLightEnabled(byPath["Bulb"].Id, false));
+		assert(!ECS::GetActor(byPath["Bulb"].Id).GetComponent<LightComponent>()->Enabled);
+		assert(!viewer.SetLightEnabled(triangle, false));
+		const EntityID cameraId = viewer.GetScene().FindByName("Camera").GetID();
+		assert(!viewer.SetVisible(cameraId, false) && !viewer.SetLightEnabled(cameraId, false));
+		assert(!viewer.SetVisible(INVALID_ENTITY_ID, false));
+
+		// Lưu / nạp trạng thái xem qua controller.
+		const auto file = (std::filesystem::temp_directory_path() / "inputprocessor-controller.view.json").string();
+		viewer.GetRenderSettings().Wireframe = true;
+		assert(viewer.SaveView(file, error));
+		assert(viewer.OpenModel(Asset("textured.gltf"), error) && viewer.GetModelGeneration() == 2);
+		assert(viewer.GetRenderSettings().Wireframe); // tuỳ chọn hiển thị giữ khi đổi model
+		viewer.GetRenderSettings().Wireframe = false;
+		assert(viewer.LoadView(file, error));
+		assert(viewer.GetModelPath() == ResolveModelPath(*LoadViewState(file, error), file).string());
+		assert(viewer.GetModelGeneration() == 3 && viewer.GetRenderSettings().Wireframe);
+		assert(!ECS::GetActor(viewer.GetScene().FindByName("Bulb").GetID()).GetComponent<LightComponent>()->Enabled);
+		std::filesystem::remove(file);
+
+		// Lỗi: giữ nguyên cảnh hiện tại.
+		const uint64_t generation = viewer.GetModelGeneration();
+		error.clear();
+		assert(!viewer.OpenModel(Asset("missing.glb"), error) && !error.empty());
+		assert(!viewer.LoadView(Asset("broken.view.json"), error) && error.find("version") != std::string::npos);
+		assert(viewer.GetModelGeneration() == generation && viewer.GetEntityTree().size() == 6);
+
+		viewer.FitCamera(); // không crash
+	}
+	CoreEngine::ECS::Shutdown();
+	assert(AliveEntities() == 0);
+	std::cout << "  -> PASS\n";
+}
+
 void TestTransformSystem() {
 	std::cout << "[RUN] TransformSystem...\n";
 	{
@@ -772,6 +849,7 @@ int main() {
 	TestViewStateJson();
 	TestNodePaths();
 	TestViewStateRoundTrip();
+	TestViewerController();
 	TestTransformSystem();
 	TestLightingSystem();
 	TestCameraSystem();

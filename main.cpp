@@ -1,6 +1,7 @@
 // Viewer mô hình 3D chạy trên ECS (Core/ECS + Domain/Scene).
 //
-//   SceneLoader     đọc file (glTF/GLB/OBJ/FBX qua Assimp) thành entity: model + các đèn (hoặc đèn mặc định)
+//   ViewerController  API của viewer (mở model, lưu/nạp trạng thái xem, cây node, bật tắt) — GUI dùng lớp này
+//   SceneLoader     đọc file (glTF/GLB/OBJ/FBX qua Assimp) thành entity: mỗi node 1 entity, đèn, đèn mặc định
 //   CameraSystem    camera orbit nhìn bao trọn model, điều khiển bằng chuột/bàn phím
 //   LightingSystem  gom đèn cho shader
 //   RenderSystem    vẽ model theo tuỳ chọn hiển thị (wireframe / texture / lighting)
@@ -12,15 +13,11 @@
 
 #include <Application/Application.hpp>
 #include <ECS/ECS.hpp>
-#include <Model/Importers/AssimpModelImporter/AssimpModelImporter.hpp>
-#include <Scene/Scene.hpp>
-#include <Scene/SceneLoader.hpp>
 #include <Scene/Systems/CameraSystem.hpp>
 #include <Scene/Systems/ViewerSystems.hpp>
-#include <Scene/ViewState.hpp>
+#include <Scene/ViewerController.hpp>
 
 #include <filesystem>
-
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -50,15 +47,14 @@ namespace {
 			renderer->Config(config);
 
 			AddViewerSystems(&GetInput(), renderer);
-			mCameras = ECS::SystemManager::GetInstance().GetSystem<CameraSystem>();
-			mCameras->SetViewportSize(config.ViewPortOptions.Width, config.ViewPortOptions.Height);
-			GetEventDispatcher()->AddEventListener<CoreEngine::WindowResizeEventContext>([this](const auto& event) {
-				mCameras->SetViewportSize(event.GetWidth(), event.GetHeight());
+			auto* cameras = ECS::SystemManager::GetInstance().GetSystem<CameraSystem>();
+			cameras->SetViewportSize(config.ViewPortOptions.Width, config.ViewPortOptions.Height);
+			GetEventDispatcher()->AddEventListener<CoreEngine::WindowResizeEventContext>([cameras](const auto& event) {
+				cameras->SetViewportSize(event.GetWidth(), event.GetHeight());
 				return false;
 			});
+			mViewer = std::make_unique<ViewerController>(renderer->GetResourceManager(), cameras);
 
-			mImporter = std::make_unique<Model::AssimpModelImporter>(renderer->GetResourceManager());
-			mScene = std::make_unique<Scene>();
 			// Có file trạng thái xem thì mở theo nó (model + camera + tuỳ chọn), không thì mở model.
 			std::error_code code;
 			if (!mViewFile.empty() && std::filesystem::exists(mViewFile, code)) {
@@ -71,13 +67,11 @@ namespace {
 		}
 
 		void OnLoopClient() override {
-			const auto& input = GetInput();
-			auto* keyboard = input.KeyboardInput;
-			if (keyboard) {
+			if (auto* keyboard = GetInput().KeyboardInput) {
 				if (keyboard->CheckIsPressed(KeyboardKey::Escape)) RequestClose();
-				if (keyboard->CheckIsJustPressed(KeyboardKey::R)) FitCamera();
+				if (keyboard->CheckIsJustPressed(KeyboardKey::R)) mViewer->FitCamera();
 
-				auto& settings = mScene->GetRenderSettings();
+				auto& settings = mViewer->GetRenderSettings();
 				if (keyboard->CheckIsJustPressed(KeyboardKey::One)) Toggle("Wireframe", settings.Wireframe);
 				if (keyboard->CheckIsJustPressed(KeyboardKey::Two)) Toggle("Textures", settings.Textures);
 				if (keyboard->CheckIsJustPressed(KeyboardKey::Three)) Toggle("Lighting", settings.Lighting);
@@ -92,65 +86,47 @@ namespace {
 
 		void OnShutdownClient() override {
 			// Buffer GPU của model và shader cần OpenGL context: huỷ scene + ECS trước khi đóng cửa sổ.
-			mScene.reset();
+			mViewer.reset();
 			ECS::Shutdown();
-			mImporter.reset();
-			mCameras = nullptr;
 		}
 
 	private:
-		// Mở model thay cho model hiện tại; lỗi thì giữ nguyên scene cũ.
+		// Mở model thay cho model hiện tại; lỗi thì giữ nguyên cảnh cũ.
 		bool OpenModel(const std::string& path) {
-			SceneLoader loader(*mImporter);
-			mModel = loader.LoadModel(*mScene, path);
-			if (!mModel.IsValid()) return false;
-
-			auto* bounds = mModel.GetComponent<BoundsComponent>();
-			if (!bounds || !bounds->Box.isValid()) {
-				std::cerr << "Warning: '" << path << "' has no vertices, nothing to show\n";
+			std::string error;
+			if (!mViewer->OpenModel(path, error)) {
+				std::cerr << error << '\n';
+				return false;
 			}
-			mCameras->CreateCamera(*mScene, bounds ? &bounds->Box : nullptr);
-			std::cout << "Opened " << path << " (" << mScene->GetEntities().size() << " entities)\n";
+			PrintStats();
 			return true;
 		}
 
 		// Lưu trạng thái xem (không đụng tới file model).
-		bool SaveView() {
+		void SaveView() {
 			std::string error;
-			ViewState state = CaptureViewState(*mScene, mModel, CameraSystem::GetActiveCamera(), mViewFile);
-			if (!SaveViewState(state, mViewFile, error)) {
-				std::cerr << "Save view failed: " << error << '\n';
-				return false;
-			}
-			std::cout << "Saved view to " << mViewFile << '\n';
-			return true;
+			if (mViewer->SaveView(mViewFile, error)) std::cout << "Saved view to " << mViewFile << '\n';
+			else std::cerr << "Save view failed: " << error << '\n';
 		}
 
 		// Nạp trạng thái xem: mở model ghi trong file rồi áp camera/tuỳ chọn. Lỗi thì giữ nguyên cảnh hiện tại.
 		bool LoadView() {
 			std::string error;
-			auto state = LoadViewState(mViewFile, error);
-			if (!state) {
+			if (!mViewer->LoadView(mViewFile, error)) {
 				std::cerr << "Load view failed: " << error << '\n';
 				return false;
 			}
-			const std::string model = ResolveModelPath(*state, mViewFile).string();
-			if (!OpenModel(model)) {
-				std::cerr << "Load view failed: can't open model '" << model << "'\n";
-				return false;
-			}
-			mPath = model;
-			const size_t skipped = ApplyViewState(*state, *mScene, mModel, CameraSystem::GetActiveCamera());
-			std::cout << "Loaded view from " << mViewFile;
-			if (skipped > 0) std::cout << " (" << skipped << " entries not found in the model)";
-			std::cout << '\n';
+			mPath = mViewer->GetModelPath();
+			std::cout << "Loaded view from " << mViewFile << '\n';
+			PrintStats();
 			return true;
 		}
 
-		void FitCamera() {
-			CameraComponent* camera = CameraSystem::GetActiveCamera();
-			auto* bounds = mModel.IsValid() ? mModel.GetComponent<BoundsComponent>() : nullptr;
-			if (camera && bounds) mCameras->FitToBounds(*camera, bounds->Box);
+		void PrintStats() const {
+			const ModelStats stats = mViewer->GetModelStats();
+			std::cout << "Opened " << stats.Path << ": " << stats.NodeCount << " nodes, " << stats.MeshCount << " meshes, "
+				<< stats.VertexCount << " vertices, " << stats.TriangleCount << " triangles, " << stats.LightCount << " lights\n";
+			if (!stats.HasBounds) std::cerr << "Warning: the model has no vertices, nothing to show\n";
 		}
 
 		static void Toggle(const char* name, bool& value) {
@@ -175,11 +151,7 @@ namespace {
 		std::string mViewFile;
 		int mFrameLimit = 0;
 		int mFrames = 0;
-
-		std::unique_ptr<Model::AssimpModelImporter> mImporter;
-		std::unique_ptr<Scene> mScene;
-		Actor mModel;
-		CameraSystem* mCameras = nullptr; // Thuộc SystemManager
+		std::unique_ptr<ViewerController> mViewer;
 	};
 
 	int ParseFrameCount(std::string_view text) {
