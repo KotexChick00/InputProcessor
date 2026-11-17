@@ -2,6 +2,7 @@
 #include <vector>
 #include <Renderer/IRenderer.hpp>
 #include <Model/Mesh.hpp>
+#include <Model/ImportedLight.hpp>
 
 namespace Model {
 	class RenderModel {
@@ -9,6 +10,10 @@ namespace Model {
 		explicit RenderModel(std::vector<Mesh> meshes);
 		~RenderModel();
 		const std::vector<Mesh>& GetMeshes() const { return mMeshes; }
+
+		// Nguồn sáng có trong file (rỗng nếu file không có).
+		const std::vector<ImportedLight>& GetLights() const { return mLights; }
+		void SetLights(std::vector<ImportedLight> lights) { mLights = std::move(lights); }
 
 		void Render(CoreEngine::IRenderer* renderer, CoreEngine::IShader* shader);
 
@@ -25,6 +30,7 @@ namespace Model {
 	private:
 		std::vector<Mesh> mMeshes;
 		std::vector<SubMesh> mSubMeshes;
+		std::vector<ImportedLight> mLights;
 		CoreEngine::IVertexBuffer* mVertexBuffer = nullptr;
 		CoreEngine::IIndexBuffer* mIndexBuffer = nullptr;
 	};

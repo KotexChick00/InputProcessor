@@ -41,7 +41,46 @@ namespace Model {
 
 		IP_ENGINE_DEBUG("AssimpModelImporter::Import: Processed {} meshes from model '{}'", meshes.size(), file);
 
-		return std::make_unique<RenderModel>(std::move(meshes));
+		auto model = std::make_unique<RenderModel>(std::move(meshes));
+		model->SetLights(ProcessLights(scene));
+		IP_ENGINE_DEBUG("AssimpModelImporter::Import: Found {} lights in model '{}'", model->GetLights().size(), file);
+		return model;
+	}
+
+	std::vector<ImportedLight> AssimpModelImporter::ProcessLights(const aiScene* scene) {
+		std::vector<ImportedLight> lights;
+		for (unsigned int i = 0; i < scene->mNumLights; i++) {
+			const aiLight* light = scene->mLights[i];
+
+			ImportedLight result;
+			result.Name = light->mName.C_Str();
+			switch (light->mType) {
+			case aiLightSource_DIRECTIONAL: result.Type = LightType::Directional; break;
+			case aiLightSource_POINT:       result.Type = LightType::Point; break;
+			case aiLightSource_SPOT:        result.Type = LightType::Spot; break;
+			default:
+				IP_ENGINE_WARN("AssimpModelImporter::ProcessLights: Unsupported light type {} for '{}', skip", static_cast<int>(light->mType), result.Name);
+				continue;
+			}
+
+			// Vị trí/hướng của aiLight nằm trong hệ toạ độ của node cùng tên -> cộng dồn transform lên tới gốc.
+			aiMatrix4x4 world;
+			for (const aiNode* node = scene->mRootNode->FindNode(light->mName); node; node = node->mParent) {
+				world = node->mTransformation * world;
+			}
+
+			aiVector3D position = world * light->mPosition;
+			aiVector3D direction = aiMatrix3x3(world) * light->mDirection;
+			if (direction.SquareLength() > 0.0f) direction.Normalize();
+
+			result.Position = glm::vec3(position.x, position.y, position.z);
+			result.Direction = glm::vec3(direction.x, direction.y, direction.z);
+			result.Color = glm::vec3(light->mColorDiffuse.r, light->mColorDiffuse.g, light->mColorDiffuse.b);
+			result.InnerConeAngle = light->mAngleInnerCone;
+			result.OuterConeAngle = light->mAngleOuterCone;
+			lights.push_back(std::move(result));
+		}
+		return lights;
 	}
 
 	void AssimpModelImporter::ProcessNode(aiNode* node, const aiScene* scene, std::vector<Mesh>& meshes, const aiMatrix4x4& parentTransform, const std::string& directory) {
