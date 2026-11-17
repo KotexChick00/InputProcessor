@@ -219,6 +219,86 @@ void TestWxInputStateMachine() {
 // Mock handler removed (chain-of-responsibility folder was deleted).
 // TestRealGltfImports below now exercises AssimpModelImporter directly.
 
+// Nhấn + nhả trong cùng một frame (bấm rất nhanh hoặc FPS thấp) vẫn phải được tính là "vừa nhấn".
+void TestWxInputTapWithinOneFrame() {
+    std::cout << "[RUN] Testing taps/clicks that start and end within one frame...\n";
+
+    WxKeyboardInput keyboard;
+    keyboard.NotifyKeyDown('2');
+    keyboard.NotifyKeyUp('2');
+    assert(keyboard.CheckIsJustPressed(KeyboardKey::Two));
+    assert(!keyboard.CheckIsPressed(KeyboardKey::Two));
+    assert(keyboard.GetKeyState(KeyboardKey::Two) == KeyState::Released);
+    keyboard.Update();
+    assert(!keyboard.CheckIsJustPressed(KeyboardKey::Two)); // chỉ một frame
+    assert(keyboard.GetKeyState(KeyboardKey::Two) == KeyState::None);
+
+    // Giữ phím: auto-repeat của hệ điều hành gửi thêm key-down nhưng không phải lần nhấn mới.
+    keyboard.NotifyKeyDown('2');
+    assert(keyboard.CheckIsJustPressed(KeyboardKey::Two));
+    keyboard.Update();
+    keyboard.NotifyKeyDown('2');
+    assert(!keyboard.CheckIsJustPressed(KeyboardKey::Two) && keyboard.CheckIsPressed(KeyboardKey::Two));
+    // Nhả rồi nhấn lại trong cùng một frame: là lần nhấn mới.
+    keyboard.NotifyKeyUp('2');
+    keyboard.NotifyKeyDown('2');
+    assert(keyboard.CheckIsJustPressed(KeyboardKey::Two) && keyboard.CheckIsPressed(KeyboardKey::Two));
+    keyboard.Update();
+    assert(!keyboard.CheckIsJustPressed(KeyboardKey::Two));
+    // Phím khác không bị ảnh hưởng.
+    assert(!keyboard.CheckIsJustPressed(KeyboardKey::Three));
+
+    WxMouseInput mouse;
+    mouse.NotifyButtonDown(MouseButton::ButtonLeft);
+    mouse.NotifyButtonUp(MouseButton::ButtonLeft);
+    assert(mouse.CheckIsJustPressed(MouseButton::ButtonLeft));
+    assert(!mouse.CheckIsPressed(MouseButton::ButtonLeft));
+    assert(mouse.GetMouseButtonState(MouseButton::ButtonLeft) == MouseButtonState::Released);
+    mouse.Update();
+    assert(!mouse.CheckIsJustPressed(MouseButton::ButtonLeft));
+    mouse.NotifyButtonDown(MouseButton::ButtonLeft);
+    mouse.Update();
+    mouse.NotifyButtonDown(MouseButton::ButtonLeft); // sự kiện lặp khi đang giữ
+    assert(!mouse.CheckIsJustPressed(MouseButton::ButtonLeft));
+    assert(!mouse.CheckIsJustPressed(MouseButton::ButtonRight));
+
+    // Ở mức controller camera:
+    OrbitCamera camera(glm::vec3(0.0f), 5.0f);
+    WxKeyboardInput keys;
+    WxMouseInput buttons;
+    InputState state{ &keys, &buttons };
+    OrbitCameraController controller(camera, state);
+
+    // Bấm nhanh R (nhấn + nhả cùng frame) vẫn reset camera — trước đây bị mất.
+    camera.Rotate(0.5f, 0.2f);
+    keys.NotifyKeyDown('R');
+    keys.NotifyKeyUp('R');
+    controller.Update(0.016f);
+    assert(FloatEqual(camera.GetAzimuth(), 0.0f) && FloatEqual(camera.GetElevation(), 0.0f));
+    keys.Update();
+    buttons.Update();
+
+    // Đang kéo chuột trái (orbit) mà click nhanh chuột phải: cú click đã nhả không được
+    // giành quyền gesture đang giữ, orbit vẫn tiếp tục và không pan.
+    buttons.NotifyButtonDown(MouseButton::ButtonLeft);
+    buttons.SetDelta(10.0f, 0.0f);
+    controller.Update(0.016f);
+    controller.Update(0.016f);
+    keys.Update();
+    buttons.Update();
+    const float azimuth = camera.GetAzimuth();
+    const glm::vec3 target = camera.GetTarget();
+    buttons.NotifyButtonDown(MouseButton::ButtonRight);
+    buttons.NotifyButtonUp(MouseButton::ButtonRight);
+    buttons.SetDelta(10.0f, 0.0f);
+    controller.Update(0.016f);
+    controller.Update(0.016f);
+    assert(!FloatEqual(camera.GetAzimuth(), azimuth));
+    assert(Vec3Equal(camera.GetTarget(), target));
+
+    std::cout << "  -> Tap within one frame PASS!\n";
+}
+
 #ifndef TEST_ASSET_DIR
 #define TEST_ASSET_DIR "tests/assets"
 #endif
@@ -430,6 +510,7 @@ int main() {
     TestOrbitCamera();
     TestOrbitCameraController();
     TestWxInputStateMachine();
+    TestWxInputTapWithinOneFrame();
     TestRealGltfImports();
     TestCameraBoundariesAndKeyboard();
     TestCameraBindingsAndGestures();

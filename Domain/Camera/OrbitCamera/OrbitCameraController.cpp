@@ -41,9 +41,11 @@ namespace Domain::Camera::OrbitCamera
 
 	bool OrbitCameraController::IsGestureActive(OrbitCameraAction gesture, bool justPressed) const
 	{
+		// "Vừa nhấn" ở đây còn phải đang giữ: input tính cả cú bấm nhanh nhấn + nhả trong một frame là
+		// vừa nhấn, nhưng một cú đã nhả thì không được giành quyền một gesture kéo đang giữ.
 		auto pressed = [&](OrbitCameraAction action) {
-			return justPressed ? m_inputMap.IsJustPressed(action, m_inputState)
-				: m_inputMap.IsContinuousPressed(action, m_inputState);
+			const bool held = m_inputMap.IsContinuousPressed(action, m_inputState);
+			return justPressed ? held && m_inputMap.IsJustPressed(action, m_inputState) : held;
 		};
 		if (pressed(gesture)) return true;
 		using enum OrbitCameraAction;

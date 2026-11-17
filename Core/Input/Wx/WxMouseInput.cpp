@@ -13,6 +13,7 @@ namespace CoreEngine
             mHeld[button] = false;
             mWasPressed[button] = false;
             mJustReleased[button] = false;
+            mPressedThisFrame[button] = false;
         }
     }
 
@@ -29,11 +30,8 @@ namespace CoreEngine
 
     bool WxMouseInput::CheckIsJustPressed(MouseButton button)
     {
-        auto itHeld = mHeld.find(button);
-        bool isHeld = itHeld != mHeld.end() && itHeld->second;
-        auto itWas = mWasPressed.find(button);
-        bool wasPressed = itWas != mWasPressed.end() && itWas->second;
-        return isHeld && !wasPressed;
+        auto it = mPressedThisFrame.find(button);
+        return it != mPressedThisFrame.end() && it->second;
     }
 
     MouseButtonState WxMouseInput::GetMouseButtonState(MouseButton button)
@@ -46,6 +44,7 @@ namespace CoreEngine
 
     void WxMouseInput::NotifyButtonDown(MouseButton button)
     {
+        if (!CheckIsPressed(button)) mPressedThisFrame[button] = true;
         mHeld[button] = true;
         mJustReleased[button] = false;
     }
@@ -62,6 +61,7 @@ namespace CoreEngine
         {
             mWasPressed[button] = CheckIsPressed(button);
             mJustReleased[button] = false;
+            mPressedThisFrame[button] = false;
         }
         // Reset per-frame positional deltas and scroll
         SetDelta(0.0f, 0.0f);

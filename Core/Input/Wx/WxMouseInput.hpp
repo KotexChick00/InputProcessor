@@ -31,5 +31,8 @@ namespace CoreEngine
         std::unordered_map<MouseButton, bool> mHeld;
         std::unordered_map<MouseButton, bool> mWasPressed;
         std::unordered_map<MouseButton, bool> mJustReleased;
+        // Set on a released -> pressed transition, cleared by Update(). Keeps a click whose button-down and
+        // button-up both arrive within one frame (otherwise "held now && not held last frame" misses it).
+        std::unordered_map<MouseButton, bool> mPressedThisFrame;
     };
 } // namespace CoreEngine

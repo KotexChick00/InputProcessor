@@ -11,6 +11,7 @@ namespace CoreEngine
             mHeld[key] = false;
             mWasPressed[key] = false;
             mJustReleased[key] = false;
+            mPressedThisFrame[key] = false;
         }
     }
 
@@ -27,11 +28,8 @@ namespace CoreEngine
 
     bool WxKeyboardInput::CheckIsJustPressed(KeyboardKey key)
     {
-        auto itHeld = mHeld.find(key);
-        bool isHeld = itHeld != mHeld.end() && itHeld->second;
-        auto itWas = mWasPressed.find(key);
-        bool wasPressed = itWas != mWasPressed.end() && itWas->second;
-        return isHeld && !wasPressed;
+        auto it = mPressedThisFrame.find(key);
+        return it != mPressedThisFrame.end() && it->second;
     }
 
     KeyState WxKeyboardInput::GetKeyState(KeyboardKey key)
@@ -47,6 +45,7 @@ namespace CoreEngine
         KeyboardKey key = ToKeyboardKey(wxKeyCode);
         if (key == KeyboardKey::Unknow) return;
 
+        if (!CheckIsPressed(key)) mPressedThisFrame[key] = true; // auto-repeat while held is not a new press
         mHeld[key] = true;
         mJustReleased[key] = false;
     }
@@ -66,6 +65,7 @@ namespace CoreEngine
         {
             mWasPressed[key] = CheckIsPressed(key);
             mJustReleased[key] = false;
+            mPressedThisFrame[key] = false;
         }
     }
 

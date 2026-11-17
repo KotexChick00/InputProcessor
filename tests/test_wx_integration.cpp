@@ -177,6 +177,26 @@ public:
             key.m_keyCode = WXK_F24;
             canvas->GetEventHandler()->ProcessEvent(key);
             assert(input.KeyboardInput->CheckIsPressed(KeyboardKey::F24));
+
+            // wxGTK có thể gửi lại cùng một key-down (cùng mã phím + timestamp), kể cả sau key-up:
+            // canvas phải bỏ bản lặp để cú bấm nhanh được tính đúng một lần và phím không bị kẹt.
+            wxKeyEvent tapDown(wxEVT_KEY_DOWN);
+            tapDown.m_keyCode = 'Q';
+            tapDown.SetTimestamp(123456);
+            wxKeyEvent tapUp(wxEVT_KEY_UP);
+            tapUp.m_keyCode = 'Q';
+            tapUp.SetTimestamp(123460);
+            canvas->GetEventHandler()->ProcessEvent(tapDown);
+            canvas->GetEventHandler()->ProcessEvent(tapUp);
+            canvas->GetEventHandler()->ProcessEvent(tapDown); // bản lặp đến sau key-up
+            assert(input.KeyboardInput->CheckIsJustPressed(KeyboardKey::Q));
+            assert(!input.KeyboardInput->CheckIsPressed(KeyboardKey::Q));
+            // Lần bấm mới (timestamp khác) vẫn được nhận.
+            wxKeyEvent nextDown(wxEVT_KEY_DOWN);
+            nextDown.m_keyCode = 'Q';
+            nextDown.SetTimestamp(123999);
+            canvas->GetEventHandler()->ProcessEvent(nextDown);
+            assert(input.KeyboardInput->CheckIsPressed(KeyboardKey::Q));
             if (requestClose) RequestClose();
             else frame->Close(); // Native close event must request shutdown without recursion.
         }

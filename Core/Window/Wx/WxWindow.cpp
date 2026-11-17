@@ -223,6 +223,21 @@ namespace CoreEngine
 
             int kc = evt.GetKeyCode();
 
+            // wxGTK can deliver the same key press twice (same key code and timestamp), sometimes after the
+            // matching key-up or after presses of other keys. Counting it again doubles a tap or leaves the key
+            // stuck as held, so remember the last press timestamp per key.
+            const long timestamp = evt.GetTimestamp();
+            if (timestamp != 0)
+            {
+                long& lastTimestamp = mLastKeyDownTimestamps[kc];
+                if (lastTimestamp == timestamp)
+                {
+                    evt.Skip();
+                    return;
+                }
+                lastTimestamp = timestamp;
+            }
+
             auto kbInput = mOwner->GetInput().KeyboardInput;
             if (kbInput)
             {
@@ -331,6 +346,7 @@ namespace CoreEngine
         }
 
         WxWindow* mOwner = nullptr;
+        std::unordered_map<int, long> mLastKeyDownTimestamps; // wx key code -> timestamp of its last key-down
     };
 
     // =========================================================================

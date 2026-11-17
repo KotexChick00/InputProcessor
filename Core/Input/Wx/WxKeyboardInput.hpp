@@ -31,6 +31,9 @@ namespace CoreEngine
         std::unordered_map<KeyboardKey, bool> mHeld;
         std::unordered_map<KeyboardKey, bool> mWasPressed;
         std::unordered_map<KeyboardKey, bool> mJustReleased;
+        // Set on a released -> pressed transition, cleared by Update(). Keeps a tap whose key-down and
+        // key-up both arrive within one frame (otherwise "held now && not held last frame" misses it).
+        std::unordered_map<KeyboardKey, bool> mPressedThisFrame;
 
         static KeyboardKey ToKeyboardKey(int wxKeyCode);
     };

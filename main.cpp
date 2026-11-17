@@ -69,7 +69,8 @@ namespace {
 
 		void OnLoopClient() override {
 			if (auto* keyboard = GetInput().KeyboardInput) {
-				if (keyboard->CheckIsPressed(KeyboardKey::Escape)) RequestClose();
+				// JustPressed: một cú bấm Esc nhanh (nhấn + nhả trong cùng frame) cũng đóng được.
+				if (keyboard->CheckIsJustPressed(KeyboardKey::Escape) || keyboard->CheckIsPressed(KeyboardKey::Escape)) RequestClose();
 				if (keyboard->CheckIsJustPressed(KeyboardKey::R)) mViewer->FitCamera();
 
 				auto& settings = mViewer->GetRenderSettings();
