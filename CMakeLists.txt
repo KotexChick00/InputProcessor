@@ -50,6 +50,7 @@ target_include_directories(engine PUBLIC Core Domain Library/Glad ${GLM_INCLUDE_
 target_link_libraries(engine PUBLIC ${WX_LIBRARIES} OpenGL::GL assimp::assimp spdlog::spdlog ${CMAKE_DL_LIBS})
 add_executable(DomainDemo main.cpp)
 target_link_libraries(DomainDemo PRIVATE engine)
+target_compile_definitions(DomainDemo PRIVATE INPUTPROCESSOR_SAMPLE_MODEL="${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/textured.gltf")
 
 enable_testing()
 foreach(test_name IN ITEMS test_core test_engine_logic test_wx_integration test_scene test_scene_gl)
@@ -67,4 +68,13 @@ add_test(NAME engine_logic COMMAND test_engine_logic)
 add_test(NAME wx_integration COMMAND test_wx_integration)
 add_test(NAME scene COMMAND test_scene)
 add_test(NAME scene_gl COMMAND test_scene_gl)
-set_tests_properties(core engine_logic wx_integration scene scene_gl PROPERTIES TIMEOUT 30)
+# Smoke test: viewer mở model, vẽ 3 frame rồi tự đóng.
+add_test(NAME viewer_gltf COMMAND DomainDemo "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/textured.gltf" --frames 3)
+add_test(NAME viewer_glb COMMAND DomainDemo "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/embedded.glb" --frames 3)
+add_test(NAME viewer_lights COMMAND DomainDemo "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/lights.gltf" --frames 3)
+add_test(NAME viewer_sample COMMAND DomainDemo --frames 3)
+# File không đọc được phải báo lỗi (exit khác 0) chứ không crash.
+add_test(NAME viewer_missing_file COMMAND DomainDemo "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/missing.glb" --frames 3)
+set_tests_properties(viewer_missing_file PROPERTIES WILL_FAIL TRUE)
+set_tests_properties(core engine_logic wx_integration scene scene_gl
+    viewer_gltf viewer_glb viewer_lights viewer_sample viewer_missing_file PROPERTIES TIMEOUT 30)
