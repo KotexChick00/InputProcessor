@@ -1,23 +1,30 @@
-// CoreEngine demo: a spinning, interactive triangle that exercises every Core component.
+// CoreEngine demo: a swarm of triangles driven by the Entity Component System (Core/ECS)
+// and the memory allocators (Core/Memory).
 //
-//   Application  - subclass + OnInit/OnLoop/OnShutdown lifecycle, RequestClose()
-//   Window       - default wxWidgets window created by WindowPlatformFactory
-//   Renderer     - renderer configuration, shader + vertex buffer from the resource manager, draw calls
-//   Event        - listeners for resize / keyboard / mouse button / scroll events
-//   Input        - per-frame polling of keyboard and mouse state (pressed, just pressed, deltas)
-//   Time         - delta time for frame-rate independent motion, FPS counter
-//   Logger       - IP_CLIENT_* log macros
-//   Memory       - LinearAllocator used as a per-frame scratch allocator
+//   ECS::Actor        - every triangle is an Actor created with ECS::CreateActor(); the player is one too
+//   Components        - Transform, Velocity, Spin, Tint, Lifetime, PlayerControl (plain data, IComponent)
+//   ComponentManager  - components live in MemoryChunkManager blocks, systems walk them with
+//                       GetAllComponents<T>() and look up siblings with GetComponentByEntityID<T>()
+//   SystemManager     - systems run in a topological order (Kahn) built from AddDependency:
+//                       PlayerInput -> Movement -> Lifetime -> Render, Spin -> Render
+//   EntityManager     - expired actors are destroyed and their ids are recycled by the next spawn
+//   MemoryManager     - per-frame allocator: list of expired actors, reset every frame by Update()
+//                       stack allocator: spawn palette allocated at init, freed at shutdown
 //
 // Frame pacing is done by Application (ApplicationConfiguration::MaxFPS, 60 by default).
 
 #include <Application/Application.hpp>
-#include <Memory/LinearAllocator.hpp>
+#include <ECS/ECS.hpp>
+#include <Memory/MemoryManager.hpp>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <iterator>
+#include <memory>
+#include <random>
 #include <stdexcept>
+
+namespace ECS = CoreEngine::ECS;
 
 namespace
 {
@@ -47,24 +54,305 @@ void main()
     oColor = vec4(vColor, 1.0) * uTint;
 })";
 
-    const CoreEngine::ColorRGBA ClearColors[] = {
-        {0.08f, 0.09f, 0.12f, 1.0f},
-        {0.20f, 0.10f, 0.15f, 1.0f},
-        {0.05f, 0.18f, 0.12f, 1.0f},
-        {0.90f, 0.90f, 0.92f, 1.0f},
-    };
+    constexpr size_t SpawnBurstCount = 25;
+    constexpr size_t MaxActorCount = 2000;
+    constexpr size_t PaletteSize = 6;
 
-    struct FrameUniforms
+    // -------------------------------------------------------------------------
+    // Components: plain data, no behaviour
+    // -------------------------------------------------------------------------
+
+    struct Transform : public ECS::IComponent
     {
-        float Tint[4];
+        Transform(float x, float y, float scale)
+            : X(x)
+            , Y(y)
+            , Scale(scale)
+        {
+        }
+        float X = 0.0f;
+        float Y = 0.0f;
+        float Angle = 0.0f;
+        float Scale = 1.0f;
     };
 
-    class CoreDemo : public CoreEngine::Application
+    struct Velocity : public ECS::IComponent
+    {
+        Velocity(float x = 0.0f, float y = 0.0f)
+            : X(x)
+            , Y(y)
+        {
+        }
+        float X;
+        float Y;
+    };
+
+    struct Spin : public ECS::IComponent
+    {
+        explicit Spin(float speed)
+            : Speed(speed)
+        {
+        }
+        float Speed; // radians per second
+    };
+
+    struct Tint : public ECS::IComponent
+    {
+        Tint(float r, float g, float b)
+            : R(r)
+            , G(g)
+            , B(b)
+        {
+        }
+        float R;
+        float G;
+        float B;
+    };
+
+    struct Lifetime : public ECS::IComponent
+    {
+        explicit Lifetime(float duration)
+            : Remaining(duration)
+            , Duration(duration)
+        {
+        }
+        float Remaining;
+        float Duration;
+    };
+
+    // Tag component: marks the actor moved by the keyboard.
+    struct PlayerControl : public ECS::IComponent
+    {
+        float Speed = 1.2f; // NDC units per second
+    };
+
+    struct Color
+    {
+        float R;
+        float G;
+        float B;
+    };
+
+    // -------------------------------------------------------------------------
+    // Systems: behaviour, run by ECS::Update in dependency order
+    // -------------------------------------------------------------------------
+
+    class PlayerInputSystem : public ECS::ISystem
     {
     public:
-        explicit CoreDemo(CoreEngine::ApplicationConfiguration& config)
+        explicit PlayerInputSystem(const CoreEngine::InputState& input)
+            : ISystem(ECS::ESystemPriority::High)
+            , mInput(input)
+        {
+        }
+
+        void OnUpdate(float) override
+        {
+            CoreEngine::KeyboardInput* keyboard = mInput.KeyboardInput;
+            if (!keyboard)
+            {
+                return;
+            }
+
+            float moveX = 0.0f, moveY = 0.0f;
+            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Left, CoreEngine::KeyboardKey::A)) moveX -= 1.0f;
+            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Right, CoreEngine::KeyboardKey::D)) moveX += 1.0f;
+            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Up, CoreEngine::KeyboardKey::W)) moveY += 1.0f;
+            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Down, CoreEngine::KeyboardKey::S)) moveY -= 1.0f;
+
+            ECS::ComponentManager& components = ECS::ComponentManager::GetInstance();
+            for (PlayerControl& player : components.GetAllComponents<PlayerControl>())
+            {
+                if (Velocity* velocity = components.GetComponentByEntityID<Velocity>(player.GetOwner()))
+                {
+                    velocity->X = moveX * player.Speed;
+                    velocity->Y = moveY * player.Speed;
+                }
+            }
+        }
+
+    private:
+        static bool IsAnyPressed(CoreEngine::KeyboardInput* keyboard, CoreEngine::KeyboardKey first, CoreEngine::KeyboardKey second)
+        {
+            return keyboard->CheckIsPressed(first) || keyboard->CheckIsPressed(second);
+        }
+
+    private:
+        const CoreEngine::InputState& mInput; // Owned by the application
+    };
+
+    class MovementSystem : public ECS::ISystem
+    {
+    public:
+        void OnUpdate(float deltaTime) override
+        {
+            ECS::ComponentManager& components = ECS::ComponentManager::GetInstance();
+            for (Velocity& velocity : components.GetAllComponents<Velocity>())
+            {
+                Transform* transform = components.GetComponentByEntityID<Transform>(velocity.GetOwner());
+                if (!transform)
+                {
+                    continue;
+                }
+
+                transform->X += velocity.X * deltaTime;
+                transform->Y += velocity.Y * deltaTime;
+
+                // The player stops at the border, the swarm bounces off it.
+                if (components.HasComponent<PlayerControl>(velocity.GetOwner()))
+                {
+                    transform->X = std::clamp(transform->X, -1.0f, 1.0f);
+                    transform->Y = std::clamp(transform->Y, -1.0f, 1.0f);
+                    continue;
+                }
+                Bounce(transform->X, velocity.X);
+                Bounce(transform->Y, velocity.Y);
+            }
+        }
+
+    private:
+        static void Bounce(float& position, float& speed)
+        {
+            if (position < -1.0f || position > 1.0f)
+            {
+                position = std::clamp(position, -1.0f, 1.0f);
+                speed = -speed;
+            }
+        }
+    };
+
+    class SpinSystem : public ECS::ISystem
+    {
+    public:
+        void OnUpdate(float deltaTime) override
+        {
+            ECS::ComponentManager& components = ECS::ComponentManager::GetInstance();
+            for (Spin& spin : components.GetAllComponents<Spin>())
+            {
+                if (Transform* transform = components.GetComponentByEntityID<Transform>(spin.GetOwner()))
+                {
+                    transform->Angle += spin.Speed * deltaTime;
+                }
+            }
+        }
+    };
+
+    // Destroys actors whose lifetime ran out. Destroying while iterating would invalidate the view,
+    // so the expired ids are collected in per-frame memory first.
+    class LifetimeSystem : public ECS::ISystem
+    {
+    public:
+        explicit LifetimeSystem(CoreEngine::MemoryManager& memory)
+            : mMemory(memory)
+        {
+        }
+
+        void OnUpdate(float deltaTime) override
+        {
+            ECS::ComponentManager& components = ECS::ComponentManager::GetInstance();
+            ECS::ComponentView<Lifetime> lifetimes = components.GetAllComponents<Lifetime>();
+            if (lifetimes.Empty())
+            {
+                return;
+            }
+
+            void* memory = mMemory.AllocateOnPerframe(sizeof(ECS::EntityID) * lifetimes.Size(), alignof(ECS::EntityID));
+            if (!memory)
+            {
+                return;
+            }
+
+            ECS::EntityID* expired = static_cast<ECS::EntityID*>(memory);
+            size_t expiredCount = 0;
+            for (Lifetime& lifetime : lifetimes)
+            {
+                lifetime.Remaining -= deltaTime;
+                if (lifetime.Remaining <= 0.0f)
+                {
+                    expired[expiredCount++] = lifetime.GetOwner();
+                }
+            }
+
+            for (size_t index = 0; index < expiredCount; ++index)
+            {
+                ECS::Actor actor = ECS::GetActor(expired[index]);
+                ECS::DestroyActor(actor);
+            }
+            mDestroyedCount += expiredCount;
+        }
+
+        size_t GetDestroyedCount() const { return mDestroyedCount; }
+
+    private:
+        CoreEngine::MemoryManager& mMemory; // Owned by the application
+        size_t mDestroyedCount = 0;
+    };
+
+    class RenderSystem : public ECS::ISystem
+    {
+    public:
+        RenderSystem(CoreEngine::IRenderer* renderer, CoreEngine::IShader* shader, CoreEngine::IVertexBuffer* triangle)
+            : ISystem(ECS::ESystemPriority::Low)
+            , mRenderer(renderer)
+            , mShader(shader)
+            , mTriangle(triangle)
+        {
+        }
+
+        void OnUpdate(float) override
+        {
+            CoreEngine::ViewPortOptions viewport = mRenderer->GetConfig().ViewPortOptions;
+            float aspect = static_cast<float>(viewport.Width) / std::max(1u, viewport.Height);
+
+            mRenderer->GetRendererCommand()->ClearBuffers(CoreEngine::ClearBufferMasks::Color);
+            mShader->Use();
+            mShader->SetUniform1f("uAspect", aspect);
+            mTriangle->Bind();
+
+            ECS::ComponentManager& components = ECS::ComponentManager::GetInstance();
+            for (const Transform& transform : components.GetAllComponents<Transform>())
+            {
+                float r = 1.0f, g = 1.0f, b = 1.0f;
+                if (const Tint* tint = components.GetComponentByEntityID<Tint>(transform.GetOwner()))
+                {
+                    r = tint->R;
+                    g = tint->G;
+                    b = tint->B;
+                }
+                // Fade out during the last second of life.
+                float fade = 1.0f;
+                if (const Lifetime* lifetime = components.GetComponentByEntityID<Lifetime>(transform.GetOwner()))
+                {
+                    fade = std::clamp(lifetime->Remaining, 0.0f, 1.0f);
+                }
+
+                mShader->SetUniform2f("uOffset", transform.X, transform.Y);
+                mShader->SetUniform1f("uAngle", transform.Angle);
+                mShader->SetUniform1f("uScale", transform.Scale);
+                mShader->SetUniform4f("uTint", r * fade, g * fade, b * fade, 1.0f);
+                mRenderer->GetRendererCommand()->Draw(CoreEngine::RenderMode::Triangles, 3);
+            }
+
+            mTriangle->UnBind();
+            mShader->Unuse();
+        }
+
+    private:
+        CoreEngine::IRenderer* mRenderer;       // Borrowed
+        CoreEngine::IShader* mShader;           // Borrowed, owned by the resource manager
+        CoreEngine::IVertexBuffer* mTriangle;   // Borrowed, owned by the resource manager
+    };
+
+    // -------------------------------------------------------------------------
+    // Application
+    // -------------------------------------------------------------------------
+
+    class EcsDemo : public CoreEngine::Application
+    {
+    public:
+        explicit EcsDemo(CoreEngine::ApplicationConfiguration& config)
             : Application(config)
-            , mFrameAllocator(4 * 1024)
+            , mMemory(CreateMemoryConfiguration())
         {
         }
 
@@ -72,45 +360,58 @@ void main()
         {
             PrintControls();
             CreateGpuResources();
-            ApplyClearColor();
+            CreatePalette();
+            CreateSystems();
             SubscribeEvents();
-            IP_CLIENT_DEBUG("Core demo initialized");
+            Reset();
+            IP_CLIENT_DEBUG("ECS demo initialized");
         }
 
         void OnLoopClient() override
         {
             const float deltaTime = GetTime()->GetDeltaTime();
 
-            mFrameAllocator.Clear();
-            HandleInput(deltaTime);
-            if (!mPaused) mAngle += RotationSpeed * deltaTime;
-
-            UpdateFpsCounter(deltaTime);
-            Render();
+            mMemory.Update(); // Frees last frame's per-frame allocations.
+            HandleInput();
+            ECS::Update(deltaTime);
+            UpdateStats(deltaTime);
         }
 
         void OnShutdownClient() override
         {
-            // Both resources are owned by the renderer's resource manager.
+            // Systems hold renderer resources: destroy the ECS while the renderer and logger are alive.
+            ECS::Shutdown();
+            mPlayer = ECS::Actor();
+
+            if (mPalette)
+            {
+                mMemory.FreeOnStack(mPalette);
+                mPalette = nullptr;
+            }
+            mMemory.DetectMemoryLeak();
+
             mShader = nullptr;
             mTriangle = nullptr;
-            IP_CLIENT_DEBUG("Core demo shut down after {:.1f}s", mElapsed);
+            IP_CLIENT_DEBUG("ECS demo shut down after {:.1f}s", mElapsed);
         }
 
     private:
-        static constexpr float RotationSpeed = 1.5f; // radians per second
-        static constexpr float MoveSpeed = 1.0f;     // NDC units per second
-        static constexpr float MinScale = 0.1f;
-        static constexpr float MaxScale = 2.0f;
+        static CoreEngine::MemoryConfiguration CreateMemoryConfiguration()
+        {
+            CoreEngine::MemoryConfiguration config;
+            config.LinearAllocateSize = 64 * 1024;
+            config.StackAllocateSize = 4 * 1024;
+            return config;
+        }
 
         static void PrintControls()
         {
-            std::cout << "CoreEngine demo controls\n"
-                      << "  Arrows / WASD     move the triangle\n"
-                      << "  Left mouse drag   move the triangle\n"
-                      << "  Mouse wheel       scale\n"
-                      << "  Space             pause / resume rotation\n"
-                      << "  C                 cycle background color\n"
+            std::cout << "CoreEngine ECS demo controls\n"
+                      << "  Arrows / WASD     move the player (white triangle)\n"
+                      << "  Space             spawn a burst of " << SpawnBurstCount << " actors\n"
+                      << "  Mouse wheel       scale the player\n"
+                      << "  P                 pause / resume the simulation (disables systems)\n"
+                      << "  Backspace         destroy every actor except the player\n"
                       << "  R                 reset\n"
                       << "  Escape            quit\n";
         }
@@ -127,163 +428,207 @@ void main()
                 -0.52f, -0.3f,
                 0.52f, -0.3f};
             float colors[] = {
-                1.0f, 0.3f, 0.3f,
-                0.3f, 1.0f, 0.3f,
-                0.3f, 0.4f, 1.0f};
+                1.0f, 1.0f, 1.0f,
+                0.8f, 0.8f, 0.8f,
+                0.6f, 0.6f, 0.6f};
 
             mTriangle = resources->CreateVertexBuffer();
             if (!mTriangle) throw std::runtime_error("Failed to create demo vertex buffer");
             mTriangle->SetData(0, positions, sizeof(positions), 2, 2 * sizeof(float));
             mTriangle->SetData(1, colors, sizeof(colors), 3, 3 * sizeof(float));
+
+            CoreEngine::RendererConfiguration config = GetRenderer()->GetConfig();
+            config.ClearBufferColor = {0.08f, 0.09f, 0.12f, 1.0f};
+            GetRenderer()->Config(config);
+        }
+
+        // The palette lives on the MemoryManager stack for the whole run and is freed at shutdown.
+        void CreatePalette()
+        {
+            void* memory = mMemory.AllocateOnStack(sizeof(Color) * PaletteSize, alignof(Color));
+            if (!memory) throw std::runtime_error("Failed to allocate the palette");
+
+            static constexpr Color Colors[PaletteSize] = {
+                {1.00f, 0.35f, 0.35f},
+                {0.35f, 1.00f, 0.45f},
+                {0.35f, 0.55f, 1.00f},
+                {1.00f, 0.85f, 0.30f},
+                {0.85f, 0.40f, 1.00f},
+                {0.30f, 0.95f, 0.95f},
+            };
+            mPalette = static_cast<Color*>(memory);
+            std::uninitialized_copy(std::begin(Colors), std::end(Colors), mPalette);
+        }
+
+        void CreateSystems()
+        {
+            ECS::SystemManager& systems = ECS::SystemManager::GetInstance();
+            systems.AddSystem<PlayerInputSystem>(GetInput());
+            systems.AddSystem<MovementSystem>();
+            systems.AddSystem<SpinSystem>();
+            mLifetimeSystem = systems.AddSystem<LifetimeSystem>(mMemory);
+            systems.AddSystem<RenderSystem>(GetRenderer(), mShader, mTriangle);
+
+            // Execution order: PlayerInput -> Movement -> Lifetime -> Render, Spin -> Render.
+            systems.AddDependency<MovementSystem, PlayerInputSystem>();
+            systems.AddDependency<LifetimeSystem, MovementSystem>();
+            systems.AddDependency<RenderSystem, MovementSystem>();
+            systems.AddDependency<RenderSystem, SpinSystem>();
+            systems.AddDependency<RenderSystem, LifetimeSystem>();
         }
 
         void SubscribeEvents()
         {
             CoreEngine::EventDispatcher* dispatcher = GetEventDispatcher();
 
-            dispatcher->AddEventListener<CoreEngine::WindowResizeEventContext>([](const CoreEngine::WindowResizeEventContext& e) {
-                IP_CLIENT_DEBUG("Window resized to {}x{}", e.GetWidth(), e.GetHeight());
-                return false;
-            });
-
-            dispatcher->AddEventListener<CoreEngine::KeyBoardKeyEventContext>([this](const CoreEngine::KeyBoardKeyEventContext& e) {
+            dispatcher->AddEventListener<CoreEngine::KeyBoardKeyEventContext>([this](const CoreEngine::KeyBoardKeyEventContext& e)
+            {
                 if (e.GetState() != CoreEngine::KeyboardKeyState::Pressed) return false;
 
                 switch (e.GetKey())
                 {
                 case CoreEngine::KeyboardKey::Space:
-                    mPaused = !mPaused;
-                    IP_CLIENT_DEBUG("Rotation {}", mPaused ? "paused" : "resumed");
+                    SpawnBurst();
                     return true;
-                case CoreEngine::KeyboardKey::C:
-                    mClearColorIndex = (mClearColorIndex + 1) % std::size(ClearColors);
-                    ApplyClearColor();
+                case CoreEngine::KeyboardKey::P:
+                    TogglePause();
+                    return true;
+                case CoreEngine::KeyboardKey::Backspace:
+                    DestroySwarm();
                     return true;
                 default:
                     return false;
                 }
             });
 
-            dispatcher->AddEventListener<CoreEngine::MouseButtonEventContext>([](const CoreEngine::MouseButtonEventContext& e) {
-                const char* state = e.GetButtonState() == CoreEngine::MouseButtonState::Released ? "released" : "pressed";
-                IP_CLIENT_TRACE("Mouse button {} {}", static_cast<int>(e.GetButton()), state);
-                return false;
-            });
-
-            dispatcher->AddEventListener<CoreEngine::MouseScrollEventContext>([this](const CoreEngine::MouseScrollEventContext& e) {
-                mScale = std::clamp(mScale * std::pow(1.1f, static_cast<float>(e.GetDeltaY())), MinScale, MaxScale);
+            dispatcher->AddEventListener<CoreEngine::MouseScrollEventContext>([this](const CoreEngine::MouseScrollEventContext& e)
+            {
+                if (Transform* transform = mPlayer.GetComponent<Transform>())
+                {
+                    transform->Scale = std::clamp(transform->Scale * std::pow(1.1f, static_cast<float>(e.GetDeltaY())), 0.05f, 0.8f);
+                }
                 return false;
             });
         }
 
-        void HandleInput(float deltaTime)
+        void HandleInput()
         {
-            const CoreEngine::InputState& input = GetInput();
-            CoreEngine::KeyboardInput* keyboard = input.KeyboardInput;
-            CoreEngine::MouseInput* mouse = input.MouseInput;
-            if (!keyboard || !mouse) return;
+            CoreEngine::KeyboardInput* keyboard = GetInput().KeyboardInput;
+            if (!keyboard) return;
 
             if (keyboard->CheckIsPressed(CoreEngine::KeyboardKey::Escape)) RequestClose();
             if (keyboard->CheckIsJustPressed(CoreEngine::KeyboardKey::R)) Reset();
-
-            float moveX = 0.0f, moveY = 0.0f;
-            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Left, CoreEngine::KeyboardKey::A)) moveX -= 1.0f;
-            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Right, CoreEngine::KeyboardKey::D)) moveX += 1.0f;
-            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Up, CoreEngine::KeyboardKey::W)) moveY += 1.0f;
-            if (IsAnyPressed(keyboard, CoreEngine::KeyboardKey::Down, CoreEngine::KeyboardKey::S)) moveY -= 1.0f;
-            mOffsetX += moveX * MoveSpeed * deltaTime;
-            mOffsetY += moveY * MoveSpeed * deltaTime;
-
-            // Mouse deltas are in pixels; convert to normalized device coordinates (Y points up).
-            if (mouse->CheckIsPressed(CoreEngine::MouseButton::ButtonLeft))
-            {
-                CoreEngine::ViewPortOptions viewport = GetRenderer()->GetConfig().ViewPortOptions;
-                mOffsetX += mouse->GetDeltaX() * 2.0f / std::max(1u, viewport.Width);
-                mOffsetY -= mouse->GetDeltaY() * 2.0f / std::max(1u, viewport.Height);
-            }
-
-            mOffsetX = std::clamp(mOffsetX, -1.0f, 1.0f);
-            mOffsetY = std::clamp(mOffsetY, -1.0f, 1.0f);
-        }
-
-        void Render()
-        {
-            CoreEngine::IRenderer* renderer = GetRenderer();
-            CoreEngine::ViewPortOptions viewport = renderer->GetConfig().ViewPortOptions;
-            float aspect = static_cast<float>(viewport.Width) / std::max(1u, viewport.Height);
-
-            // Per-frame data lives in the scratch allocator; it is reclaimed by Clear() next frame.
-            auto* uniforms = static_cast<FrameUniforms*>(mFrameAllocator.Allocate(sizeof(FrameUniforms), alignof(FrameUniforms)));
-            float pulse = mPaused ? 1.0f : 0.85f + 0.15f * std::sin(mElapsed * 3.0f);
-            *uniforms = {{pulse, pulse, pulse, 1.0f}};
-
-            renderer->GetRendererCommand()->ClearBuffers(CoreEngine::ClearBufferMasks::Color);
-
-            mShader->Use();
-            mShader->SetUniform2f("uOffset", mOffsetX, mOffsetY);
-            mShader->SetUniform1f("uAngle", mAngle);
-            mShader->SetUniform1f("uScale", mScale);
-            mShader->SetUniform1f("uAspect", aspect);
-            mShader->SetUniform4f("uTint", uniforms->Tint[0], uniforms->Tint[1], uniforms->Tint[2], uniforms->Tint[3]);
-
-            mTriangle->Bind();
-            renderer->GetRendererCommand()->Draw(CoreEngine::RenderMode::Triangles, 3);
-            mTriangle->UnBind();
-            mShader->Unuse();
-        }
-
-        void UpdateFpsCounter(float deltaTime)
-        {
-            mElapsed += deltaTime;
-            mFpsTime += deltaTime;
-            ++mFpsFrames;
-            if (mFpsTime >= 2.0f)
-            {
-                IP_CLIENT_DEBUG("{:.1f} FPS (scale {:.2f}, offset {:.2f}, {:.2f})", mFpsFrames / mFpsTime, mScale, mOffsetX, mOffsetY);
-                mFpsTime = 0.0f;
-                mFpsFrames = 0;
-            }
-        }
-
-        void ApplyClearColor()
-        {
-            CoreEngine::IRenderer* renderer = GetRenderer();
-            CoreEngine::RendererConfiguration config = renderer->GetConfig();
-            config.ClearBufferColor = ClearColors[mClearColorIndex];
-            renderer->Config(config);
         }
 
         void Reset()
         {
-            mOffsetX = 0.0f;
-            mOffsetY = 0.0f;
-            mAngle = 0.0f;
-            mScale = 1.0f;
-            mPaused = false;
-            IP_CLIENT_DEBUG("Demo state reset");
+            DestroySwarm();
+            if (mPlayer.IsValid()) ECS::DestroyActor(mPlayer);
+
+            mPlayer = ECS::CreateActor();
+            mPlayer.AddComponent<Transform>(0.0f, 0.0f, 0.2f);
+            mPlayer.AddComponent<Velocity>();
+            mPlayer.AddComponent<Tint>(1.0f, 1.0f, 1.0f);
+            mPlayer.AddComponent<PlayerControl>();
+
+            if (mPaused) TogglePause();
+            SpawnBurst();
+            IP_CLIENT_DEBUG("Demo state reset, player is entity {}", mPlayer.GetID());
         }
 
-        static bool IsAnyPressed(CoreEngine::KeyboardInput* keyboard, CoreEngine::KeyboardKey first, CoreEngine::KeyboardKey second)
+        void SpawnBurst()
         {
-            return keyboard->CheckIsPressed(first) || keyboard->CheckIsPressed(second);
+            const Transform* origin = mPlayer.GetComponent<Transform>();
+            std::uniform_real_distribution<float> angle(0.0f, 6.2831853f);
+            std::uniform_real_distribution<float> speed(0.2f, 0.9f);
+            std::uniform_real_distribution<float> spin(-4.0f, 4.0f);
+            std::uniform_real_distribution<float> scale(0.03f, 0.09f);
+            std::uniform_real_distribution<float> lifetime(3.0f, 8.0f);
+            std::uniform_int_distribution<size_t> color(0, PaletteSize - 1);
+
+            size_t spawned = 0;
+            for (; spawned < SpawnBurstCount && ECS::EntityManager::GetInstance().GetAliveCount() < MaxActorCount; ++spawned)
+            {
+                float direction = angle(mRandom);
+                float startSpeed = speed(mRandom);
+                const Color& tint = mPalette[color(mRandom)];
+
+                ECS::Actor actor = ECS::CreateActor();
+                actor.AddComponent<Transform>(origin ? origin->X : 0.0f, origin ? origin->Y : 0.0f, scale(mRandom));
+                actor.AddComponent<Velocity>(std::cos(direction) * startSpeed, std::sin(direction) * startSpeed);
+                actor.AddComponent<Spin>(spin(mRandom));
+                actor.AddComponent<Tint>(tint.R, tint.G, tint.B);
+                actor.AddComponent<Lifetime>(lifetime(mRandom));
+            }
+            IP_CLIENT_TRACE("Spawned {} actors", spawned);
+        }
+
+        // Destroys every actor that has a Lifetime (everything but the player).
+        void DestroySwarm()
+        {
+            ECS::ComponentManager& components = ECS::ComponentManager::GetInstance();
+            ECS::ComponentView<Lifetime> lifetimes = components.GetAllComponents<Lifetime>();
+            if (lifetimes.Empty()) return;
+
+            // Same pattern as LifetimeSystem: collect first, destroy after the iteration.
+            void* memory = mMemory.AllocateOnPerframe(sizeof(ECS::EntityID) * lifetimes.Size(), alignof(ECS::EntityID));
+            if (!memory) return;
+
+            ECS::EntityID* swarm = static_cast<ECS::EntityID*>(memory);
+            size_t count = 0;
+            for (const Lifetime& lifetime : lifetimes) swarm[count++] = lifetime.GetOwner();
+            for (size_t index = 0; index < count; ++index)
+            {
+                ECS::Actor actor = ECS::GetActor(swarm[index]);
+                ECS::DestroyActor(actor);
+            }
+            IP_CLIENT_DEBUG("Destroyed {} actors", count);
+        }
+
+        void TogglePause()
+        {
+            mPaused = !mPaused;
+            ECS::SystemManager& systems = ECS::SystemManager::GetInstance();
+            systems.GetSystem<MovementSystem>()->SetEnabled(!mPaused);
+            systems.GetSystem<SpinSystem>()->SetEnabled(!mPaused);
+            systems.GetSystem<LifetimeSystem>()->SetEnabled(!mPaused);
+            IP_CLIENT_DEBUG("Simulation {}", mPaused ? "paused" : "resumed");
+        }
+
+        void UpdateStats(float deltaTime)
+        {
+            mElapsed += deltaTime;
+            mStatsTime += deltaTime;
+            ++mStatsFrames;
+            if (mStatsTime >= 2.0f)
+            {
+                const ECS::ComponentManager& components = ECS::ComponentManager::GetInstance();
+                IP_CLIENT_DEBUG("{:.1f} FPS | {} actors alive, {} transforms, {} lifetimes, {} destroyed so far",
+                    mStatsFrames / mStatsTime,
+                    ECS::EntityManager::GetInstance().GetAliveCount(),
+                    components.GetComponentCount<Transform>(),
+                    components.GetComponentCount<Lifetime>(),
+                    mLifetimeSystem ? mLifetimeSystem->GetDestroyedCount() : 0);
+                mStatsTime = 0.0f;
+                mStatsFrames = 0;
+            }
         }
 
     private:
-        CoreEngine::LinearAllocator mFrameAllocator;
+        CoreEngine::MemoryManager mMemory;
+        Color* mPalette = nullptr; // Lives in mMemory's stack allocator
 
         CoreEngine::IShader* mShader = nullptr;
         CoreEngine::IVertexBuffer* mTriangle = nullptr;
 
-        float mOffsetX = 0.0f;
-        float mOffsetY = 0.0f;
-        float mAngle = 0.0f;
-        float mScale = 1.0f;
+        ECS::Actor mPlayer;
+        LifetimeSystem* mLifetimeSystem = nullptr; // Owned by the SystemManager
+        std::mt19937 mRandom{std::random_device{}()};
         bool mPaused = false;
-        size_t mClearColorIndex = 0;
 
         float mElapsed = 0.0f;
-        float mFpsTime = 0.0f;
-        int mFpsFrames = 0;
+        float mStatsTime = 0.0f;
+        int mStatsFrames = 0;
     };
 }
 
@@ -291,8 +636,8 @@ int main()
 {
     try
     {
-        CoreEngine::ApplicationConfiguration config{960, 640, "CoreEngine Demo"};
-        CoreDemo demo(config);
+        CoreEngine::ApplicationConfiguration config{960, 640, "CoreEngine ECS Demo"};
+        EcsDemo demo(config);
         demo.Run();
     }
     catch (const std::exception& error)

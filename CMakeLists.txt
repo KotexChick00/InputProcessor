@@ -41,7 +41,7 @@ find_path(STB_INCLUDE_DIR stb_image.h PATH_SUFFIXES stb REQUIRED)
 
 file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     Core/Application/*.cpp Core/Input/Wx/*.cpp Core/Window/Wx/*.cpp
-    Core/Renderer/Opengl/*.cpp Core/Logger/*.cpp Core/Logger/SpdLog/*.cpp Core/Memory/*.cpp
+    Core/Renderer/Opengl/*.cpp Core/Logger/*.cpp Core/Logger/SpdLog/*.cpp Core/Memory/*.cpp Core/ECS/*.cpp
     Domain/Camera/OrbitCamera/*.cpp Domain/Camera/OrbitCamera/States/*.cpp
     Domain/Model/Importers/AssimpModelImporter/*.cpp)
 add_library(engine STATIC ${ENGINE_SOURCES} Core/Window/WindowPlatformFactory.cpp

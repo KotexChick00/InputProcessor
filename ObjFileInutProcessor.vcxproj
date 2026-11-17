@@ -181,6 +181,11 @@
     <ClCompile Include="Core\Memory\PoolAllocator.cpp" />
     <ClCompile Include="Core\Memory\MemoryManager.cpp" />
     <ClCompile Include="Core\Memory\MemoryChunkManager.cpp" />
+    <ClCompile Include="Core\ECS\ComponentManager.cpp" />
+    <ClCompile Include="Core\ECS\EntityManager.cpp" />
+    <ClCompile Include="Core\ECS\SystemManager.cpp" />
+    <ClCompile Include="Core\ECS\Actor.cpp" />
+    <ClCompile Include="Core\ECS\ECS.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBuffer.cpp" />
@@ -239,6 +244,15 @@
     <ClInclude Include="Core\Memory\PoolAllocator.hpp" />
     <ClInclude Include="Core\Memory\MemoryManager.hpp" />
     <ClInclude Include="Core\Memory\MemoryChunkManager.hpp" />
+    <ClInclude Include="Core\ECS\ECSType.hpp" />
+    <ClInclude Include="Core\ECS\IComponent.hpp" />
+    <ClInclude Include="Core\ECS\ComponentContainer.hpp" />
+    <ClInclude Include="Core\ECS\ComponentManager.hpp" />
+    <ClInclude Include="Core\ECS\EntityManager.hpp" />
+    <ClInclude Include="Core\ECS\ISystem.hpp" />
+    <ClInclude Include="Core\ECS\SystemManager.hpp" />
+    <ClInclude Include="Core\ECS\Actor.hpp" />
+    <ClInclude Include="Core\ECS\ECS.hpp" />
     <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />
     <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />
