@@ -70,4 +70,20 @@ namespace CoreEngine
         }
         glDrawElements(renderModeAddr, count, GL_UNSIGNED_INT, (void*)start);
     }
+
+    void OpenglRendererCommand::SetPolygonMode(PolygonMode polygonMode)
+    {
+        switch (polygonMode)
+        {
+        case PolygonMode::Fill:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+        case PolygonMode::Line:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+        default:
+            IP_ENGINE_ERROR("Undefined polygonMode, no action");
+            break;
+        }
+    }
 }

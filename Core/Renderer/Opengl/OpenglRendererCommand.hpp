@@ -14,6 +14,7 @@ namespace CoreEngine
         void ClearBuffers(ClearBufferMasks clearBufferMasks) override;
         void Draw(RenderMode renderMode, unsigned int count, unsigned int start = 0) override;
         void DrawIndex(RenderMode renderMode, unsigned int count, unsigned int start = 0) override;
+        void SetPolygonMode(PolygonMode polygonMode) override;
 
     private:
         OpenglRendererCommand() = default;

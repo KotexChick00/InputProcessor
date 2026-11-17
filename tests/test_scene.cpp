@@ -7,11 +7,23 @@
 #include <Scene/SceneLoader.hpp>
 #include <Model/Importers/AssimpModelImporter/AssimpModelImporter.hpp>
 #include <Renderer/Resource/IResourceManager.hpp>
+#include <Scene/Systems/TransformSystem.hpp>
+#include <Scene/Systems/CameraSystem.hpp>
+#include <Scene/Systems/LightingSystem.hpp>
+#include <Scene/Systems/RenderSystem.hpp>
+#include <Scene/Systems/ViewerSystems.hpp>
+#include <Input/Wx/WxKeyboardInput.hpp>
+#include <Input/Wx/WxMouseInput.hpp>
+
+#include <map>
+#include <string>
+#include <vector>
 
 #include <cassert>
 #include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 
 #ifndef TEST_ASSET_DIR
 #define TEST_ASSET_DIR "tests/assets"
@@ -58,6 +70,81 @@ namespace {
 		CoreEngine::IFrameBuffer* CreateColorFrameBuffer(unsigned int, unsigned int) override { return nullptr; }
 		CoreEngine::ITexture* CreateTexture(const std::string&) override { return &texture; }
 		CoreEngine::ITexture* CreateTextureFromMemory(const unsigned char*, unsigned int) override { return &texture; }
+	};
+
+	// --- Renderer giả: ghi lại lệnh vẽ và uniform để kiểm tra RenderSystem không cần OpenGL ---
+	class FakeShader : public CoreEngine::IShader {
+	public:
+		std::map<std::string, std::vector<float>> Uniforms;
+		int UseCount = 0;
+		void SetUniformMatrix4fv(const std::string& name, const float* value) override { Uniforms[name].assign(value, value + 16); }
+		void SetUniformMatrix3fv(const std::string& name, const float* value) override { Uniforms[name].assign(value, value + 9); }
+		void SetUniform1i(const std::string& name, int value) override { Uniforms[name] = { static_cast<float>(value) }; }
+		void SetUniform1f(const std::string& name, float value) override { Uniforms[name] = { value }; }
+		void SetUniform2f(const std::string& name, float a, float b) override { Uniforms[name] = { a, b }; }
+		void SetUniform3f(const std::string& name, float a, float b, float c) override { Uniforms[name] = { a, b, c }; }
+		void SetUniform4f(const std::string& name, float a, float b, float c, float d) override { Uniforms[name] = { a, b, c, d }; }
+		void SetUniformBuffer(const std::string&, unsigned int) override {}
+		void SetUniformTexture(const std::string& name, CoreEngine::ITexture*) override { Uniforms[name] = { 1 }; }
+		void Use() override { ++UseCount; }
+		void Unuse() override {}
+		CoreEngine::ShaderID GetShaderId() const override { return 7; }
+		float Get(const std::string& name) const { auto it = Uniforms.find(name); return it == Uniforms.end() ? -999.0f : it->second.front(); }
+	};
+
+	class FakeVertexBuffer : public CoreEngine::IVertexBuffer {
+	public:
+		void SetData(unsigned int, void*, unsigned int, unsigned int, unsigned int, CoreEngine::VertexBufferDataType, CoreEngine::VertexBufferRenderMode) override {}
+		void SetData(unsigned int, void*, unsigned int, unsigned int, unsigned int, unsigned int, CoreEngine::VertexBufferDataType, CoreEngine::VertexBufferRenderMode) override {}
+		void Bind() override {}
+		void UnBind() override {}
+		void EnableAttrib(unsigned int) override {}
+		void DisableAttrib(unsigned int) override {}
+		CoreEngine::VertexBufferID GetVertexBufferId() const override { return 1; }
+	};
+
+	class FakeIndexBuffer : public CoreEngine::IIndexBuffer {
+	public:
+		void SetData(unsigned int*, unsigned int, CoreEngine::IndexBufferRenderMode) override {}
+		void Bind() override {}
+		void UnBind() override {}
+		CoreEngine::IndexBufferID GetIndexBufferId() const override { return 1; }
+	};
+
+	// RenderModel tự delete buffer nó tạo, nên ở đây cấp phát mới mỗi lần.
+	class FakeGpuResources : public TestResources {
+	public:
+		FakeShader Shader;
+		int VertexBuffersCreated = 0;
+		CoreEngine::IVertexBuffer* CreateVertexBuffer() override { ++VertexBuffersCreated; return new FakeVertexBuffer(); }
+		CoreEngine::IIndexBuffer* CreateIndexBuffer() override { return new FakeIndexBuffer(); }
+		CoreEngine::IShader* CreateShaderFromSources(const std::string& vertex, const std::string& fragment) override {
+			assert(vertex.find("uModel") != std::string::npos && fragment.find("uLights") != std::string::npos);
+			return &Shader;
+		}
+	};
+
+	class FakeCommand : public CoreEngine::IRendererCommand {
+	public:
+		int Clears = 0;
+		std::vector<unsigned int> DrawnIndexCounts;
+		std::vector<CoreEngine::PolygonMode> PolygonModes;
+		void ClearBuffers(CoreEngine::ClearBufferMasks) override { ++Clears; }
+		void Draw(CoreEngine::RenderMode, unsigned int, unsigned int) override {}
+		void DrawIndex(CoreEngine::RenderMode, unsigned int count, unsigned int) override { DrawnIndexCounts.push_back(count); }
+		void SetPolygonMode(CoreEngine::PolygonMode mode) override { PolygonModes.push_back(mode); }
+	};
+
+	class FakeRenderer : public CoreEngine::IRenderer {
+	public:
+		FakeCommand Command;
+		FakeGpuResources Resources;
+		void Config(CoreEngine::RendererConfiguration) override {}
+		CoreEngine::IRendererCommand* GetRendererCommand() override { return &Command; }
+		CoreEngine::IResourceManager* GetResourceManager() override { return &Resources; }
+		CoreEngine::IFrameBufferManager* GetFrameBufferManager() override { return nullptr; }
+		void Free() override {}
+		CoreEngine::RendererConfiguration GetConfig() override { return {}; }
 	};
 }
 
@@ -212,12 +299,193 @@ void TestLoadFailureKeepsScene() {
 	std::cout << "  -> PASS\n";
 }
 
+void TestTransformSystem() {
+	std::cout << "[RUN] TransformSystem...\n";
+	{
+		Scene scene;
+		Actor root = scene.CreateEntity("Root");
+		Actor child = scene.CreateEntity("Child", root);
+		Actor grandChild = scene.CreateEntity("GrandChild", child);
+		root.GetComponent<TransformComponent>()->Position = { 1, 0, 0 };
+		root.GetComponent<TransformComponent>()->Scale = glm::vec3(2);
+		child.GetComponent<TransformComponent>()->Position = { 0, 1, 0 };
+		grandChild.GetComponent<TransformComponent>()->Position = { 0, 0, 1 };
+
+		TransformSystem system;
+		system.OnUpdate(0.0f);
+		auto worldOf = [](Actor actor) { return glm::vec3(actor.GetComponent<TransformComponent>()->World[3]); };
+		// Scale 2 của gốc áp lên mọi cấp con: (1,0,0) + 2*(0,1,0) + 2*(0,0,1)
+		assert(Vec3Equal(worldOf(root), { 1, 0, 0 }));
+		assert(Vec3Equal(worldOf(child), { 1, 2, 0 }));
+		assert(Vec3Equal(worldOf(grandChild), { 1, 2, 2 }));
+		assert(!grandChild.GetComponent<TransformComponent>()->Dirty);
+
+		// Không Dirty -> không tính lại (giữ nguyên giá trị đã ghi đè).
+		grandChild.GetComponent<TransformComponent>()->World = glm::mat4(0.0f);
+		system.OnUpdate(0.0f);
+		assert(grandChild.GetComponent<TransformComponent>()->World == glm::mat4(0.0f));
+
+		// Cha đổi -> cả nhánh con được tính lại.
+		root.GetComponent<TransformComponent>()->Position = { 5, 0, 0 };
+		root.GetComponent<TransformComponent>()->Dirty = true;
+		system.OnUpdate(0.0f);
+		assert(Vec3Equal(worldOf(grandChild), { 5, 2, 2 }));
+	}
+	std::cout << "  -> PASS\n";
+}
+
+void TestLightingSystem() {
+	std::cout << "[RUN] LightingSystem...\n";
+	TestResources resources;
+	Model::AssimpModelImporter importer(&resources);
+	SceneLoader loader(importer);
+	{
+		Scene scene;
+		loader.LoadModel(scene, Asset("lights.gltf"));
+		LightingSystem system;
+		system.OnUpdate(0.0f);
+		assert(system.GetLights().size() == 3 && system.GetDroppedCount() == 0);
+
+		const ShaderLight* spot = nullptr;
+		for (const auto& light : system.GetLights()) if (light.Type == Model::LightType::Spot) spot = &light;
+		assert(spot && std::fabs(spot->CosInnerCone - std::cos(0.2f)) < 1e-5f && std::fabs(spot->CosOuterCone - std::cos(0.5f)) < 1e-5f);
+
+		// Đèn tắt không được gửi cho shader.
+		scene.FindByName("Bulb").GetComponent<LightComponent>()->Enabled = false;
+		system.OnUpdate(0.0f);
+		assert(system.GetLights().size() == 2);
+
+		// Quá giới hạn shader -> cắt bớt và đếm số bị bỏ.
+		for (int i = 0; i < 10; ++i) scene.CreateEntity("Extra").AddComponent<LightComponent>();
+		system.OnUpdate(0.0f);
+		assert(system.GetLights().size() == MAX_SHADER_LIGHTS);
+		assert(system.GetDroppedCount() == 12 - MAX_SHADER_LIGHTS);
+	}
+	std::cout << "  -> PASS\n";
+}
+
+void TestCameraSystem() {
+	std::cout << "[RUN] CameraSystem...\n";
+	TestResources resources;
+	Model::AssimpModelImporter importer(&resources);
+	SceneLoader loader(importer);
+	{
+		Scene scene;
+		Actor model = loader.LoadModel(scene, Asset("textured.gltf"));
+		const auto& box = model.GetComponent<BoundsComponent>()->Box;
+
+		CameraSystem noInput(nullptr);
+		noInput.SetViewportSize(800, 600);
+		noInput.SetViewportSize(0, 0); // thu nhỏ cửa sổ về 0: bỏ qua, không chia cho 0
+		assert(noInput.GetViewportWidth() == 800 && noInput.GetViewportHeight() == 600);
+
+		Actor cameraEntity = noInput.CreateCamera(scene, &box);
+		auto* camera = cameraEntity.GetComponent<CameraComponent>();
+		assert(camera && CameraSystem::GetActiveCamera() == camera);
+		assert(Vec3Equal(camera->Camera.GetTarget(), box.getCenter()));
+		assert(std::fabs(camera->Camera.GetAspect() - 800.0f / 600.0f) < 1e-4f);
+		// Mọi góc của model nằm trong khung hình.
+		const glm::mat4 viewProjection = camera->Camera.GetProjectionMatrix() * camera->Camera.GetViewMatrix();
+		for (const auto& vertex : model.GetComponent<MeshRendererComponent>()->Model->GetMeshes().front().Vertices) {
+			glm::vec4 clip = viewProjection * glm::vec4(vertex.Position, 1.0f);
+			glm::vec3 ndc = glm::vec3(clip) / clip.w;
+			assert(std::fabs(ndc.x) < 1 && std::fabs(ndc.y) < 1 && std::fabs(ndc.z) < 1);
+		}
+
+		// Resize áp cho camera đã có.
+		noInput.SetViewportSize(400, 800);
+		assert(std::fabs(camera->Camera.GetAspect() - 0.5f) < 1e-4f);
+
+		// Không có input -> không tạo controller, không crash.
+		noInput.OnUpdate(0.016f);
+		assert(!camera->Controller);
+
+		// Có input -> controller được tạo cho camera Active và xử lý kéo chuột.
+		CoreEngine::WxMouseInput mouse;
+		CoreEngine::WxKeyboardInput keyboard;
+		CoreEngine::InputState input{ &keyboard, &mouse };
+		CameraSystem withInput(&input);
+		withInput.OnUpdate(0.016f);
+		assert(camera->Controller);
+		const glm::vec3 before = camera->Camera.GetPosition();
+		mouse.NotifyButtonDown(CoreEngine::MouseButton::ButtonLeft);
+		mouse.SetDelta(10.0f, 0.0f);
+		withInput.OnUpdate(0.016f);
+		withInput.OnUpdate(0.016f);
+		assert(!Vec3Equal(camera->Camera.GetPosition(), before));
+
+		// Bounds rỗng (model không có đỉnh) -> giữ camera mặc định, không crash.
+		Model::AssimpBoundingBox empty;
+		Actor fallback = noInput.CreateCamera(scene, &empty);
+		assert(fallback.IsValid());
+
+		camera->Active = false;
+		assert(CameraSystem::GetActiveCamera() == fallback.GetComponent<CameraComponent>());
+		fallback.GetComponent<CameraComponent>()->Active = false;
+		assert(CameraSystem::GetActiveCamera() == nullptr);
+	}
+	std::cout << "  -> PASS\n";
+}
+
+void TestRenderSystem() {
+	std::cout << "[RUN] RenderSystem with a fake renderer...\n";
+	FakeRenderer renderer;
+	Model::AssimpModelImporter importer(&renderer.Resources);
+	SceneLoader loader(importer);
+	CoreEngine::ECS::Shutdown();
+	AddViewerSystems(nullptr, &renderer);
+	auto& systems = ECS::SystemManager::GetInstance();
+	assert(!systems.HasDependencyCycle());
+	auto* render = systems.GetSystem<RenderSystem>();
+	assert(render && render->IsReady());
+	{
+		Scene scene;
+		ECS::Update(0.016f); // chưa có camera: chỉ xoá màn hình
+		assert(renderer.Command.Clears == 1 && render->GetLastDrawCount() == 0);
+
+		Actor model = loader.LoadModel(scene, Asset("textured.gltf"));
+		systems.GetSystem<CameraSystem>()->CreateCamera(scene, &model.GetComponent<BoundsComponent>()->Box);
+		ECS::Update(0.016f);
+		assert(render->GetLastDrawCount() == 1);
+		assert(renderer.Command.DrawnIndexCounts == std::vector<unsigned int>{ 3 });
+		assert(renderer.Resources.VertexBuffersCreated == 1);
+		FakeShader& shader = renderer.Resources.Shader;
+		assert(shader.Get("uEnableTextures") == 1 && shader.Get("uEnableLighting") == 1);
+		assert(shader.Get("uLightCount") == 1 && shader.Get("uLights[0].type") == 0); // đèn mặc định
+		const glm::mat4 identity(1.0f);
+		assert(shader.Uniforms["uModel"] == std::vector<float>(glm::value_ptr(identity), glm::value_ptr(identity) + 16));
+		assert(renderer.Command.PolygonModes.back() == CoreEngine::PolygonMode::Fill);
+
+		// Bật wireframe, tắt texture + lighting.
+		auto& settings = scene.GetRenderSettings();
+		settings.Wireframe = true;
+		settings.Textures = false;
+		settings.Lighting = false;
+		renderer.Command.PolygonModes.clear();
+		ECS::Update(0.016f);
+		assert((renderer.Command.PolygonModes == std::vector{ CoreEngine::PolygonMode::Line, CoreEngine::PolygonMode::Fill }));
+		assert(shader.Get("uEnableTextures") == 0 && shader.Get("uEnableLighting") == 0);
+		assert(renderer.Resources.VertexBuffersCreated == 1); // lazy-upload: dùng lại buffer frame trước
+
+		// Ẩn model -> không vẽ.
+		model.GetComponent<MeshRendererComponent>()->Visible = false;
+		ECS::Update(0.016f);
+		assert(render->GetLastDrawCount() == 0);
+	}
+	CoreEngine::ECS::Shutdown();
+	std::cout << "  -> PASS\n";
+}
+
 int main() {
 	TestHierarchyAndDestroy();
 	TestTransformLocalMatrix();
 	TestLoadModelWithoutLights();
 	TestLoadModelWithLights();
 	TestLoadFailureKeepsScene();
+	TestTransformSystem();
+	TestLightingSystem();
+	TestCameraSystem();
+	TestRenderSystem();
 	CoreEngine::ECS::Shutdown();
 	std::cout << "All scene tests passed.\n";
 	return 0;

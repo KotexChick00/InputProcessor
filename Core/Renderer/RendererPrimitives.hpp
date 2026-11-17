@@ -25,6 +25,13 @@ namespace CoreEngine
         Triangles = 0
     };
 
+    // How polygons are rasterized: filled (normal) or as outlines (wireframe).
+    enum class CORE_API PolygonMode
+    {
+        Fill = 0,
+        Line = 1
+    };
+
     struct CORE_API ColorRGB
     {
         float Red;

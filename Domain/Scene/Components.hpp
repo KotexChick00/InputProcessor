@@ -3,6 +3,8 @@
 #include <Model/RenderModel.hpp>
 #include <Model/ImportedLight.hpp>
 #include <Model/Importers/AssimpModelImporter/AssimpBoundingBox.h>
+#include <Camera/OrbitCamera/OrbitCamera.hpp>
+#include <Camera/OrbitCamera/OrbitCameraController.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -73,6 +75,14 @@ namespace Domain::Scene {
 		// true: lấy từ file; false: đèn mặc định do viewer tạo khi file không có đèn.
 		bool FromFile = true;
 		bool Enabled = true;
+	};
+
+	// Camera quay quanh model. CameraSystem tạo Controller cho camera đang Active.
+	// Controller khai báo sau Camera để bị huỷ trước (nó giữ tham chiếu tới Camera).
+	struct CameraComponent : CoreEngine::ECS::IComponent {
+		Domain::Camera::OrbitCamera::OrbitCamera Camera{ glm::vec3(0.0f), 5.0f };
+		std::unique_ptr<Domain::Camera::OrbitCamera::OrbitCameraController> Controller;
+		bool Active = true;
 	};
 
 	// Tuỳ chọn hiển thị chung cho cả scene ("bật tắt shader" trong đặc tả).

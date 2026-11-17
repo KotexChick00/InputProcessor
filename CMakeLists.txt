@@ -43,7 +43,7 @@ file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
     Core/Application/*.cpp Core/Input/Wx/*.cpp Core/Window/Wx/*.cpp
     Core/Renderer/Opengl/*.cpp Core/Logger/*.cpp Core/Logger/SpdLog/*.cpp Core/Memory/*.cpp Core/ECS/*.cpp
     Domain/Camera/OrbitCamera/*.cpp Domain/Camera/OrbitCamera/States/*.cpp
-    Domain/Model/Importers/AssimpModelImporter/*.cpp Domain/Scene/*.cpp)
+    Domain/Model/Importers/AssimpModelImporter/*.cpp Domain/Scene/*.cpp Domain/Scene/Systems/*.cpp)
 add_library(engine STATIC ${ENGINE_SOURCES} Core/Window/WindowPlatformFactory.cpp
     Core/Renderer/RendererFactory.cpp Domain/Model/RenderModel.cpp Domain/Model/AdsMaterial.cpp Library/Glad/src/glad.c)
 target_include_directories(engine PUBLIC Core Domain Library/Glad ${GLM_INCLUDE_DIR} PRIVATE ${STB_INCLUDE_DIR})
@@ -52,7 +52,7 @@ add_executable(DomainDemo main.cpp)
 target_link_libraries(DomainDemo PRIVATE engine)
 
 enable_testing()
-foreach(test_name IN ITEMS test_core test_engine_logic test_wx_integration test_scene)
+foreach(test_name IN ITEMS test_core test_engine_logic test_wx_integration test_scene test_scene_gl)
     add_executable(${test_name} tests/${test_name}.cpp)
     target_link_libraries(${test_name} PRIVATE engine)
     target_compile_definitions(${test_name} PRIVATE TEST_ASSET_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/assets")
@@ -66,4 +66,5 @@ add_test(NAME core COMMAND test_core)
 add_test(NAME engine_logic COMMAND test_engine_logic)
 add_test(NAME wx_integration COMMAND test_wx_integration)
 add_test(NAME scene COMMAND test_scene)
-set_tests_properties(core engine_logic wx_integration scene PROPERTIES TIMEOUT 30)
+add_test(NAME scene_gl COMMAND test_scene_gl)
+set_tests_properties(core engine_logic wx_integration scene scene_gl PROPERTIES TIMEOUT 30)

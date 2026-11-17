@@ -550,6 +550,7 @@ public:
     void ClearBuffers(ClearBufferMasks) override { }
     void Draw(RenderMode, unsigned int, unsigned int) override { }
     void DrawIndex(RenderMode, unsigned int, unsigned int) override { }
+    void SetPolygonMode(PolygonMode) override { }
 };
 
 class FakeRenderer : public IRenderer
