@@ -36,6 +36,7 @@ else()
 endif()
 find_package(assimp CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 find_path(GLM_INCLUDE_DIR glm/glm.hpp REQUIRED)
 find_path(STB_INCLUDE_DIR stb_image.h PATH_SUFFIXES stb REQUIRED)
 
@@ -47,7 +48,7 @@ file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS
 add_library(engine STATIC ${ENGINE_SOURCES} Core/Window/WindowPlatformFactory.cpp
     Core/Renderer/RendererFactory.cpp Domain/Model/RenderModel.cpp Domain/Model/AdsMaterial.cpp Library/Glad/src/glad.c)
 target_include_directories(engine PUBLIC Core Domain Library/Glad ${GLM_INCLUDE_DIR} PRIVATE ${STB_INCLUDE_DIR})
-target_link_libraries(engine PUBLIC ${WX_LIBRARIES} OpenGL::GL assimp::assimp spdlog::spdlog ${CMAKE_DL_LIBS})
+target_link_libraries(engine PUBLIC ${WX_LIBRARIES} OpenGL::GL assimp::assimp spdlog::spdlog nlohmann_json::nlohmann_json ${CMAKE_DL_LIBS})
 add_executable(DomainDemo main.cpp)
 target_link_libraries(DomainDemo PRIVATE engine)
 target_compile_definitions(DomainDemo PRIVATE INPUTPROCESSOR_SAMPLE_MODEL="${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/textured.gltf")
@@ -75,6 +76,9 @@ add_test(NAME viewer_lights COMMAND DomainDemo "${CMAKE_CURRENT_SOURCE_DIR}/test
 add_test(NAME viewer_sample COMMAND DomainDemo --frames 3)
 # File không đọc được phải báo lỗi (exit khác 0) chứ không crash.
 add_test(NAME viewer_missing_file COMMAND DomainDemo "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/missing.glb" --frames 3)
-set_tests_properties(viewer_missing_file PROPERTIES WILL_FAIL TRUE)
+# Mở theo file trạng thái xem; file trạng thái hỏng phải báo lỗi.
+add_test(NAME viewer_view COMMAND DomainDemo --view "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/lights.view.json" --frames 3)
+add_test(NAME viewer_broken_view COMMAND DomainDemo --view "${CMAKE_CURRENT_SOURCE_DIR}/tests/assets/broken.view.json" --frames 3)
+set_tests_properties(viewer_missing_file viewer_broken_view PROPERTIES WILL_FAIL TRUE)
 set_tests_properties(core engine_logic wx_integration scene scene_gl
-    viewer_gltf viewer_glb viewer_lights viewer_sample viewer_missing_file PROPERTIES TIMEOUT 30)
+    viewer_gltf viewer_glb viewer_lights viewer_sample viewer_missing_file viewer_view viewer_broken_view PROPERTIES TIMEOUT 30)

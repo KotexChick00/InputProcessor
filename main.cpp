@@ -5,8 +5,10 @@
 //   LightingSystem  gom đèn cho shader
 //   RenderSystem    vẽ model theo tuỳ chọn hiển thị (wireframe / texture / lighting)
 //
-// Cách dùng: DomainDemo [model] [--frames N]
-//   --frames N: tự đóng sau N frame (dùng cho smoke test).
+// Cách dùng: DomainDemo [model] [--view FILE] [--frames N]
+//   --view FILE: file trạng thái xem (JSON). Có sẵn thì mở theo nó; F5 lưu vào đây, F9 nạp lại.
+//                Mặc định: <tên model>.view.json trong thư mục hiện tại.
+//   --frames N:  tự đóng sau N frame (dùng cho smoke test).
 
 #include <Application/Application.hpp>
 #include <ECS/ECS.hpp>
@@ -15,6 +17,9 @@
 #include <Scene/SceneLoader.hpp>
 #include <Scene/Systems/CameraSystem.hpp>
 #include <Scene/Systems/ViewerSystems.hpp>
+#include <Scene/ViewState.hpp>
+
+#include <filesystem>
 
 #include <iostream>
 #include <memory>
@@ -33,8 +38,8 @@ namespace {
 
 	class ModelViewer : public CoreEngine::Application {
 	public:
-		ModelViewer(CoreEngine::ApplicationConfiguration& config, std::string path, int frameLimit)
-			: Application(config), mPath(std::move(path)), mFrameLimit(frameLimit) {}
+		ModelViewer(CoreEngine::ApplicationConfiguration& config, std::string path, std::string viewFile, int frameLimit)
+			: Application(config), mPath(std::move(path)), mViewFile(std::move(viewFile)), mFrameLimit(frameLimit) {}
 
 		void OnInitClient() override {
 			auto* renderer = GetRenderer();
@@ -54,7 +59,14 @@ namespace {
 
 			mImporter = std::make_unique<Model::AssimpModelImporter>(renderer->GetResourceManager());
 			mScene = std::make_unique<Scene>();
-			if (!OpenModel(mPath)) throw std::runtime_error("Failed to read model: " + mPath);
+			// Có file trạng thái xem thì mở theo nó (model + camera + tuỳ chọn), không thì mở model.
+			std::error_code code;
+			if (!mViewFile.empty() && std::filesystem::exists(mViewFile, code)) {
+				if (!LoadView()) throw std::runtime_error("Failed to open view: " + mViewFile);
+			} else if (!OpenModel(mPath)) {
+				throw std::runtime_error("Failed to read model: " + mPath);
+			}
+			if (mViewFile.empty()) mViewFile = std::filesystem::path(mPath).stem().string() + ".view.json";
 			PrintControls();
 		}
 
@@ -69,6 +81,8 @@ namespace {
 				if (keyboard->CheckIsJustPressed(KeyboardKey::One)) Toggle("Wireframe", settings.Wireframe);
 				if (keyboard->CheckIsJustPressed(KeyboardKey::Two)) Toggle("Textures", settings.Textures);
 				if (keyboard->CheckIsJustPressed(KeyboardKey::Three)) Toggle("Lighting", settings.Lighting);
+				if (keyboard->CheckIsJustPressed(KeyboardKey::F5)) SaveView();
+				if (keyboard->CheckIsJustPressed(KeyboardKey::F9)) LoadView();
 			}
 
 			ECS::Update(GetTime()->GetDeltaTime());
@@ -100,6 +114,39 @@ namespace {
 			return true;
 		}
 
+		// Lưu trạng thái xem (không đụng tới file model).
+		bool SaveView() {
+			std::string error;
+			ViewState state = CaptureViewState(*mScene, mModel, CameraSystem::GetActiveCamera(), mViewFile);
+			if (!SaveViewState(state, mViewFile, error)) {
+				std::cerr << "Save view failed: " << error << '\n';
+				return false;
+			}
+			std::cout << "Saved view to " << mViewFile << '\n';
+			return true;
+		}
+
+		// Nạp trạng thái xem: mở model ghi trong file rồi áp camera/tuỳ chọn. Lỗi thì giữ nguyên cảnh hiện tại.
+		bool LoadView() {
+			std::string error;
+			auto state = LoadViewState(mViewFile, error);
+			if (!state) {
+				std::cerr << "Load view failed: " << error << '\n';
+				return false;
+			}
+			const std::string model = ResolveModelPath(*state, mViewFile).string();
+			if (!OpenModel(model)) {
+				std::cerr << "Load view failed: can't open model '" << model << "'\n";
+				return false;
+			}
+			mPath = model;
+			const size_t skipped = ApplyViewState(*state, *mScene, mModel, CameraSystem::GetActiveCamera());
+			std::cout << "Loaded view from " << mViewFile;
+			if (skipped > 0) std::cout << " (" << skipped << " entries not found in the model)";
+			std::cout << '\n';
+			return true;
+		}
+
 		void FitCamera() {
 			CameraComponent* camera = CameraSystem::GetActiveCamera();
 			auto* bounds = mModel.IsValid() ? mModel.GetComponent<BoundsComponent>() : nullptr;
@@ -119,11 +166,13 @@ namespace {
 				<< "  Mouse wheel             zoom\n"
 				<< "  R                       fit camera to the model\n"
 				<< "  1 / 2 / 3               toggle wireframe / textures / lighting\n"
+				<< "  F5 / F9                 save / load the view (camera, options) as JSON\n"
 				<< "  Esc                     quit\n";
 		}
 
 	private:
 		std::string mPath;
+		std::string mViewFile;
 		int mFrameLimit = 0;
 		int mFrames = 0;
 
@@ -145,23 +194,26 @@ namespace {
 int main(int argc, char** argv) {
 	try {
 		std::string path = INPUTPROCESSOR_SAMPLE_MODEL;
+		std::string viewFile;
 		int frameLimit = 0;
 		bool hasPath = false;
 		for (int i = 1; i < argc; ++i) {
 			std::string_view argument = argv[i];
 			if (argument == "--frames" && i + 1 < argc) {
 				frameLimit = ParseFrameCount(argv[++i]);
+			} else if (argument == "--view" && i + 1 < argc) {
+				viewFile = argv[++i];
 			} else if (!hasPath && !argument.starts_with("--")) {
 				path = argv[i];
 				hasPath = true;
 			} else {
-				std::cerr << "Usage: DomainDemo [model.gltf|.glb|.obj|.fbx] [--frames N]\n";
+				std::cerr << "Usage: DomainDemo [model.gltf|.glb|.obj|.fbx] [--view FILE.json] [--frames N]\n";
 				return 1;
 			}
 		}
 
 		CoreEngine::ApplicationConfiguration config{ 1000, 700, "InputProcessor - Model Viewer" };
-		ModelViewer viewer(config, path, frameLimit);
+		ModelViewer viewer(config, path, viewFile, frameLimit);
 		viewer.Run();
 	} catch (const std::exception& error) {
 		std::cerr << error.what() << '\n';

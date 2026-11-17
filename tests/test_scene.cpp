@@ -12,6 +12,7 @@
 #include <Scene/Systems/LightingSystem.hpp>
 #include <Scene/Systems/RenderSystem.hpp>
 #include <Scene/Systems/ViewerSystems.hpp>
+#include <Scene/ViewState.hpp>
 #include <Input/Wx/WxKeyboardInput.hpp>
 #include <Input/Wx/WxMouseInput.hpp>
 
@@ -22,6 +23,8 @@
 #include <cassert>
 #include <cmath>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -426,6 +429,157 @@ void TestTooManyNodesFlattens() {
 	std::cout << "  -> PASS\n";
 }
 
+void TestViewStateJson() {
+	std::cout << "[RUN] View state JSON...\n";
+	ViewState state;
+	state.ModelPath = "models/car.glb";
+	state.HasCamera = true;
+	state.CameraTarget = { 1, 2, 3 };
+	state.CameraDistance = 4.5f;
+	state.CameraAzimuth = 0.25f;
+	state.CameraElevation = -0.5f;
+	state.Wireframe = true;
+	state.Lighting = false;
+	state.HiddenNodes = { "Body/Wheel", "Body/Wheel#1" };
+	state.DisabledLights = { "Sun" };
+
+	std::string error;
+	auto parsed = ViewStateFromJson(ViewStateToJson(state), error);
+	assert(parsed && error.empty());
+	assert(parsed->ModelPath == state.ModelPath && parsed->HasCamera);
+	assert(Vec3Equal(parsed->CameraTarget, state.CameraTarget));
+	assert(parsed->CameraDistance == 4.5f && parsed->CameraAzimuth == 0.25f && parsed->CameraElevation == -0.5f);
+	assert(parsed->Wireframe && parsed->Textures && !parsed->Lighting);
+	assert(parsed->HiddenNodes == state.HiddenNodes && parsed->DisabledLights == state.DisabledLights);
+
+	// Chỉ có version + model: các mục khác lấy mặc định.
+	auto minimal = ViewStateFromJson(R"({"version": 1, "model": "a.gltf"})", error);
+	assert(minimal && !minimal->HasCamera && !minimal->Wireframe && minimal->Textures && minimal->HiddenNodes.empty());
+
+	// File hỏng / sai: báo lỗi, không crash.
+	for (const char* bad : {
+		"not json",
+		"[1, 2]",
+		R"({"model": "a.gltf"})",                               // thiếu version
+		R"({"version": 2, "model": "a.gltf"})",                 // version không hỗ trợ
+		R"({"version": 1})",                                    // thiếu model
+		R"({"version": 1, "model": ""})",
+		R"({"version": 1, "model": 5})",                        // sai kiểu
+		R"({"version": 1, "model": "a", "camera": {"target": [0, 0], "distance": 1, "azimuth": 0, "elevation": 0}})",
+		R"({"version": 1, "model": "a", "camera": {"target": [0, 0, 0], "distance": 0, "azimuth": 0, "elevation": 0}})",
+		R"({"version": 1, "model": "a", "render": {"wireframe": "yes"}})",
+		R"({"version": 1, "model": "a", "hiddenNodes": "Body"})" }) {
+		error.clear();
+		assert(!ViewStateFromJson(bad, error) && !error.empty());
+	}
+	std::cout << "  -> PASS\n";
+}
+
+void TestNodePaths() {
+	std::cout << "[RUN] Node paths...\n";
+	TestResources resources;
+	Model::AssimpModelImporter importer(&resources);
+	SceneLoader loader(importer);
+	{
+		Scene scene;
+		Actor root = loader.LoadModel(scene, Asset("lights.gltf"));
+		assert(GetNodePath(root, root) == std::string());
+		assert(GetNodePath(scene.FindByName("Spot"), root) == std::string("Rig/Spot"));
+		assert(GetNodePath(scene.FindByName("Triangle"), root) == std::string("Triangle"));
+		assert(FindByNodePath(root, "Rig/Spot") == scene.FindByName("Spot"));
+		assert(FindByNodePath(root, "") == root);
+		assert(!FindByNodePath(root, "Rig/Missing").IsValid());
+		for (const Actor& entity : scene.GetEntities()) {
+			auto path = GetNodePath(entity, root);
+			assert(path && FindByNodePath(root, *path) == entity);
+		}
+		// Entity ngoài cây của model (vd camera) không có đường dẫn.
+		assert(!GetNodePath(scene.CreateEntity("Camera"), root));
+
+		// Anh em trùng tên được đánh số theo thứ tự.
+		Actor parent = scene.CreateEntity("Parent", root);
+		Actor first = scene.CreateEntity("Wheel", parent);
+		Actor second = scene.CreateEntity("Wheel", parent);
+		assert(GetNodePath(first, root) == std::string("Parent/Wheel"));
+		assert(GetNodePath(second, root) == std::string("Parent/Wheel#1"));
+		assert(FindByNodePath(root, "Parent/Wheel#1") == second);
+	}
+	std::cout << "  -> PASS\n";
+}
+
+std::string ReadFile(const std::filesystem::path& path) {
+	std::ifstream stream(path, std::ios::binary);
+	std::stringstream content;
+	content << stream.rdbuf();
+	return content.str();
+}
+
+void TestViewStateRoundTrip() {
+	std::cout << "[RUN] Save and load a view...\n";
+	TestResources resources;
+	Model::AssimpModelImporter importer(&resources);
+	SceneLoader loader(importer);
+	const auto directory = std::filesystem::temp_directory_path() / "inputprocessor-test-view";
+	std::filesystem::create_directories(directory);
+	const auto viewFile = directory / "lights.view.json";
+	const std::string modelBefore = ReadFile(Asset("lights.gltf"));
+
+	CameraSystem cameras(nullptr);
+	cameras.SetViewportSize(640, 480);
+	ViewState saved;
+	{
+		Scene scene;
+		Actor root = loader.LoadModel(scene, Asset("lights.gltf"));
+		auto* camera = cameras.CreateCamera(scene, &root.GetComponent<BoundsComponent>()->Box).GetComponent<CameraComponent>();
+		camera->Camera.SetAzimuth(0.7f);
+		camera->Camera.SetElevation(0.3f);
+		camera->Camera.SetDistance(camera->Camera.GetDistance() * 1.5f);
+		scene.FindByName("Triangle").GetComponent<MeshRendererComponent>()->Visible = false;
+		FindByNodePath(root, "Rig/Spot").GetComponent<LightComponent>()->Enabled = false;
+		scene.GetRenderSettings().Wireframe = true;
+		scene.GetRenderSettings().Textures = false;
+
+		saved = CaptureViewState(scene, root, camera, viewFile);
+		std::string error;
+		assert(SaveViewState(saved, viewFile, error));
+		assert(saved.HiddenNodes == std::vector<std::string>{ "Triangle" });
+		assert(saved.DisabledLights == std::vector<std::string>{ "Rig/Spot" });
+		// Đường dẫn model ghi tương đối với thư mục file trạng thái (nếu được), và trỏ đúng file.
+		assert(std::filesystem::equivalent(ResolveModelPath(saved, viewFile), Asset("lights.gltf")));
+	}
+	// Lưu trạng thái không bao giờ sửa file model.
+	assert(ReadFile(Asset("lights.gltf")) == modelBefore);
+
+	{
+		std::string error;
+		auto loaded = LoadViewState(viewFile, error);
+		assert(loaded);
+		Scene scene;
+		Actor root = loader.LoadModel(scene, ResolveModelPath(*loaded, viewFile).string());
+		assert(root.IsValid());
+		auto* camera = cameras.CreateCamera(scene, &root.GetComponent<BoundsComponent>()->Box).GetComponent<CameraComponent>();
+		assert(ApplyViewState(*loaded, scene, root, camera) == 0);
+
+		assert(!scene.FindByName("Triangle").GetComponent<MeshRendererComponent>()->Visible);
+		assert(!scene.FindByName("Spot").GetComponent<LightComponent>()->Enabled);
+		assert(scene.FindByName("Bulb").GetComponent<LightComponent>()->Enabled);
+		assert(scene.GetRenderSettings().Wireframe && !scene.GetRenderSettings().Textures && scene.GetRenderSettings().Lighting);
+		assert(Vec3Equal(camera->Camera.GetTarget(), saved.CameraTarget));
+		assert(std::fabs(camera->Camera.GetDistance() - saved.CameraDistance) < 1e-4f);
+		assert(std::fabs(camera->Camera.GetAzimuth() - 0.7f) < 1e-4f);
+		assert(std::fabs(camera->Camera.GetElevation() - 0.3f) < 1e-4f);
+
+		// Node không còn trong model (vd model đã đổi) -> bỏ qua và đếm, không crash.
+		ViewState stale = *loaded;
+		stale.HiddenNodes.push_back("Gone");
+		stale.DisabledLights.push_back("Triangle"); // node có nhưng không phải đèn
+		assert(ApplyViewState(stale, scene, root, camera) == 2);
+	}
+	assert(!LoadViewState(directory / "missing.view.json", *std::make_unique<std::string>()));
+	std::filesystem::remove_all(directory);
+	std::cout << "  -> PASS\n";
+}
+
 void TestTransformSystem() {
 	std::cout << "[RUN] TransformSystem...\n";
 	{
@@ -615,6 +769,9 @@ int main() {
 	TestNodeHierarchyMatchesFlattened();
 	TestShearedNodeKeepsMatrix();
 	TestTooManyNodesFlattens();
+	TestViewStateJson();
+	TestNodePaths();
+	TestViewStateRoundTrip();
 	TestTransformSystem();
 	TestLightingSystem();
 	TestCameraSystem();

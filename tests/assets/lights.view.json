@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "model": "lights.gltf",
+  "camera": {
+    "target": [0.5, 0.5, 0.0],
+    "distance": 3.0,
+    "azimuth": 0.4,
+    "elevation": 0.2
+  },
+  "render": {
+    "wireframe": true,
+    "textures": true,
+    "lighting": true
+  },
+  "hiddenNodes": [],
+  "disabledLights": ["Bulb"]
+}
