@@ -1,4 +1,5 @@
 #include <Scene/SceneLoader.hpp>
+#include <Scene/Utf8Path.hpp>
 #include <Logger/Logger.hpp>
 
 #include <exception>
@@ -56,7 +57,7 @@ namespace Domain::Scene {
 			auto& node = imported->Nodes[i];
 			const bool isRoot = node.Parent < 0;
 			Actor parent = isRoot ? Actor() : entities[node.Parent];
-			std::string name = isRoot ? std::filesystem::path(path).stem().string()
+			std::string name = isRoot ? PathToUtf8(PathFromUtf8(path).stem())
 				: (node.Name.empty() ? "Node" : node.Name);
 
 			Actor entity = scene.CreateEntity(std::move(name), parent);

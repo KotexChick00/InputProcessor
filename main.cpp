@@ -16,6 +16,7 @@
 #include <Scene/Systems/CameraSystem.hpp>
 #include <Scene/Systems/ViewerSystems.hpp>
 #include <Scene/ViewerController.hpp>
+#include <Scene/Utf8Path.hpp>
 
 #include <filesystem>
 #include <iostream>
@@ -57,12 +58,12 @@ namespace {
 
 			// Có file trạng thái xem thì mở theo nó (model + camera + tuỳ chọn), không thì mở model.
 			std::error_code code;
-			if (!mViewFile.empty() && std::filesystem::exists(mViewFile, code)) {
+			if (!mViewFile.empty() && std::filesystem::exists(PathFromUtf8(mViewFile), code)) {
 				if (!LoadView()) throw std::runtime_error("Failed to open view: " + mViewFile);
 			} else if (!OpenModel(mPath)) {
 				throw std::runtime_error("Failed to read model: " + mPath);
 			}
-			if (mViewFile.empty()) mViewFile = std::filesystem::path(mPath).stem().string() + ".view.json";
+			if (mViewFile.empty()) mViewFile = PathToUtf8(PathFromUtf8(mPath).stem()) + ".view.json";
 			PrintControls();
 		}
 

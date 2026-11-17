@@ -14,6 +14,7 @@
 #include <Scene/Systems/ViewerSystems.hpp>
 #include <Scene/ViewState.hpp>
 #include <Scene/ViewerController.hpp>
+#include <Scene/Utf8Path.hpp>
 #include <Input/Wx/WxKeyboardInput.hpp>
 #include <Input/Wx/WxMouseInput.hpp>
 
@@ -545,8 +546,23 @@ void TestViewStateRoundTrip() {
 		assert(SaveViewState(saved, viewFile, error));
 		assert(saved.HiddenNodes == std::vector<std::string>{ "Triangle" });
 		assert(saved.DisabledLights == std::vector<std::string>{ "Rig/Spot" });
-		// Đường dẫn model ghi tương đối với thư mục file trạng thái (nếu được), và trỏ đúng file.
+		// Đường dẫn model luôn trỏ đúng file.
 		assert(std::filesystem::equivalent(ResolveModelPath(saved, viewFile), Asset("lights.gltf")));
+		// File trạng thái ở thư mục tạm, model ở thư mục dự án: nếu hai bên chỉ chung gốc ổ đĩa thì ghi tuyệt đối,
+		// không ghi "../../.." đi lên tận gốc.
+		const auto canonicalAssets = std::filesystem::weakly_canonical(std::filesystem::absolute(TEST_ASSET_DIR));
+		const auto canonicalTemp = std::filesystem::weakly_canonical(directory);
+		if (*canonicalAssets.relative_path().begin() != *canonicalTemp.relative_path().begin()) {
+			assert(std::filesystem::path(saved.ModelPath).is_absolute());
+		}
+		assert(saved.ModelPath.find("..") == std::string::npos || !std::filesystem::path(saved.ModelPath).is_absolute());
+
+		// File trạng thái cạnh model -> chỉ ghi tên file; trong thư mục con -> "../lights.gltf".
+		const ViewState beside = CaptureViewState(scene, root, camera, Asset("lights.view.json"));
+		assert(beside.ModelPath == "lights.gltf");
+		const ViewState nested = CaptureViewState(scene, root, camera, Asset("views/lights.view.json"));
+		assert(nested.ModelPath == "../lights.gltf");
+		assert(std::filesystem::equivalent(ResolveModelPath(nested, Asset("views/lights.view.json")), Asset("lights.gltf")));
 	}
 	// Lưu trạng thái không bao giờ sửa file model.
 	assert(ReadFile(Asset("lights.gltf")) == modelBefore);
@@ -651,6 +667,25 @@ void TestViewerController() {
 		assert(viewer.GetModelGeneration() == generation && viewer.GetEntityTree().size() == 6);
 
 		viewer.FitCamera(); // không crash
+
+		// Lưu vào thư mục không tồn tại: trả lỗi, không ném exception.
+		error.clear();
+		assert(!viewer.SaveView((std::filesystem::temp_directory_path() / "no-such-dir-ip" / "x.json").string(), error) && !error.empty());
+
+		// Đường dẫn UTF-8 có tiếng Việt + dấu cách (Windows: không đi qua bảng mã ANSI).
+		const auto folder = std::filesystem::temp_directory_path() / PathFromUtf8("thư mục thử");
+		std::filesystem::create_directories(folder);
+		const auto model = folder / PathFromUtf8("Mô hình.glb");
+		std::filesystem::copy_file(Asset("embedded.glb"), model, std::filesystem::copy_options::overwrite_existing);
+		const std::string modelUtf8 = PathToUtf8(model);
+		const std::string viewUtf8 = PathToUtf8(folder / PathFromUtf8("góc nhìn.view.json"));
+		assert(viewer.OpenModel(modelUtf8, error));
+		assert(viewer.GetEntityTree().front().Name == "Mô hình");
+		assert(viewer.SaveView(viewUtf8, error));
+		assert(LoadViewState(PathFromUtf8(viewUtf8), error)->ModelPath == "Mô hình.glb");
+		assert(viewer.OpenModel(Asset("textured.gltf"), error));
+		assert(viewer.LoadView(viewUtf8, error) && viewer.GetEntityTree().front().Name == "Mô hình");
+		std::filesystem::remove_all(folder);
 	}
 	CoreEngine::ECS::Shutdown();
 	assert(AliveEntities() == 0);

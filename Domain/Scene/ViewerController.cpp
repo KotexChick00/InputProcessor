@@ -1,5 +1,8 @@
 #include <Scene/ViewerController.hpp>
+#include <Scene/Utf8Path.hpp>
+#include <Logger/Logger.hpp>
 
+#include <exception>
 #include <filesystem>
 #include <stdexcept>
 
@@ -14,7 +17,28 @@ namespace Domain::Scene {
 	// Huỷ scene (giải phóng buffer GPU) khi OpenGL context còn sống: huỷ controller trước khi đóng cửa sổ.
 	ViewerController::~ViewerController() = default;
 
+	namespace {
+		// Mọi API của controller trả lỗi qua `error` thay vì ném exception lên vòng lặp ứng dụng
+		// (vd đổi đường dẫn trên Windows có thể ném std::system_error).
+		template <typename Function>
+		bool Guard(const char* action, std::string& error, Function&& function) {
+			try {
+				return function();
+			} catch (const std::exception& exception) {
+				error = std::string(action) + ": " + exception.what();
+			} catch (...) {
+				error = std::string(action) + ": unknown error";
+			}
+			IP_ENGINE_ERROR("ViewerController: {}", error);
+			return false;
+		}
+	}
+
 	bool ViewerController::OpenModel(const std::string& path, std::string& error) {
+		return Guard("open model", error, [&] { return OpenModelUnguarded(path, error); });
+	}
+
+	bool ViewerController::OpenModelUnguarded(const std::string& path, std::string& error) {
 		SceneLoader loader(*mImporter);
 		Actor root = loader.LoadModel(*mScene, path);
 		if (!root.IsValid()) {
@@ -30,21 +54,27 @@ namespace Domain::Scene {
 	}
 
 	bool ViewerController::SaveView(const std::string& file, std::string& error) const {
-		if (!HasModel()) {
-			error = "no model is open";
-			return false;
-		}
-		const ViewState state = CaptureViewState(*mScene, mRoot, CameraSystem::GetActiveCamera(), file);
-		return SaveViewState(state, file, error);
+		return Guard("save view", error, [&] {
+			if (!HasModel()) {
+				error = "no model is open";
+				return false;
+			}
+			const std::filesystem::path viewFile = PathFromUtf8(file);
+			const ViewState state = CaptureViewState(*mScene, mRoot, CameraSystem::GetActiveCamera(), viewFile);
+			return SaveViewState(state, viewFile, error);
+		});
 	}
 
 	bool ViewerController::LoadView(const std::string& file, std::string& error) {
-		auto state = LoadViewState(file, error);
-		if (!state) return false;
-		const std::string model = ResolveModelPath(*state, file).string();
-		if (!OpenModel(model, error)) return false;
-		ApplyViewState(*state, *mScene, mRoot, CameraSystem::GetActiveCamera());
-		return true;
+		return Guard("load view", error, [&] {
+			const std::filesystem::path viewFile = PathFromUtf8(file);
+			auto state = LoadViewState(viewFile, error);
+			if (!state) return false;
+			const std::string model = PathToUtf8(ResolveModelPath(*state, viewFile));
+			if (!OpenModelUnguarded(model, error)) return false;
+			ApplyViewState(*state, *mScene, mRoot, CameraSystem::GetActiveCamera());
+			return true;
+		});
 	}
 
 	std::vector<EntityInfo> ViewerController::GetEntityTree() const {

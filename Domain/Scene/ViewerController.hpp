@@ -55,7 +55,8 @@ namespace Domain::Scene {
 		ViewerController(const ViewerController&) = delete;
 		ViewerController& operator=(const ViewerController&) = delete;
 
-		// --- Mở / lưu / nạp. Thất bại: trả về false, error mô tả lỗi, cảnh hiện tại giữ nguyên. ---
+		// --- Mở / lưu / nạp. Đường dẫn là chuỗi UTF-8. Thất bại: trả về false, error mô tả lỗi,
+		// cảnh hiện tại giữ nguyên; không ném exception. ---
 		bool OpenModel(const std::string& path, std::string& error);
 		bool SaveView(const std::string& file, std::string& error) const;
 		bool LoadView(const std::string& file, std::string& error);
@@ -85,6 +86,7 @@ namespace Domain::Scene {
 		Actor GetModelRoot() const { return mRoot; }
 
 	private:
+		bool OpenModelUnguarded(const std::string& path, std::string& error);
 		bool IsInModel(Actor entity) const;
 		void SetVisibleRecursive(Actor entity, bool visible, bool recursive);
 		void CollectTree(Actor entity, int depth, std::vector<EntityInfo>& out) const;

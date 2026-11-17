@@ -1,4 +1,5 @@
 #include <Scene/ViewState.hpp>
+#include <Scene/Utf8Path.hpp>
 #include <Logger/Logger.hpp>
 
 #include <nlohmann/json.hpp>
@@ -16,6 +17,14 @@ namespace Domain::Scene {
 		glm::vec3 Vec3FromJson(const Json& value) {
 			if (!value.is_array() || value.size() != 3) throw std::invalid_argument("expected an array of 3 numbers");
 			return { value.at(0).get<float>(), value.at(1).get<float>(), value.at(2).get<float>() };
+		}
+
+		// true nếu hai đường dẫn tuyệt đối có chung ít nhất một thư mục ngoài gốc ổ đĩa ("/" hoặc "C:\").
+		bool SharesFolder(const std::filesystem::path& a, const std::filesystem::path& b) {
+			if (a.root_path() != b.root_path()) return false;
+			const auto relativeA = a.relative_path();
+			const auto relativeB = b.relative_path();
+			return !relativeA.empty() && !relativeB.empty() && *relativeA.begin() == *relativeB.begin();
 		}
 
 		// Tên của entity trong đường dẫn: tên node, thêm "#k" nếu là anh em trùng tên thứ k (k >= 1).
@@ -96,12 +105,12 @@ namespace Domain::Scene {
 	bool SaveViewState(const ViewState& state, const std::filesystem::path& file, std::string& error) {
 		std::ofstream stream(file, std::ios::binary | std::ios::trunc);
 		if (!stream) {
-			error = "can't open '" + file.string() + "' for writing";
+			error = "can't open '" + PathToUtf8(file) + "' for writing";
 			return false;
 		}
 		stream << ViewStateToJson(state) << '\n';
 		if (!stream) {
-			error = "can't write '" + file.string() + "'";
+			error = "can't write '" + PathToUtf8(file) + "'";
 			return false;
 		}
 		return true;
@@ -110,13 +119,13 @@ namespace Domain::Scene {
 	std::optional<ViewState> LoadViewState(const std::filesystem::path& file, std::string& error) {
 		std::ifstream stream(file, std::ios::binary);
 		if (!stream) {
-			error = "can't open '" + file.string() + "'";
+			error = "can't open '" + PathToUtf8(file) + "'";
 			return std::nullopt;
 		}
 		std::stringstream content;
 		content << stream.rdbuf();
 		auto state = ViewStateFromJson(content.str(), error);
-		if (!state) error = "'" + file.string() + "': " + error;
+		if (!state) error = "'" + PathToUtf8(file) + "': " + error;
 		return state;
 	}
 
@@ -161,13 +170,14 @@ namespace Domain::Scene {
 		const std::filesystem::path& viewFile) {
 		ViewState state;
 
-		// Ghi đường dẫn model tương đối với thư mục file trạng thái (dễ chép cả thư mục sang máy khác).
+		// Ghi đường dẫn model tương đối với thư mục file trạng thái (dễ chép cả thư mục sang máy khác),
+		// trừ khi hai bên chỉ chung nhau gốc ổ đĩa: khi đó "../../.." đi tới gốc vô nghĩa ở máy khác -> tuyệt đối.
 		if (auto* source = modelRoot.IsValid() ? modelRoot.GetComponent<ModelSourceComponent>() : nullptr) {
 			std::error_code code;
-			const auto model = std::filesystem::absolute(source->Path, code);
-			const auto base = std::filesystem::absolute(viewFile, code).parent_path();
+			const auto model = std::filesystem::weakly_canonical(std::filesystem::absolute(PathFromUtf8(source->Path), code), code);
+			const auto base = std::filesystem::weakly_canonical(std::filesystem::absolute(viewFile, code), code).parent_path();
 			const auto relative = std::filesystem::relative(model, base, code);
-			state.ModelPath = (!code && !relative.empty() ? relative : model).generic_string();
+			state.ModelPath = PathToUtf8(!code && !relative.empty() && SharesFolder(model, base) ? relative : model);
 		}
 
 		if (camera) {
@@ -197,7 +207,7 @@ namespace Domain::Scene {
 	}
 
 	std::filesystem::path ResolveModelPath(const ViewState& state, const std::filesystem::path& viewFile) {
-		std::filesystem::path model(state.ModelPath);
+		std::filesystem::path model = PathFromUtf8(state.ModelPath);
 		if (model.is_relative()) model = viewFile.parent_path() / model;
 		return model.lexically_normal();
 	}
