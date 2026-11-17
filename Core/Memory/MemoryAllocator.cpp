@@ -10,6 +10,14 @@ namespace CoreEngine
     {
     }
 
+    bool MemoryAllocator::Contains(const void* address) const
+    {
+        uintptr_t ipAddress = reinterpret_cast<uintptr_t>(address);
+        uintptr_t ipStartAddress = reinterpret_cast<uintptr_t>(mStartAddress);
+
+        return ipAddress >= ipStartAddress && ipAddress < ipStartAddress + mMemorySize;
+    }
+
     bool MemoryAllocator::CheckIsPowerOfTwo(uint8_t alignment)
     {
         return (alignment & (alignment - 1)) == 0;

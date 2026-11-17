@@ -180,6 +180,7 @@
     <ClCompile Include="Core\Memory\StackAllocator.cpp" />
     <ClCompile Include="Core\Memory\PoolAllocator.cpp" />
     <ClCompile Include="Core\Memory\MemoryManager.cpp" />
+    <ClCompile Include="Core\Memory\MemoryChunkManager.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglConstantFactory.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglCubeMap.cpp" />
     <ClCompile Include="Core\Renderer\Opengl\OpenglFrameBuffer.cpp" />
@@ -237,6 +238,7 @@
     <ClInclude Include="Core\Memory\StackAllocator.hpp" />
     <ClInclude Include="Core\Memory\PoolAllocator.hpp" />
     <ClInclude Include="Core\Memory\MemoryManager.hpp" />
+    <ClInclude Include="Core\Memory\MemoryChunkManager.hpp" />
     <ClInclude Include="Core\pch.h" />
     <ClInclude Include="Core\Renderer\IRenderer.hpp" />
     <ClInclude Include="Core\Renderer\IRendererCommand.hpp" />

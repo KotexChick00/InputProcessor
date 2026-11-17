@@ -15,6 +15,9 @@ namespace CoreEngine
         void Free(void* memory) override;
         void Clear() override;
 
+        // Only the block area counts, the alignment padding before the first block does not.
+        bool Contains(const void* address) const override;
+
         CORE_FORCE_INLINE size_t GetBlockSize() const { return mBlockSize; }
         CORE_FORCE_INLINE size_t GetBlockCount() const { return mBlockCount; }
         CORE_FORCE_INLINE size_t GetFreeBlockCount() const { return mBlockCount - mAllocatedCount; }

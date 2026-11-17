@@ -34,6 +34,7 @@
     <ClCompile Include="Core\Memory\StackAllocator.cpp" />
     <ClCompile Include="Core\Memory\PoolAllocator.cpp" />
     <ClCompile Include="Core\Memory\MemoryManager.cpp" />
+    <ClCompile Include="Core\Memory\MemoryChunkManager.cpp" />
     <ClCompile Include="Domain\Model\AdsMaterial.cpp" />
     <ClCompile Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.cpp" />
     <ClCompile Include="Domain\Model\RenderModel.cpp" />
@@ -115,6 +116,7 @@
     <ClInclude Include="Core\Memory\StackAllocator.hpp" />
     <ClInclude Include="Core\Memory\PoolAllocator.hpp" />
     <ClInclude Include="Core\Memory\MemoryManager.hpp" />
+    <ClInclude Include="Core\Memory\MemoryChunkManager.hpp" />
     <ClInclude Include="Domain\Model\AdsMaterial.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpModelImporter.hpp" />
     <ClInclude Include="Domain\Model\Importers\AssimpModelImporter\AssimpBoundingBox.h" />

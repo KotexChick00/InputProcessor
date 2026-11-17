@@ -21,6 +21,7 @@
 #include <Memory/StackAllocator.hpp>
 #include <Memory/PoolAllocator.hpp>
 #include <Memory/MemoryManager.hpp>
+#include <Memory/MemoryChunkManager.hpp>
 #include <Time/Time.hpp>
 #include <cmath>
 #include <cstdint>
@@ -341,6 +342,65 @@ static void TestMemoryManager()
     manager.FreeOnStack(a);
 }
 
+static void TestMemoryChunkManager()
+{
+    MemoryChunkManagerConfiguration config;
+    config.StackAllocateSize = 1024;
+    config.BlockSize = 24;
+    config.MaxBlockCountPerChunk = 2;
+    config.BlockAlignment = 16;
+    MemoryChunkManager manager(config);
+    CHECK(manager.GetChunkCount() == 0);
+
+    // The first chunk is created on demand and holds MaxBlockCountPerChunk blocks.
+    void* first = manager.Allocate();
+    void* second = manager.Allocate();
+    CHECK(first && second && first != second);
+    CHECK(IsAligned(first, 16) && IsAligned(second, 16));
+    CHECK(manager.GetChunkCount() == 1);
+
+    // A full chunk makes the manager create a new one.
+    void* third = manager.Allocate();
+    void* fourth = manager.Allocate();
+    CHECK(third && fourth && third != fourth);
+    CHECK(third != first && third != second);
+    CHECK(manager.GetChunkCount() == 2);
+
+    // Blocks are writable without touching their neighbours.
+    void* blocks[] = {first, second, third, fourth};
+    for (size_t i = 0; i < 4; ++i) std::memset(blocks[i], static_cast<int>(0x20 + i), 24);
+    for (size_t i = 0; i < 4; ++i) CHECK(static_cast<unsigned char*>(blocks[i])[23] == 0x20 + i);
+
+    // Free finds the owning chunk, and the freed block is reused before a new chunk is made.
+    manager.Free(first);
+    CHECK(manager.Allocate() == first);
+    CHECK(manager.GetChunkCount() == 2);
+
+    // Unknown addresses and nullptr are ignored (an error is logged for the former).
+    int notOwned = 0;
+    manager.Free(&notOwned);
+    manager.Free(nullptr);
+
+    // Freeing a block of the second chunk goes to that chunk.
+    manager.Free(fourth);
+    CHECK(manager.Allocate() == fourth);
+    CHECK(manager.GetChunkCount() == 2);
+
+    // Clear destroys every chunk; new chunks are created again on demand.
+    manager.Clear();
+    CHECK(manager.GetChunkCount() == 0);
+    CHECK(manager.Allocate() != nullptr);
+    CHECK(manager.GetChunkCount() == 1);
+
+    // When the stack can't hold another chunk, Allocate returns nullptr.
+    MemoryChunkManagerConfiguration smallConfig = config;
+    smallConfig.StackAllocateSize = 128; // room for one MemoryChunk object only (x64)
+    MemoryChunkManager smallManager(smallConfig);
+    CHECK(smallManager.Allocate() && smallManager.Allocate());
+    CHECK(smallManager.Allocate() == nullptr);
+    CHECK(smallManager.GetChunkCount() == 1);
+}
+
 static void TestPoolAllocator()
 {
     constexpr size_t BlockCount = 4;
@@ -395,6 +455,12 @@ static void TestPoolAllocator()
     CHECK(a && b && a != b);
     CHECK(IsAligned(a, alignof(std::max_align_t)) && IsAligned(b, alignof(std::max_align_t)));
     CHECK(reinterpret_cast<uintptr_t>(b) - reinterpret_cast<uintptr_t>(a) >= sizeof(void*));
+
+    // Contains only accepts addresses inside the allocator's own memory.
+    int notOwned = 0;
+    CHECK(pool.Contains(blocks[0]) && pool.Contains(blocks[BlockCount - 1]));
+    CHECK(tinyPool.Contains(a) && !pool.Contains(a));
+    CHECK(!pool.Contains(&notOwned));
 }
 
 // -----------------------------------------------------------------------------
@@ -773,6 +839,7 @@ int main(int argc, char** argv)
         {"StackAllocator", TestStackAllocator},
         {"PoolAllocator", TestPoolAllocator},
         {"MemoryManager", TestMemoryManager},
+        {"MemoryChunkManager", TestMemoryChunkManager},
         {"WxKeyboardInput", TestWxKeyboardInput},
         {"WxMouseInput", TestWxMouseInput},
         {"ApplicationLoop", TestApplicationLoop},

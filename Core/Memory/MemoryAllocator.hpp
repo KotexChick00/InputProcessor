@@ -17,9 +17,17 @@ namespace CoreEngine
             mStartAddress = nullptr;
         }
 
+        // Owns raw malloc memory: copying would leak or double free it.
+        MemoryAllocator(const MemoryAllocator&) = delete;
+        MemoryAllocator& operator=(const MemoryAllocator&) = delete;
+
         virtual void* Allocate(size_t memorySize, uint8_t alignment) = 0;
         virtual void Free(void* memory) = 0;
         virtual void Clear() = 0;
+
+        // True when the address lies inside the memory range managed by this allocator.
+        // Default: [start address, start address + memory size). Override when only part of the memory is handed out.
+        virtual bool Contains(const void* address) const;
 
     protected:
         static bool CheckIsPowerOfTwo(uint8_t alignment);

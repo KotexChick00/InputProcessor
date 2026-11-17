@@ -86,12 +86,20 @@ namespace CoreEngine
         return (stride + alignment - 1) & ~static_cast<size_t>(alignment - 1);
     }
 
-    bool PoolAllocator::CheckIsBlockAddress(const void* address) const
+    bool PoolAllocator::Contains(const void* address) const
     {
         uintptr_t ipAddress = reinterpret_cast<uintptr_t>(address);
         uintptr_t ipFirstBlock = reinterpret_cast<uintptr_t>(mFirstBlock);
 
-        if (ipAddress < ipFirstBlock || ipAddress >= ipFirstBlock + mBlockCount * mBlockStride) return false;
+        return ipAddress >= ipFirstBlock && ipAddress < ipFirstBlock + mBlockCount * mBlockStride;
+    }
+
+    bool PoolAllocator::CheckIsBlockAddress(const void* address) const
+    {
+        if (!PoolAllocator::Contains(address)) return false;
+
+        uintptr_t ipAddress = reinterpret_cast<uintptr_t>(address);
+        uintptr_t ipFirstBlock = reinterpret_cast<uintptr_t>(mFirstBlock);
         return (ipAddress - ipFirstBlock) % mBlockStride == 0;
     }
 }
