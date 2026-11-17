@@ -369,6 +369,7 @@ assets/tests/test_engine_logic
 /build/
 /CMakeUserPresets.json
 
-# Local-only: editor settings and personal docs
+# Local-only: editor settings and personal docs (except shared write-ups listed below)
 .vscode/
-docs/
+docs/*
+!docs/sua-loi-input-wx.md
