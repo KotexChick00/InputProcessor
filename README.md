@@ -11,6 +11,8 @@ Chương trình chính là target `DomainDemo` (`main.cpp`): viewer mô hình 3D
 
 Ứng dụng dùng backend wxWidgets mặc định, qua các interface window/input/application có sẵn. Một vòng lặp của engine dispatch sự kiện wx, cập nhật camera, render, reset input rồi swap buffers. GLFW vẫn có thể được chọn bằng cấu hình, nhưng không được khởi động khi dùng wx.
 
+Cửa sổ có menu **File → Open Model...** (phím tắt Ctrl+O). Cửa sổ chỉ phát yêu cầu "người dùng muốn mở file" qua `IWindow::OnOpenFileRequestCallback`; hộp thoại (`IWindow::ShowOpenFileDialog`, đường dẫn trả về là UTF-8) và việc mở model nằm ở tầng ứng dụng (`main.cpp`) — Core không phụ thuộc Domain. Hủy hộp thoại hoặc model lỗi thì cảnh hiện tại giữ nguyên.
+
 Đọc `.gltf` và `.glb` bằng Assimp: mesh, transform của node, normal, UV, vertex color, màu base color và texture ngoài hoặc texture PNG/JPEG nhúng. Viewer hiển thị mô hình tĩnh với ánh sáng đơn giản; animation, skinning và pipeline PBR đầy đủ nằm ngoài phạm vi nhiệm vụ trong ảnh.
 
 Phần camera dùng nguyên namespace `Domain::Camera::OrbitCamera`, `InputMap` và state machine của nhánh `feat/domain` (`35c6905`). Các TODO bàn phím được hoàn thành trong `States/OrbitingState.cpp`, `PanningState.cpp` và `DollyingState.cpp`; không còn controller riêng ở `Domain/Camera/`.
@@ -107,6 +109,7 @@ Trên Windows với generator Visual Studio, executable Debug nằm trong `build
 | Dolly (thay đổi khoảng cách) | Giữ chuột giữa và kéo, hoặc PageUp / PageDown |
 | Căn lại camera theo mô hình | R |
 | Bật/tắt wireframe / texture / ánh sáng | 1 / 2 / 3 |
+| Mở mô hình khác | Menu File → Open Model..., hoặc Ctrl+O |
 | Lưu / nạp trạng thái xem | F5 / F9 |
 | Đóng ứng dụng | Escape hoặc nút đóng cửa sổ |
 

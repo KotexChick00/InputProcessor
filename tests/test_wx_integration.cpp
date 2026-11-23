@@ -20,7 +20,21 @@
 class TrackingWindow : public CoreEngine::WxWindow {
 public:
     int closeCalls = 0;
+    int openFileRequests = 0;
+    int dialogCalls = 0;
+    CoreEngine::WindowFileDialogOptions lastDialogOptions;
+    std::string cannedOpenPath; // empty: dialog reports "user cancelled"
+
     void Close() override { ++closeCalls; WxWindow::Close(); }
+
+    // Must not show a real modal dialog (not automatable): return the canned
+    // path instead, so the client flow around the dialog stays testable.
+    bool ShowOpenFileDialog(const CoreEngine::WindowFileDialogOptions& options, std::string& outPath) override {
+        ++dialogCalls;
+        lastDialogOptions = options;
+        outPath = cannedOpenPath;
+        return !cannedOpenPath.empty();
+    }
 };
 
 class InputApplication : public CoreEngine::Application {
@@ -102,6 +116,21 @@ public:
             height = event.GetHeight();
             return false;
         });
+
+        // The window owns a File menu with an "Open Model..." item bound to Ctrl+O.
+        wxMenuBar* menuBar = frame->GetMenuBar();
+        assert(menuBar);
+        wxMenuItem* openItem = menuBar->FindItem(wxID_OPEN);
+        assert(openItem && openItem->GetItemLabelText() == "Open Model...");
+        const wxAcceleratorEntry* accelerator = openItem->GetAccel();
+        assert(accelerator && accelerator->GetFlags() == wxACCEL_CTRL && accelerator->GetKeyCode() == 'O');
+
+        // Firing the menu command before a callback is registered must be a no-op.
+        wxCommandEvent early(wxEVT_MENU, wxID_OPEN);
+        frame->GetEventHandler()->ProcessEvent(early);
+        assert(window->openFileRequests == 0);
+
+        window->OnOpenFileRequestCallback([this]() { ++openRequests; });
     }
 
     void OnLoopClient() override {
@@ -197,6 +226,31 @@ public:
             nextDown.SetTimestamp(123999);
             canvas->GetEventHandler()->ProcessEvent(nextDown);
             assert(input.KeyboardInput->CheckIsPressed(KeyboardKey::Q));
+            // Menu command reaches the registered callback (same path as a real click).
+            assert(openRequests == 0);
+            wxCommandEvent openCmd(wxEVT_MENU, wxID_OPEN);
+            frame->GetEventHandler()->ProcessEvent(openCmd);
+            assert(openRequests == 1);
+
+            // The dialog API round-trips options and returns the chosen path...
+            CoreEngine::WindowFileDialogOptions options;
+            options.Title = "Unit test dialog";
+            options.Filters = "GLTF (*.gltf)|*.gltf";
+            options.StartDirectory = TEST_ASSET_DIR;
+            std::string chosenPath;
+            window->cannedOpenPath = TEST_ASSET_DIR "/embedded.glb";
+            assert(window->ShowOpenFileDialog(options, chosenPath));
+            assert(chosenPath == window->cannedOpenPath);
+            assert(window->lastDialogOptions.Title == options.Title);
+            assert(window->lastDialogOptions.Filters == options.Filters);
+            assert(window->lastDialogOptions.StartDirectory == options.StartDirectory);
+
+            // ...and cancelling (empty canned path) returns false without a path.
+            window->cannedOpenPath.clear();
+            assert(!window->ShowOpenFileDialog(options, chosenPath));
+            assert(chosenPath.empty());
+            assert(window->dialogCalls == 2);
+
             if (requestClose) RequestClose();
             else frame->Close(); // Native close event must request shutdown without recursion.
         }
@@ -223,6 +277,7 @@ public:
 private:
     TrackingWindow* window;
     bool requestClose;
+    int openRequests = 0;
     wxFrame* frame = nullptr;
     wxGLCanvas* canvas = nullptr;
     unsigned int width = 0, height = 0;

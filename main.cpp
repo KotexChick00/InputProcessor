@@ -56,6 +56,10 @@ namespace {
 			});
 			mViewer = std::make_unique<ViewerController>(renderer->GetResourceManager(), cameras);
 
+			// Menu "File -> Open Model..." (Ctrl+O): cửa sổ chỉ phát yêu cầu mở file,
+			// hộp thoại và việc mở model nằm ở đây (tầng ứng dụng) — Core không biết Domain.
+			GetWindow()->OnOpenFileRequestCallback([this]() { PromptOpenModel(); });
+
 			// Có file trạng thái xem thì mở theo nó (model + camera + tuỳ chọn), không thì mở model.
 			std::error_code code;
 			if (!mViewFile.empty() && std::filesystem::exists(PathFromUtf8(mViewFile), code)) {
@@ -70,15 +74,15 @@ namespace {
 		void OnLoopClient() override {
 			if (auto* keyboard = GetInput().KeyboardInput) {
 				// JustPressed: một cú bấm Esc nhanh (nhấn + nhả trong cùng frame) cũng đóng được.
-				if (keyboard->CheckIsSinglePressed(KeyboardKey::Escape) || keyboard->CheckIsPressed(KeyboardKey::Escape)) RequestClose();
-				if (keyboard->CheckIsSinglePressed(KeyboardKey::R)) mViewer->FitCamera();
+				if (keyboard->CheckIsJustPressed(KeyboardKey::Escape) || keyboard->CheckIsPressed(KeyboardKey::Escape)) RequestClose();
+				if (keyboard->CheckIsJustPressed(KeyboardKey::R)) mViewer->FitCamera();
 
 				auto& settings = mViewer->GetRenderSettings();
-				if (keyboard->CheckIsSinglePressed(KeyboardKey::One)) Toggle("Wireframe", settings.Wireframe);
-				if (keyboard->CheckIsSinglePressed(KeyboardKey::Two)) Toggle("Textures", settings.Textures);
-				if (keyboard->CheckIsSinglePressed(KeyboardKey::Three)) Toggle("Lighting", settings.Lighting);
-				if (keyboard->CheckIsSinglePressed(KeyboardKey::F5)) SaveView();
-				if (keyboard->CheckIsSinglePressed(KeyboardKey::F9)) LoadView();
+				if (keyboard->CheckIsJustPressed(KeyboardKey::One)) Toggle("Wireframe", settings.Wireframe);
+				if (keyboard->CheckIsJustPressed(KeyboardKey::Two)) Toggle("Textures", settings.Textures);
+				if (keyboard->CheckIsJustPressed(KeyboardKey::Three)) Toggle("Lighting", settings.Lighting);
+				if (keyboard->CheckIsJustPressed(KeyboardKey::F5)) SaveView();
+				if (keyboard->CheckIsJustPressed(KeyboardKey::F9)) LoadView();
 			}
 
 			ECS::Update(GetTime()->GetDeltaTime());
@@ -102,6 +106,27 @@ namespace {
 			}
 			PrintStats();
 			return true;
+		}
+
+		// Hộp thoại chọn model: hủy hoặc file lỗi thì giữ nguyên cảnh hiện tại. Mở được thì
+		// chuyển sang file trạng thái xem riêng của model mới (<tên model>.view.json),
+		// đúng quy ước như khi mở từ dòng lệnh; thư mục mở dialog là thư mục model hiện tại.
+		void PromptOpenModel() {
+			CoreEngine::WindowFileDialogOptions options;
+			options.Title = "Open model";
+			options.Filters = "3D models (*.gltf;*.glb;*.obj;*.fbx)|*.gltf;*.glb;*.obj;*.fbx"
+				"|GLTF/GLB (*.gltf;*.glb)|*.gltf;*.glb"
+				"|Wavefront OBJ (*.obj)|*.obj"
+				"|FBX (*.fbx)|*.fbx"
+				"|All files (*.*)|*.*";
+			if (!mPath.empty()) options.StartDirectory = PathToUtf8(PathFromUtf8(mPath).parent_path());
+
+			std::string path;
+			if (!GetWindow()->ShowOpenFileDialog(options, path)) return;
+			if (OpenModel(path)) {
+				mPath = path;
+				mViewFile = PathToUtf8(PathFromUtf8(path).stem()) + ".view.json";
+			}
 		}
 
 		// Lưu trạng thái xem (không đụng tới file model).
@@ -138,6 +163,7 @@ namespace {
 
 		static void PrintControls() {
 			std::cout << "Controls\n"
+				<< "  File menu / Ctrl+O      open another model\n"
 				<< "  Left drag / arrows      orbit\n"
 				<< "  Right drag / W A S D    pan\n"
 				<< "  Middle drag / PgUp PgDn dolly\n"

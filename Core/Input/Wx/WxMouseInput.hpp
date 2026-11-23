@@ -16,7 +16,7 @@ namespace CoreEngine
 
         bool CheckIsPressed(MouseButton mouseButton) override;
         bool CheckIsReleased(MouseButton mouseButton) override;
-        bool CheckIsSinglePressed(MouseButton mouseButton) override;
+        bool CheckIsJustPressed(MouseButton mouseButton) override;
 
         MouseButtonState GetMouseButtonState(MouseButton mouseButton) override;
 

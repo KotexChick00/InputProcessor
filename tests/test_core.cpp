@@ -631,6 +631,15 @@ public:
     void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override { mScroll = callback; }
     void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) override { mResize = callback; }
 
+    bool ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath) override
+    {
+        (void)options;
+        outPath.clear();
+        return false; // The injected fake window never shows a real dialog.
+    }
+
+    void OnOpenFileRequestCallback(std::function<void()> callback) override { mOpenFileRequest = callback; }
+
     InputState GetInput() const override
     {
         return {const_cast<WxKeyboardInput*>(&mKeyboardInput), const_cast<WxMouseInput*>(&mMouseInput)};
@@ -665,6 +674,7 @@ private:
     std::function<void(const WindowKeyboardKeyEventContext&)> mKeyboard;
     std::function<void(const WindowMouseScrollEventContext&)> mScroll;
     std::function<void(const WindowSizeEventContext&)> mResize;
+    std::function<void()> mOpenFileRequest;
 };
 
 class TestApplication : public Application

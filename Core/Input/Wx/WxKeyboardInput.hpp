@@ -16,7 +16,7 @@ namespace CoreEngine
 
         bool CheckIsPressed(KeyboardKey key) override;
         bool CheckIsReleased(KeyboardKey key) override;
-        bool CheckIsSinglePressed(KeyboardKey key) override;
+        bool CheckIsJustPressed(KeyboardKey key) override;
 
         KeyState GetKeyState(KeyboardKey key) override;
 

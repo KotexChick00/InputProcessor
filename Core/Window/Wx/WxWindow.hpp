@@ -50,6 +50,9 @@ namespace CoreEngine
         void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override;
         void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) override;
 
+        bool ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath) override;
+        void OnOpenFileRequestCallback(std::function<void()> callback) override;
+
         InputState GetInput() const override;
         float GetCurrentSeconds() override;
 
@@ -66,6 +69,8 @@ namespace CoreEngine
         CORE_FORCE_INLINE std::function<void(const WindowKeyboardKeyEventContext&)> GetKeyboardEventCallback() const { return mKeyboardCallback; }
         CORE_FORCE_INLINE std::function<void(const WindowMouseScrollEventContext&)> GetMouseScrollEventCallback() const { return mMouseScrollCallback; }
         CORE_FORCE_INLINE std::function<void(const WindowSizeEventContext&)> GetWindowResizeEventCallback() const { return mWindowResizeCallback; }
+        // Used by the frame's menu handler (defined inline like the accessors above).
+        CORE_FORCE_INLINE std::function<void()> GetOpenFileRequestCallback() const { return mOpenFileRequestCallback; }
 
     private:
         friend class WxEngineCanvas;
@@ -85,6 +90,7 @@ namespace CoreEngine
         std::function<void(const WindowKeyboardKeyEventContext&)> mKeyboardCallback = nullptr;
         std::function<void(const WindowMouseScrollEventContext&)> mMouseScrollCallback = nullptr;
         std::function<void(const WindowSizeEventContext&)> mWindowResizeCallback = nullptr;
+        std::function<void()> mOpenFileRequestCallback = nullptr;
 
         bool mShouldClose = false;
         bool mOwnsWxApp = false;

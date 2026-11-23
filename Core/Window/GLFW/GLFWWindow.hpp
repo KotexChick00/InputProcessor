@@ -25,6 +25,9 @@ namespace CoreEngine
         void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override;
         void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) override;
 
+        bool ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath) override;
+        void OnOpenFileRequestCallback(std::function<void()> callback) override;
+
         CORE_FORCE_INLINE std::function<void(const WindowMouseMoveEventContext&)> GetMouseMoveEventCallback() const { return mMouseMoveEventCallback; }
         CORE_FORCE_INLINE std::function<void(const WindowMouseButtonEventContext&)> GetMouseButtonEventCallback() const { return mMouseButtonCallback; }
         CORE_FORCE_INLINE std::function<void(const WindowKeyboardKeyEventContext&)> GetKeyboardKeyEventCallback() const { return mWindowKeyboardKeyCallback; }
@@ -47,6 +50,7 @@ namespace CoreEngine
         std::function<void(const WindowKeyboardKeyEventContext&)> mWindowKeyboardKeyCallback = nullptr;
         std::function<void(const WindowMouseScrollEventContext&)> mMouseScrollCallback = nullptr;
         std::function<void(const WindowSizeEventContext&)> mWindowResizeEventContext = nullptr;
+        std::function<void()> mOpenFileRequestCallback = nullptr;
 
         Unique<GLFWKeyBoardInput> mKeyboardInput = nullptr;
         Unique<GLFWMouseInput> mMouseInput = nullptr;

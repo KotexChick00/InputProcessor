@@ -215,6 +215,21 @@ namespace CoreEngine
         mWindowResizeEventContext = callback;
     }
 
+    // The GLFW backend has no menu bar, so no open-file request is ever
+    // generated; the dialog is a no-op that reports "cancelled" until a
+    // GLFW implementation is needed.
+    bool GLFWWindow::ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath)
+    {
+        (void)options;
+        outPath.clear();
+        return false;
+    }
+
+    void GLFWWindow::OnOpenFileRequestCallback(std::function<void()> callback)
+    {
+        mOpenFileRequestCallback = std::move(callback);
+    }
+
     InputState GLFWWindow::GetInput() const
     {
         return {mKeyboardInput.get(), mMouseInput.get()};

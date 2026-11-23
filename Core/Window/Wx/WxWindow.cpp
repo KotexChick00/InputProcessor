@@ -7,6 +7,8 @@
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include <wx/evtloop.h>
+#include <wx/menu.h>
+#include <wx/filedlg.h>
 #include <stdexcept>
 
 namespace CoreEngine
@@ -30,6 +32,7 @@ namespace CoreEngine
         {
             (void)size; // size applied via SetClientSize below; passed for API symmetry.
             Bind(wxEVT_CLOSE_WINDOW, &WxEngineFrame::OnClose, this);
+            CreateFileMenu();
         }
 
     private:
@@ -39,6 +42,33 @@ namespace CoreEngine
             if (mOwner) mOwner->Close();
             // Preserve the GL context until application shutdown releases GPU resources.
             if (evt.CanVeto()) evt.Veto();
+        }
+
+        // ------------------------------------------------------------------
+        // File menu
+        //
+        // The frame only owns the menu UI. Choosing "Open Model..." (or
+        // pressing its Ctrl+O accelerator, parsed by wxWidgets from the label)
+        // reports the request to the client through
+        // WxWindow::OnOpenFileRequestCallback; the client shows the dialog via
+        // IWindow::ShowOpenFileDialog and decides what to load.
+        // ------------------------------------------------------------------
+        void CreateFileMenu()
+        {
+            wxMenuBar* menuBar = new wxMenuBar();
+            wxMenu* fileMenu = new wxMenu();
+            fileMenu->Append(wxID_OPEN, "&Open Model...\tCtrl+O",
+                             "Open a 3D model file (GLTF, GLB, OBJ, FBX)");
+            menuBar->Append(fileMenu, "&File");
+            SetMenuBar(menuBar);
+            Bind(wxEVT_MENU, &WxEngineFrame::OnOpenModel, this, wxID_OPEN);
+        }
+
+        void OnOpenModel(wxCommandEvent&)
+        {
+            if (!mOwner) return;
+            auto callback = mOwner->GetOpenFileRequestCallback();
+            if (callback) callback();
         }
 
         WxWindow* mOwner = nullptr;
@@ -509,6 +539,35 @@ namespace CoreEngine
             auto scale = mGLCanvas->GetContentScaleFactor();
             callback({static_cast<unsigned int>(size.x * scale), static_cast<unsigned int>(size.y * scale)});
         }
+    }
+
+    // -------------------------------------------------------------------------
+
+    bool WxWindow::ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath)
+    {
+        outPath.clear();
+        if (!mFrame) return false; // Init() not called: there is no window to host the dialog.
+
+        wxString filter = wxString::FromUTF8(options.Filters.c_str());
+        if (filter.empty()) filter = wxFileSelectorDefaultWildcardStr;
+        wxFileDialog dialog(mFrame,
+                            wxString::FromUTF8(options.Title.c_str()),
+                            wxString::FromUTF8(options.StartDirectory.c_str()),
+                            wxString(),
+                            filter,
+                            wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+        // ShowModal runs a nested event loop; afterwards restore our GL context
+        // before the caller uploads textures or renders anything.
+        const bool chosen = dialog.ShowModal() == wxID_OK;
+        if (mGLCanvas && mGLContext) mGLCanvas->SetCurrent(*mGLContext);
+        if (!chosen) return false;
+        outPath = dialog.GetPath().ToStdString(wxConvUTF8);
+        return !outPath.empty();
+    }
+
+    void WxWindow::OnOpenFileRequestCallback(std::function<void()> callback)
+    {
+        mOpenFileRequestCallback = std::move(callback);
     }
 
     // -------------------------------------------------------------------------
