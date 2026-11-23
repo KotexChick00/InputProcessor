@@ -70,15 +70,15 @@ namespace {
 		void OnLoopClient() override {
 			if (auto* keyboard = GetInput().KeyboardInput) {
 				// JustPressed: một cú bấm Esc nhanh (nhấn + nhả trong cùng frame) cũng đóng được.
-				if (keyboard->CheckIsJustPressed(KeyboardKey::Escape) || keyboard->CheckIsPressed(KeyboardKey::Escape)) RequestClose();
-				if (keyboard->CheckIsJustPressed(KeyboardKey::R)) mViewer->FitCamera();
+				if (keyboard->CheckIsSinglePressed(KeyboardKey::Escape) || keyboard->CheckIsPressed(KeyboardKey::Escape)) RequestClose();
+				if (keyboard->CheckIsSinglePressed(KeyboardKey::R)) mViewer->FitCamera();
 
 				auto& settings = mViewer->GetRenderSettings();
-				if (keyboard->CheckIsJustPressed(KeyboardKey::One)) Toggle("Wireframe", settings.Wireframe);
-				if (keyboard->CheckIsJustPressed(KeyboardKey::Two)) Toggle("Textures", settings.Textures);
-				if (keyboard->CheckIsJustPressed(KeyboardKey::Three)) Toggle("Lighting", settings.Lighting);
-				if (keyboard->CheckIsJustPressed(KeyboardKey::F5)) SaveView();
-				if (keyboard->CheckIsJustPressed(KeyboardKey::F9)) LoadView();
+				if (keyboard->CheckIsSinglePressed(KeyboardKey::One)) Toggle("Wireframe", settings.Wireframe);
+				if (keyboard->CheckIsSinglePressed(KeyboardKey::Two)) Toggle("Textures", settings.Textures);
+				if (keyboard->CheckIsSinglePressed(KeyboardKey::Three)) Toggle("Lighting", settings.Lighting);
+				if (keyboard->CheckIsSinglePressed(KeyboardKey::F5)) SaveView();
+				if (keyboard->CheckIsSinglePressed(KeyboardKey::F9)) LoadView();
 			}
 
 			ECS::Update(GetTime()->GetDeltaTime());

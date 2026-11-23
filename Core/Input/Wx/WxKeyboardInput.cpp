@@ -26,7 +26,7 @@ namespace CoreEngine
         return !CheckIsPressed(key);
     }
 
-    bool WxKeyboardInput::CheckIsJustPressed(KeyboardKey key)
+    bool WxKeyboardInput::CheckIsSinglePressed(KeyboardKey key)
     {
         auto it = mPressedThisFrame.find(key);
         return it != mPressedThisFrame.end() && it->second;

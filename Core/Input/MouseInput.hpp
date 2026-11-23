@@ -11,7 +11,7 @@ namespace CoreEngine
 
         virtual bool CheckIsPressed(MouseButton mouseButton) = 0;
         virtual bool CheckIsReleased(MouseButton mouseButton) = 0;
-        virtual bool CheckIsJustPressed(MouseButton mouseButton) = 0;
+        virtual bool CheckIsSinglePressed(MouseButton mouseButton) = 0;
 
         virtual MouseButtonState GetMouseButtonState(MouseButton mouseButton) = 0;
 

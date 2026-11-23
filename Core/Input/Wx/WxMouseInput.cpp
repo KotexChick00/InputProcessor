@@ -28,7 +28,7 @@ namespace CoreEngine
         return !CheckIsPressed(button);
     }
 
-    bool WxMouseInput::CheckIsJustPressed(MouseButton button)
+    bool WxMouseInput::CheckIsSinglePressed(MouseButton button)
     {
         auto it = mPressedThisFrame.find(button);
         return it != mPressedThisFrame.end() && it->second;

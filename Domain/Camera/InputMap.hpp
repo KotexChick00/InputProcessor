@@ -21,8 +21,8 @@ namespace Domain::Camera
 		bool IsJustPressed(TAction action, const CoreEngine::InputState& inputState) const
 		{
 			return QueryAction(action, inputState,
-				[&](CoreEngine::KeyboardKey key) { return inputState.KeyboardInput->CheckIsJustPressed(key); },
-				[&](CoreEngine::MouseButton button) { return inputState.MouseInput->CheckIsJustPressed(button); },
+				[&](CoreEngine::KeyboardKey key) { return inputState.KeyboardInput->CheckIsSinglePressed(key); },
+				[&](CoreEngine::MouseButton button) { return inputState.MouseInput->CheckIsSinglePressed(button); },
 				[&](MouseScrollDirection scrollDir) {
 					return IsScrolling(scrollDir, inputState);
 				});

@@ -11,7 +11,7 @@ namespace CoreEngine
 
         virtual bool CheckIsPressed(KeyboardKey key) = 0;
         virtual bool CheckIsReleased(KeyboardKey key) = 0;
-        virtual bool CheckIsJustPressed(KeyboardKey key) = 0;
+        virtual bool CheckIsSinglePressed(KeyboardKey key) = 0;
 
         virtual KeyState GetKeyState(KeyboardKey key) = 0;
 
