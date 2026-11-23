@@ -1,5 +1,7 @@
 #pragma once
 #include <Input/InputState.hpp>
+#include <filesystem>
+#include <optional>
 #include <pch.h>
 
 namespace CoreEngine
@@ -208,15 +210,10 @@ namespace CoreEngine
         unsigned int Height;
     };
 
-    // Options for a modal open-file dialog (IWindow::ShowOpenFileDialog).
-    // Filters uses the "Description|*.ext1;*.ext2|..." pair format separated
-    // by '|'; each backend translates it to its platform's native format.
-    // An empty Filters string means "every file".
-    struct WindowFileDialogOptions
+    // Đường dẫn file người dùng vừa chọn (menu File → Open, hộp thoại hệ thống).
+    struct WindowFileSelectedEventContext
     {
-        std::string Title;
-        std::string StartDirectory; // directory the dialog opens in (empty = system default)
-        std::string Filters;
+        std::filesystem::path Path;
     };
 
     class CORE_API IWindowVisitor;
@@ -237,18 +234,12 @@ namespace CoreEngine
         virtual void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) = 0;
         virtual void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) = 0;
 
-        // Shows a modal open-file dialog (blocks until the user picks a file or
-        // cancels). Returns true and fills outPath (UTF-8) when a file was
-        // chosen, false when the user cancelled. Must be called on the main
-        // thread, e.g. from an OnOpenFileRequestCallback handler.
-        virtual bool ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath) = 0;
+        // Hiện hộp thoại hệ thống chọn file mở. Trả về std::nullopt khi người dùng bấm Cancel.
+        // wildcard theo định dạng wxWidgets: "Mô tả|*.a;*.b|Mô tả khác|*.c".
+        virtual std::optional<std::filesystem::path> ShowOpenFileDialog(const std::string& caption, const std::string& wildcard) = 0;
 
-        // Registers the callback invoked when the user asks to open a file from
-        // the window's own UI (a "File -> Open Model..." menu item or its
-        // Ctrl+O accelerator). The callback runs inside PollEvents; the client
-        // decides what to do (typically call ShowOpenFileDialog there). The
-        // window layer only reports the request and never touches client state.
-        virtual void OnOpenFileRequestCallback(std::function<void()> callback) = 0;
+        // Callback bắn ra khi người dùng đã chọn xong một file (ví dụ qua menu File → Open).
+        virtual void OnFileSelectedEventCallback(std::function<void(const WindowFileSelectedEventContext&)> callback) = 0;
 
         virtual InputState GetInput() const = 0;
 

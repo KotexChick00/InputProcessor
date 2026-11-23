@@ -609,6 +609,7 @@ public:
             if (mMouseButton) mMouseButton({WindowMouseButton::Button2, WindowMouseButtonState::Released});
             if (mScroll) mScroll({1.5, -2.0});
             if (mMouseMove) mMouseMove({10.0, 20.0});
+            if (mFileSelected) mFileSelected({std::filesystem::path("assets/teapot.gltf")});
         }
         else if (mFrame == 2)
         {
@@ -631,14 +632,14 @@ public:
     void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override { mScroll = callback; }
     void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) override { mResize = callback; }
 
-    bool ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath) override
+    std::optional<std::filesystem::path> ShowOpenFileDialog(const std::string& caption, const std::string& wildcard) override
     {
-        (void)options;
-        outPath.clear();
-        return false; // The injected fake window never shows a real dialog.
+        (void)caption;
+        (void)wildcard;
+        return std::nullopt;
     }
 
-    void OnOpenFileRequestCallback(std::function<void()> callback) override { mOpenFileRequest = callback; }
+    void OnFileSelectedEventCallback(std::function<void(const WindowFileSelectedEventContext&)> callback) override { mFileSelected = callback; }
 
     InputState GetInput() const override
     {
@@ -674,7 +675,7 @@ private:
     std::function<void(const WindowKeyboardKeyEventContext&)> mKeyboard;
     std::function<void(const WindowMouseScrollEventContext&)> mScroll;
     std::function<void(const WindowSizeEventContext&)> mResize;
-    std::function<void()> mOpenFileRequest;
+    std::function<void(const WindowFileSelectedEventContext&)> mFileSelected;
 };
 
 class TestApplication : public Application
@@ -721,6 +722,11 @@ public:
         dispatcher->AddEventListener<MouseScrollEventContext>([this](const MouseScrollEventContext& e)
         {
             Events.push_back("scroll " + std::to_string(e.GetDeltaX()) + " " + std::to_string(e.GetDeltaY()));
+            return false;
+        });
+        dispatcher->AddEventListener<FileSelectedEventContext>([this](const FileSelectedEventContext& e)
+        {
+            Events.push_back("file selected " + e.GetPath().generic_string());
             return false;
         });
     }
@@ -785,7 +791,8 @@ static void TestApplicationLoop()
 
     // Raw window events are translated into engine events, in emission order.
     std::vector<std::string> expected = {"resize 800x600", "key A pressed", "mouse right released",
-                                         "scroll " + std::to_string(1.5) + " " + std::to_string(-2.0)};
+                                         "scroll " + std::to_string(1.5) + " " + std::to_string(-2.0),
+                                         "file selected assets/teapot.gltf"};
     CHECK(app.Events == expected);
 
     // Polled input flows through GetInput(), and EndFrame advances the state machine.

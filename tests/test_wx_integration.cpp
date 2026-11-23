@@ -20,20 +20,16 @@
 class TrackingWindow : public CoreEngine::WxWindow {
 public:
     int closeCalls = 0;
-    int openFileRequests = 0;
-    int dialogCalls = 0;
-    CoreEngine::WindowFileDialogOptions lastDialogOptions;
-    std::string cannedOpenPath; // empty: dialog reports "user cancelled"
-
+    // File dialog stub: the real WxWindow shows a modal wxFileDialog (not automatable);
+    // this override returns the canned path instead so the menu wiring can be tested.
+    std::optional<std::filesystem::path> cannedFile;
+    std::string dialogCaption;
+    std::string dialogWildcard;
     void Close() override { ++closeCalls; WxWindow::Close(); }
-
-    // Must not show a real modal dialog (not automatable): return the canned
-    // path instead, so the client flow around the dialog stays testable.
-    bool ShowOpenFileDialog(const CoreEngine::WindowFileDialogOptions& options, std::string& outPath) override {
-        ++dialogCalls;
-        lastDialogOptions = options;
-        outPath = cannedOpenPath;
-        return !cannedOpenPath.empty();
+    std::optional<std::filesystem::path> ShowOpenFileDialog(const std::string& caption, const std::string& wildcard) override {
+        dialogCaption = caption;
+        dialogWildcard = wildcard;
+        return cannedFile;
     }
 };
 
@@ -116,21 +112,11 @@ public:
             height = event.GetHeight();
             return false;
         });
-
-        // The window owns a File menu with an "Open Model..." item bound to Ctrl+O.
-        wxMenuBar* menuBar = frame->GetMenuBar();
-        assert(menuBar);
-        wxMenuItem* openItem = menuBar->FindItem(wxID_OPEN);
-        assert(openItem && openItem->GetItemLabelText() == "Open Model...");
-        const wxAcceleratorEntry* accelerator = openItem->GetAccel();
-        assert(accelerator && accelerator->GetFlags() == wxACCEL_CTRL && accelerator->GetKeyCode() == 'O');
-
-        // Firing the menu command before a callback is registered must be a no-op.
-        wxCommandEvent early(wxEVT_MENU, wxID_OPEN);
-        frame->GetEventHandler()->ProcessEvent(early);
-        assert(window->openFileRequests == 0);
-
-        window->OnOpenFileRequestCallback([this]() { ++openRequests; });
+        GetEventDispatcher()->AddEventListener<CoreEngine::FileSelectedEventContext>([this](const CoreEngine::FileSelectedEventContext& event) {
+            ++fileSelectedCount;
+            fileSelectedPath = event.GetPath();
+            return false;
+        });
     }
 
     void OnLoopClient() override {
@@ -184,6 +170,26 @@ public:
             controller->Update(0);
             controller->Update(0.1f);
             assert(camera.GetAzimuth() != 0);
+
+            // Menu File: item Open/Exit tồn tại, và menu event Open đi hết đường
+            // dialog (stub) → callback → EventDispatcher.
+            wxMenuBar* menuBar = frame->GetMenuBar();
+            assert(menuBar);
+            wxMenu* fileMenu = nullptr;
+            wxMenuItem* openItem = menuBar->FindItem(wxID_OPEN, &fileMenu);
+            assert(openItem && fileMenu && fileMenu->GetTitle().Lower().Contains("file"));
+            assert(menuBar->FindItem(wxID_EXIT));
+            window->cannedFile = std::filesystem::path(TEST_ASSET_DIR) / "embedded.glb";
+            wxCommandEvent openEvent(wxEVT_MENU, wxID_OPEN);
+            assert(frame->ProcessWindowEvent(openEvent));
+            assert(window->dialogCaption == "Open model");
+            assert(window->dialogWildcard.find("*.gltf") != std::string::npos);
+            assert(fileSelectedCount == 1);
+            assert(fileSelectedPath.filename() == "embedded.glb");
+            // Cancel (std::nullopt) không được phát sự kiện file.
+            window->cannedFile = std::nullopt;
+            assert(frame->ProcessWindowEvent(openEvent));
+            assert(fileSelectedCount == 1);
         } else if (frames == 1) {
             assert(!input.KeyboardInput->CheckIsJustPressed(KeyboardKey::R));
             assert(input.KeyboardInput->CheckIsPressed(KeyboardKey::R));
@@ -226,31 +232,6 @@ public:
             nextDown.SetTimestamp(123999);
             canvas->GetEventHandler()->ProcessEvent(nextDown);
             assert(input.KeyboardInput->CheckIsPressed(KeyboardKey::Q));
-            // Menu command reaches the registered callback (same path as a real click).
-            assert(openRequests == 0);
-            wxCommandEvent openCmd(wxEVT_MENU, wxID_OPEN);
-            frame->GetEventHandler()->ProcessEvent(openCmd);
-            assert(openRequests == 1);
-
-            // The dialog API round-trips options and returns the chosen path...
-            CoreEngine::WindowFileDialogOptions options;
-            options.Title = "Unit test dialog";
-            options.Filters = "GLTF (*.gltf)|*.gltf";
-            options.StartDirectory = TEST_ASSET_DIR;
-            std::string chosenPath;
-            window->cannedOpenPath = TEST_ASSET_DIR "/embedded.glb";
-            assert(window->ShowOpenFileDialog(options, chosenPath));
-            assert(chosenPath == window->cannedOpenPath);
-            assert(window->lastDialogOptions.Title == options.Title);
-            assert(window->lastDialogOptions.Filters == options.Filters);
-            assert(window->lastDialogOptions.StartDirectory == options.StartDirectory);
-
-            // ...and cancelling (empty canned path) returns false without a path.
-            window->cannedOpenPath.clear();
-            assert(!window->ShowOpenFileDialog(options, chosenPath));
-            assert(chosenPath.empty());
-            assert(window->dialogCalls == 2);
-
             if (requestClose) RequestClose();
             else frame->Close(); // Native close event must request shutdown without recursion.
         }
@@ -277,10 +258,11 @@ public:
 private:
     TrackingWindow* window;
     bool requestClose;
-    int openRequests = 0;
     wxFrame* frame = nullptr;
     wxGLCanvas* canvas = nullptr;
     unsigned int width = 0, height = 0;
+    int fileSelectedCount = 0;
+    std::filesystem::path fileSelectedPath;
     std::unique_ptr<Model::RenderModel> model;
     CoreEngine::IShader* shader = nullptr;
     const CoreEngine::InputState* inputState = nullptr;

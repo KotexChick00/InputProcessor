@@ -2,6 +2,8 @@
 
 Bản sửa lỗi Critical (C1–C18) từ code review. Mỗi mục có `file:line`, mô tả, lý do, và cách sửa.
 
+> **Ghi chú:** các mục C4/C5 đụng tới `Core/Window/GLFW/GLFWWindow.*` — backend GLFW sau đó đã bị **xóa hoàn toàn khỏi repo** (cùng `Core/Input/GLFW` và `Library/ImGui/imgui_impl_glfw.*`) vì wxWidgets là backend window duy nhất. Đọc C4/C5 như bối cảnh lịch sử của review, không còn file tương ứng trong cây mã nguồn.
+
 ## Giới hạn verify
 
 Sandbox Linux không có root để cài các thư viện hệ thống (wxWidgets, Assimp, GLFW, spdlog, stb, glm), và build vcpkg từ source vượt quá thời gian cho phép. Do đó, verify được thực hiện bằng **syntax-only check** (`g++ -std=c++20 -fsyntax-only`) với **stub headers** cho 6 thư viện còn thiếu. Điều này bắt được:

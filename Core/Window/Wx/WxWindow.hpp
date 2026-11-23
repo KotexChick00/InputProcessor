@@ -50,8 +50,12 @@ namespace CoreEngine
         void OnMouseSrollEventCallback(std::function<void(const WindowMouseScrollEventContext&)> callback) override;
         void OnWindowReiszeEventCallback(std::function<void(const WindowSizeEventContext&)> callback) override;
 
-        bool ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath) override;
-        void OnOpenFileRequestCallback(std::function<void()> callback) override;
+        std::optional<std::filesystem::path> ShowOpenFileDialog(const std::string& caption, const std::string& wildcard) override;
+        void OnFileSelectedEventCallback(std::function<void(const WindowFileSelectedEventContext&)> callback) override;
+
+        /// Runs the built-in File -> Open dialog (model file filter) and reports the
+        /// chosen path through the file-selected callback. Called by the menu bar.
+        void OpenModelFileDialog();
 
         InputState GetInput() const override;
         float GetCurrentSeconds() override;
@@ -69,8 +73,6 @@ namespace CoreEngine
         CORE_FORCE_INLINE std::function<void(const WindowKeyboardKeyEventContext&)> GetKeyboardEventCallback() const { return mKeyboardCallback; }
         CORE_FORCE_INLINE std::function<void(const WindowMouseScrollEventContext&)> GetMouseScrollEventCallback() const { return mMouseScrollCallback; }
         CORE_FORCE_INLINE std::function<void(const WindowSizeEventContext&)> GetWindowResizeEventCallback() const { return mWindowResizeCallback; }
-        // Used by the frame's menu handler (defined inline like the accessors above).
-        CORE_FORCE_INLINE std::function<void()> GetOpenFileRequestCallback() const { return mOpenFileRequestCallback; }
 
     private:
         friend class WxEngineCanvas;
@@ -90,7 +92,10 @@ namespace CoreEngine
         std::function<void(const WindowKeyboardKeyEventContext&)> mKeyboardCallback = nullptr;
         std::function<void(const WindowMouseScrollEventContext&)> mMouseScrollCallback = nullptr;
         std::function<void(const WindowSizeEventContext&)> mWindowResizeCallback = nullptr;
-        std::function<void()> mOpenFileRequestCallback = nullptr;
+        std::function<void(const WindowFileSelectedEventContext&)> mFileSelectedCallback = nullptr;
+
+        // Directory remembered between two Open dialogs so the next one starts where the user last picked a file.
+        std::string mLastFileDialogDirectory;
 
         bool mShouldClose = false;
         bool mOwnsWxApp = false;

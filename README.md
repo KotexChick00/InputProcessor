@@ -9,9 +9,9 @@ Nếu đây là lần đầu bạn mở dự án C++, hãy đọc theo thứ t�
 
 Chương trình chính là target `DomainDemo` (`main.cpp`): viewer mô hình 3D chạy trên ECS, đọc GLTF/GLB/OBJ/FBX qua Assimp. Chọn target `DomainDemo` để mở mô hình của bạn.
 
-Ứng dụng dùng backend wxWidgets mặc định, qua các interface window/input/application có sẵn. Một vòng lặp của engine dispatch sự kiện wx, cập nhật camera, render, reset input rồi swap buffers. GLFW vẫn có thể được chọn bằng cấu hình, nhưng không được khởi động khi dùng wx.
+Ứng dụng dùng backend wxWidgets làm nền window/input duy nhất, qua các interface window/input/application có sẵn. Một vòng lặp của engine dispatch sự kiện wx, cập nhật camera, render, reset input rồi swap buffers. Backend GLFW cũ đã bị xóa hoàn toàn khỏi repo (cả `Core/Window/GLFW` lẫn `Core/Input/GLFW`).
 
-Cửa sổ có menu **File → Open Model...** (phím tắt Ctrl+O). Cửa sổ chỉ phát yêu cầu "người dùng muốn mở file" qua `IWindow::OnOpenFileRequestCallback`; hộp thoại (`IWindow::ShowOpenFileDialog`, đường dẫn trả về là UTF-8) và việc mở model nằm ở tầng ứng dụng (`main.cpp`) — Core không phụ thuộc Domain. Hủy hộp thoại hoặc model lỗi thì cảnh hiện tại giữ nguyên.
+Trên cửa sổ viewer có menu **File → Open... (Ctrl+O)** dùng hộp thoại hệ thống để chọn model mới (`.gltf`, `.glb`, `.obj`, `.fbx`); mở lỗi thì cảnh hiện tại được giữ nguyên.
 
 Đọc `.gltf` và `.glb` bằng Assimp: mesh, transform của node, normal, UV, vertex color, màu base color và texture ngoài hoặc texture PNG/JPEG nhúng. Viewer hiển thị mô hình tĩnh với ánh sáng đơn giản; animation, skinning và pipeline PBR đầy đủ nằm ngoài phạm vi nhiệm vụ trong ảnh.
 
@@ -84,7 +84,7 @@ Thay `vcpkg-debug` bằng `vcpkg-release` để build Release. Các preset `debu
 Trên Ubuntu 24.04, cài dependency rồi dùng preset hệ thống:
 
 ```sh
-sudo apt install cmake g++ libwxgtk3.2-dev libassimp-dev libglfw3-dev libglm-dev libspdlog-dev libstb-dev libgl-dev
+sudo apt install cmake g++ libwxgtk3.2-dev libassimp-dev libglm-dev libspdlog-dev libstb-dev libgl-dev
 cmake --preset debug
 cmake --build --preset debug
 ```
@@ -99,17 +99,17 @@ GLAD dùng source có sẵn trong `Library/Glad`. CMake ưu tiên các target wx
 ./build/debug/DomainDemo --view tests/assets/lights.view.json
 ```
 
-Trên Windows với generator Visual Studio, executable Debug nằm trong `build/vcpkg-debug/Debug/DomainDemo.exe`; generator Ninja đặt executable trực tiếp trong `build/vcpkg-debug/`. Chạy không có đối số sẽ mở mẫu `textured.gltf`. Tùy chọn `--frames N` đóng viewer sau N frame để kiểm tra tự động. Tùy chọn `--view FILE.json` chọn file trạng thái xem: nếu file đã có, viewer mở theo nó (model + camera + tùy chọn); F5 lưu vào file này (mặc định `<tên model>.view.json` trong thư mục hiện tại), F9 nạp lại.
+Trên Windows với generator Visual Studio, executable Debug nằm trong `build/vcpkg-debug/Debug/DomainDemo.exe`; generator Ninja đặt executable trực tiếp trong `build/vcpkg-debug/`. Chạy không có đối số sẽ mở mẫu `textured.gltf`; menu File → Open (Ctrl+O) đổi sang model khác bất kỳ lúc nào. Tùy chọn `--frames N` đóng viewer sau N frame để kiểm tra tự động. Tùy chọn `--view FILE.json` chọn file trạng thái xem: nếu file đã có, viewer mở theo nó (model + camera + tùy chọn); F5 lưu vào file này (mặc định `<tên model>.view.json` trong thư mục hiện tại), F9 nạp lại.
 
 | Thao tác | Điều khiển |
 |---|---|
+| Mở model khác | Menu File → Open... hoặc Ctrl+O |
 | Xoay camera | Giữ chuột trái và kéo, hoặc phím mũi tên |
 | Zoom | Cuộn chuột |
 | Dịch chuyển điểm nhìn | Giữ chuột phải và kéo, hoặc W / A / S / D |
 | Dolly (thay đổi khoảng cách) | Giữ chuột giữa và kéo, hoặc PageUp / PageDown |
 | Căn lại camera theo mô hình | R |
 | Bật/tắt wireframe / texture / ánh sáng | 1 / 2 / 3 |
-| Mở mô hình khác | Menu File → Open Model..., hoặc Ctrl+O |
 | Lưu / nạp trạng thái xem | F5 / F9 |
 | Đóng ứng dụng | Escape hoặc nút đóng cửa sổ |
 
@@ -134,7 +134,7 @@ Bộ kiểm thử bao gồm:
 - Camera/state: xoay, pan, dolly bằng bàn phím, rebind, chuyển gesture, thả phím, reset sau fit, giới hạn zoom, projection và viewport bằng 0.
 - Input: pressed/held/released/just-pressed và reset delta/scroll theo frame.
 - Đọc GLTF thật: data URI, buffer/texture ngoài, GLB với PNG nhúng, transform node, file lỗi/không tồn tại, đuôi viết hoa và handler không có fallback, texture dùng chung và import lặp lại.
-- Tích hợp wx: event input qua cửa sổ thật, resize, mất focus, upload texture nhúng, yêu cầu đóng qua API, nút đóng cửa sổ và mở lại ứng dụng; input ổn định cho controller và framebuffer màu của nhóm.
+- Tích hợp wx: event input qua cửa sổ thật, resize, mất focus, upload texture nhúng, yêu cầu đóng qua API, nút đóng cửa sổ và mở lại ứng dụng; input ổn định cho controller và framebuffer màu của nhóm. Menu File: item Open/Exit tồn tại, menu event Open đi hết đường dialog (giả lập) → callback → `EventDispatcher`.
 - Scene/ECS (`test_scene`, không cần OpenGL): cây entity, transform nhiều cấp, node có shear, đọc đèn, so cây node với bản gộp trên 6 file, từng system (renderer giả), lưu/nạp trạng thái xem (JSON hỏng, sai version, node không còn), `ViewerController`.
 - Pipeline ECS với OpenGL thật (`test_scene_gl`): shader biên dịch, ảnh giống từng pixel với viewer cũ, wireframe/texture/lighting đổi hình.
 - Chạy viewer ba frame bằng `--frames 3` (GLTF, GLB, đèn, mẫu mặc định, `--view`), file thiếu và file trạng thái hỏng phải báo lỗi.

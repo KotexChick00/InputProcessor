@@ -5,11 +5,22 @@
 
 // wxWidgets — must be included before any std headers that conflict
 #include <wx/wx.h>
+#include <wx/filedlg.h>
 #include <wx/glcanvas.h>
 #include <wx/evtloop.h>
-#include <wx/menu.h>
-#include <wx/filedlg.h>
 #include <stdexcept>
+
+namespace
+{
+    // File -> Open menu: caption + filter covering every format the Assimp-based viewer opens.
+    constexpr const char* kOpenModelCaption = "Open model";
+    constexpr const char* kModelFileDialogFilter =
+        "All supported models (*.gltf;*.glb;*.obj;*.fbx)|*.gltf;*.glb;*.obj;*.fbx"
+        "|glTF (*.gltf;*.glb)|*.gltf;*.glb"
+        "|Wavefront OBJ (*.obj)|*.obj"
+        "|FBX (*.fbx)|*.fbx"
+        "|All files (*.*)|*.*";
+}
 
 namespace CoreEngine
 {
@@ -44,31 +55,31 @@ namespace CoreEngine
             if (evt.CanVeto()) evt.Veto();
         }
 
-        // ------------------------------------------------------------------
-        // File menu
-        //
-        // The frame only owns the menu UI. Choosing "Open Model..." (or
-        // pressing its Ctrl+O accelerator, parsed by wxWidgets from the label)
-        // reports the request to the client through
-        // WxWindow::OnOpenFileRequestCallback; the client shows the dialog via
-        // IWindow::ShowOpenFileDialog and decides what to load.
-        // ------------------------------------------------------------------
-        void CreateFileMenu()
+        void OnOpen(wxCommandEvent& evt)
         {
-            wxMenuBar* menuBar = new wxMenuBar();
-            wxMenu* fileMenu = new wxMenu();
-            fileMenu->Append(wxID_OPEN, "&Open Model...\tCtrl+O",
-                             "Open a 3D model file (GLTF, GLB, OBJ, FBX)");
-            menuBar->Append(fileMenu, "&File");
-            SetMenuBar(menuBar);
-            Bind(wxEVT_MENU, &WxEngineFrame::OnOpenModel, this, wxID_OPEN);
+            // Dialog + file-selected callback live on the owner; the frame only forwards the request.
+            if (mOwner) mOwner->OpenModelFileDialog();
         }
 
-        void OnOpenModel(wxCommandEvent&)
+        void OnExit(wxCommandEvent& evt)
         {
-            if (!mOwner) return;
-            auto callback = mOwner->GetOpenFileRequestCallback();
-            if (callback) callback();
+            // Same shutdown path as the window close button.
+            if (mOwner) mOwner->Close();
+        }
+
+        void CreateFileMenu()
+        {
+            wxMenu* fileMenu = new wxMenu();
+            fileMenu->Append(wxID_OPEN, "&Open...\tCtrl-O", "Open a model file");
+            fileMenu->AppendSeparator();
+            fileMenu->Append(wxID_EXIT);
+
+            wxMenuBar* menuBar = new wxMenuBar();
+            menuBar->Append(fileMenu, "&File");
+            SetMenuBar(menuBar);
+
+            Bind(wxEVT_MENU, &WxEngineFrame::OnOpen, this, wxID_OPEN);
+            Bind(wxEVT_MENU, &WxEngineFrame::OnExit, this, wxID_EXIT);
         }
 
         WxWindow* mOwner = nullptr;
@@ -543,31 +554,41 @@ namespace CoreEngine
 
     // -------------------------------------------------------------------------
 
-    bool WxWindow::ShowOpenFileDialog(const WindowFileDialogOptions& options, std::string& outPath)
+    std::optional<std::filesystem::path> WxWindow::ShowOpenFileDialog(
+        const std::string& caption, const std::string& wildcard)
     {
-        outPath.clear();
-        if (!mFrame) return false; // Init() not called: there is no window to host the dialog.
+        if (!mFrame) return std::nullopt;
 
-        wxString filter = wxString::FromUTF8(options.Filters.c_str());
-        if (filter.empty()) filter = wxFileSelectorDefaultWildcardStr;
         wxFileDialog dialog(mFrame,
-                            wxString::FromUTF8(options.Title.c_str()),
-                            wxString::FromUTF8(options.StartDirectory.c_str()),
-                            wxString(),
-                            filter,
+                            wxString::FromUTF8(caption.c_str()),
+                            wxString::FromUTF8(mLastFileDialogDirectory.c_str()),
+                            wxEmptyString, // no default file name
+                            wxString::FromUTF8(wildcard.c_str()),
                             wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-        // ShowModal runs a nested event loop; afterwards restore our GL context
-        // before the caller uploads textures or renders anything.
-        const bool chosen = dialog.ShowModal() == wxID_OK;
-        if (mGLCanvas && mGLContext) mGLCanvas->SetCurrent(*mGLContext);
-        if (!chosen) return false;
-        outPath = dialog.GetPath().ToStdString(wxConvUTF8);
-        return !outPath.empty();
+        if (dialog.ShowModal() != wxID_OK) return std::nullopt;
+
+        const wxScopedCharBuffer utf8Directory = dialog.GetDirectory().ToUTF8();
+        mLastFileDialogDirectory.assign(utf8Directory.data(), utf8Directory.length());
+
+        // Decode the UTF-8 bytes into a path like Domain's Utf8Path helpers do, so
+        // Vietnamese/Unicode file names survive Windows ANSI code pages untouched.
+        const wxScopedCharBuffer utf8Path = dialog.GetPath().ToUTF8();
+        const std::u8string u8Path(utf8Path.data(), utf8Path.data() + utf8Path.length());
+        return std::filesystem::path(u8Path);
     }
 
-    void WxWindow::OnOpenFileRequestCallback(std::function<void()> callback)
+    void WxWindow::OnFileSelectedEventCallback(
+        std::function<void(const WindowFileSelectedEventContext&)> callback)
     {
-        mOpenFileRequestCallback = std::move(callback);
+        mFileSelectedCallback = callback;
+    }
+
+    void WxWindow::OpenModelFileDialog()
+    {
+        // Virtual call on purpose: a subclass (tests) can stub the dialog while the
+        // real WxWindow shows the native wxFileDialog.
+        auto path = ShowOpenFileDialog(kOpenModelCaption, kModelFileDialogFilter);
+        if (path && mFileSelectedCallback) mFileSelectedCallback({std::move(*path)});
     }
 
     // -------------------------------------------------------------------------

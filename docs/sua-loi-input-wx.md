@@ -89,4 +89,4 @@ Esc trước đây kiểm tra bằng `CheckIsPressed` (đang giữ) → Esc bấ
 - **Windows (wxMSW):** chưa chạy. Lỗi 2 quan sát trên wxGTK; bộ lọc theo timestamp vô hại nếu wxMSW không gửi lặp. Cần build + chạy `ctest --preset vcpkg-debug` và thử bấm phím trên Windows.
 - **Chuột:** không thấy sự kiện chuột bị lặp; chỉ sửa lỗi 1 cho chuột.
 - **Ngữ nghĩa mới của `CheckIsJustPressed`:** "đã có một lần chuyển thả → nhấn từ lần `Update()` trước", **không còn hàm ý đang giữ**. Code nào cần "vừa nhấn và còn giữ" thì kiểm tra thêm `CheckIsPressed` (như `OrbitCameraController`).
-- Backend GLFW (`Core/Input/GLFW`) không nằm trong build CMake nên không sửa.
+- Backend GLFW (`Core/Input/GLFW`) không nằm trong build CMake nên không sửa. *(Ghi chú sau: toàn bộ backend GLFW — `Core/Input/GLFW`, `Core/Window/GLFW` — đã bị xóa khỏi repo.)*

@@ -48,7 +48,6 @@ namespace CoreEngine
 
         // Client API
         CORE_FORCE_INLINE IRenderer* GetRenderer() const { return mRenderer.get(); }
-        CORE_FORCE_INLINE IWindow* GetWindow() const { return mWindow.get(); } // valid from OnInitClient on
         CORE_FORCE_INLINE Time* GetTime() const { return Time::GetInstance(); }
         CORE_FORCE_INLINE const InputState& GetInput() const { return mInputState; }
         CORE_FORCE_INLINE EventDispatcher* GetEventDispatcher() const { return (EventDispatcher*)&mEventDispatcher; }

@@ -1,5 +1,6 @@
 #pragma once
 #include <pch.h>
+#include <filesystem>
 #include <Input/InputCodes.hpp>
 
 namespace CoreEngine
@@ -72,5 +73,19 @@ namespace CoreEngine
 
     private:
         double mDeltaX, mDeltaY;
+    };
+
+    // Người dùng chọn file qua hộp thoại của cửa sổ (menu File → Open).
+    class CORE_API FileSelectedEventContext : public EventContext
+    {
+    public:
+        explicit FileSelectedEventContext(std::filesystem::path path)
+            : mPath(std::move(path))
+        {
+        }
+        CORE_FORCE_INLINE const std::filesystem::path& GetPath() const { return mPath; }
+
+    private:
+        std::filesystem::path mPath;
     };
 }

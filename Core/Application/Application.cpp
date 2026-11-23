@@ -187,6 +187,11 @@ namespace CoreEngine
             MouseScrollEventContext evc(ec.OffsetX, ec.OffsetY);
             this->mEventDispatcher.Notify(evc);
         });
+
+        mWindow->OnFileSelectedEventCallback([this](CoreEngine::WindowFileSelectedEventContext ec) {
+            FileSelectedEventContext evc(ec.Path);
+            this->mEventDispatcher.Notify(evc);
+        });
     }
 
     KeyboardKey Application::ToApplicationKeyboardKey(WindowKeyboardKey key)
